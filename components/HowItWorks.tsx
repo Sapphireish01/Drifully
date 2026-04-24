@@ -105,40 +105,79 @@ function DatePickerMockup() {
       }}
     >
       <div className="date-picker-mock">
-        <p className="date-picker-mock__label">Pick-up and Drop Off dates</p>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: 4,
-          }}
-        >
-          <span className="date-picker-mock__value">30 Mar 2025</span>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <p className="date-picker-mock__label">Pick-up and Drop Off dates</p>
           <span
             style={{
               fontFamily: "var(--font-body)",
               fontSize: "0.55rem",
               color: "var(--color-muted)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              border: "1px solid var(--color-border)",
+              borderRadius: "6px",
+              padding: "4px",
             }}
           >
-            Edit 📅
+            Edit
+            <img
+              src="/icons/edit.png"
+              alt="edit"
+              style={{ width: "10px", height: "10px", objectFit: "contain" }}
+            />
           </span>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <span className="date-picker-mock__value">30 Mar 2025 - 11 May 2025</span>
         </div>
         <div
           style={{ borderBottom: "1px solid var(--color-border)", margin: "6px 0" }}
         />
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div>
+          <div style={{ width: "47%", backgroundColor: "var(--color-surface)", padding: "var(--space-2)", borderRadius: "var(--radius-md)" }}>
             <p className="date-picker-mock__label">Daily Rate</p>
-            <p className="date-picker-mock__value">$120</p>
+            <p className="date-picker-mock__total">$120</p>
           </div>
-          <div style={{ textAlign: "right" }}>
+          <div style={{ width: "47%", backgroundColor: "var(--color-surface)", padding: "var(--space-2)", borderRadius: "var(--radius-md)" }}>
             <p className="date-picker-mock__label">Estimated Total</p>
-            <p className="date-picker-mock__total">$340</p>
+            <p className="date-picker-mock__total">$240</p>
           </div>
         </div>
         <div className="date-picker-mock__avail">
-          <span style={{ color: "#22c55e" }}>●</span>
+          <span
+            style={{
+              width: "8px",
+              height: "8px",
+              backgroundColor: "#016630",
+              borderRadius: "50%",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <svg
+              width="5"
+              height="5"
+              viewBox="0 0 10 10"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M2 5L4 7L8 3"
+                stroke="white"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
           <span>Great news — this vehicle is available for your selected dates</span>
         </div>
       </div>
