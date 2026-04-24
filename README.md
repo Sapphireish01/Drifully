@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Drifully
+
+Drifully is a modern car rental platform providing seamless vehicle booking services. The application facilitates a quick transition from selection to driving through a streamlined reservation process. Users can choose from a wide range of vehicles for self-drive or professional chauffeur-driven requirements.
+
+## Features
+
+- **Simplified Booking Workflow**: A structured three-step process for vehicle selection, date scheduling, and instant confirmation.
+- **Service Flexibility**: Support for both self-drive and professional chauffeur-driven services to accommodate various user needs.
+- **Extensive Fleet Management**: Access to a diverse inventory of vehicles with advanced filtering by type, features, and pricing.
+- **Responsive Interface**: A high-performance, responsive user interface developed with focus on modern design principles and fluid interactions.
+- **Search Engine Optimization**: Comprehensive SEO implementation, including metadata management and JSON-LD structured data.
+
+## Tech Stack
+
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
+- **Styling**: Vanilla CSS with a centralized Design System
+- **Typography**: Google Fonts (Sora and DM Sans)
+- **Deployment**: Vercel
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js (Latest LTS version recommended)
+- npm or yarn
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/drifully.git
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-## Learn More
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. Access the application at `http://localhost:3000`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `/app`: Application Router pages, layouts, and global styles.
+- `/components`: Modular UI components and layout sections.
+- `/public`: Static assets, including brand imagery and media.
+- `/public/icons`: Branding assets and interface iconography.
 
-## Deploy on Vercel
+## SEO and Accessibility
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Implementation of semantic HTML5 elements for improved structure.
+- ARIA standards compliance for interactive components.
+- JSON-LD structured data for enhanced search engine visibility.
+- Dynamic metadata configuration for social graph optimization (OpenGraph and Twitter).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+© 2026 Drifully. All rights reserved. 
