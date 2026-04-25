@@ -29,16 +29,34 @@ export default function HowItWorks() {
       className="howitworks"
       aria-labelledby="how-heading"
     >
+      <img
+        src="/images/trackmark.png"
+        className="howitworks__trackmark"
+        alt=""
+        aria-hidden="true"
+      />
       <div className="container">
         {/* Header */}
         <header className="howitworks__header">
           <h2 id="how-heading" className="heading-2 howitworks__heading">
             Book in 3 simple steps
+            <img
+              src="/images/first_car-side.svg"
+              className="howitworks__title-icon"
+              alt=""
+              aria-hidden="true"
+            />
           </h2>
           <p>
             Get from booking to driving in just a few simple steps—quick,
             seamless, and designed for your convenience
           </p>
+          <img
+            src="/images/second_car-tilt.svg"
+            className="step-card__top-left-icon"
+            alt=""
+            aria-hidden="true"
+          />
         </header>
 
         {/* Steps */}
@@ -188,8 +206,13 @@ function DatePickerMockup() {
 /* ── Visual: booking confirmed for Step 3 ── */
 function ConfirmMockup() {
   return (
-    <div className="step-card__confirm-box" style={{ width: "100%" }}>
-      <div className="step-card__confirm-icon" aria-hidden="true">✓</div>
+    <div className="step-card__confirm-box" style={{ width: "77%", backgroundColor: "#ffffff", borderRadius: "var(--radius-xl)" }}>
+      <div className="step-card__confirm-icon-wrapper">
+        <div className="step-card__confirm-pulse"></div>
+        <div className="step-card__confirm-icon">
+          <img src="/images/checkmark.svg" alt="Confirmed" aria-hidden="true" />
+        </div>
+      </div>
       <p className="step-card__confirm-title">Booking Confirmed 🎉</p>
       <p className="step-card__confirm-sub">
         Your vehicle has been successfully reserved for your selected dates.
