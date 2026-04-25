@@ -1,86 +1,108 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
     <footer className="footer" aria-labelledby="footer-logo">
-      <div className="container">
-        {/* Grid */}
+      {/* Background Watermark */}
+      <div className="footer__watermark" aria-hidden="true">
+        DRIFULLY
+      </div>
+
+      <div className="container footer__container">
+        {/* Main Grid */}
         <div className="footer__grid">
-          {/* Brand column */}
-          <div>
-            <span className="footer__logo" id="footer-logo">
-              DRIFULLY
-            </span>
+          {/* Brand & Apps column */}
+          <div className="footer__brand-col">
+            <Link href="/" className="footer__logo-link">
+              <span className="footer__logo" id="footer-logo">
+                DRIFULLY
+              </span>
+            </Link>
             <p className="footer__tagline">
-              Rent a car your way — drive yourself or get a chauffeur. Fast,
-              flexible, and hassle-free.
+              Wherever you&apos;re going, start with Drifully. <br />
+              Download the app and take control of your next journey.
             </p>
+
+            <div className="footer__apps">
+              <Link href="#" className="footer__app-btn footer__app-btn--dark">
+                <span>Get it on Google Play</span>
+                <Image src="/icons/google-play.svg" alt="" width={20} height={20} />
+              </Link>
+              <Link href="#" className="footer__app-btn footer__app-btn--outline">
+                <span>Download on App Store</span>
+                <Image src="/icons/apple.svg" alt="" width={20} height={20} />
+              </Link>
+            </div>
           </div>
 
           {/* Link columns */}
-          {[
-            {
-              title: "Company",
-              links: [
-                { label: "About Us", href: "/about-us" },
-                { label: "Our Fleet", href: "/our-fleet" },
-                { label: "Blog", href: "/blog" },
-                { label: "Careers", href: "/careers" },
-              ],
-            },
-            {
-              title: "Support",
-              links: [
-                { label: "Help Center", href: "/help" },
-                { label: "Contact Us", href: "/contact-us" },
-                { label: "Safety", href: "/safety" },
-                { label: "Terms", href: "/terms" },
-              ],
-            },
-            {
-              title: "Download",
-              links: [
-                {
-                  label: "Google Play",
-                  href: "https://play.google.com/store",
-                },
-                { label: "App Store", href: "https://apps.apple.com" },
-              ],
-            },
-          ].map((col) => (
-            <div key={col.title}>
-              <p className="footer__col-title">{col.title}</p>
-              <ul className="footer__links" role="list">
-                {col.links.map((link) => (
-                  <li key={link.label}>
-                    <Link href={link.href} className="footer__link">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+          <div className="footer__nav-col">
+            <h3 className="footer__col-title">Company</h3>
+            <ul className="footer__links">
+              <li><Link href="/" className="footer__link">Home</Link></li>
+              <li><Link href="/about" className="footer__link">About Us</Link></li>
+              <li><Link href="/blog" className="footer__link">Blog</Link></li>
+              <li><Link href="/contact" className="footer__link">Contact Us</Link></li>
+            </ul>
+          </div>
 
-        {/* Bottom bar */}
-        <div className="footer__bottom">
+          <div className="footer__nav-col">
+            <h3 className="footer__col-title">Legal</h3>
+            <ul className="footer__links">
+              <li><Link href="/privacy" className="footer__link">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="footer__link">Terms & Conditions</Link></li>
+              <li><Link href="/cancellation" className="footer__link">Cancellation Policy</Link></li>
+            </ul>
+          </div>
+
+          {/* Newsletter column */}
+          <div className="footer__newsletter-col">
+            <h3 className="footer__col-title">Newsletter</h3>
+            <p className="footer__newsletter-text">
+              Join our newsletter for exclusive offers and updates.
+            </p>
+            <form className="footer__newsletter-form" onSubmit={(e) => e.preventDefault()}>
+              <input
+                type="email"
+                placeholder="Enter your email to get notified"
+                className="footer__newsletter-input"
+                required
+              />
+              <button type="submit" className="footer__newsletter-btn">Join Now</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar outside container for full-width background */}
+      <div className="footer__bottom">
+        <div className="container footer__bottom-container">
           <p className="footer__copy">
             © {year} Drifully. All rights reserved.
           </p>
-          <p className="footer__copy">
-            <Link href="/privacy" className="footer__link">
-              Privacy Policy
+
+          <div className="footer__socials">
+            <Link href="#" className="footer__social-link" aria-label="X">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.045 4.126H5.078z" /></svg>
             </Link>
-            {" · "}
-            <Link href="/cookies" className="footer__link">
-              Cookie Policy
+            <Link href="#" className="footer__social-link" aria-label="Facebook">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
             </Link>
-          </p>
+            <Link href="#" className="footer__social-link" aria-label="Instagram">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7.75 2h8.5C19.425 2 22 4.575 22 7.75v8.5c0 3.175-2.575 5.75-5.75 5.75h-8.5C4.575 22 2 19.425 2 16.25v-8.5C2 4.575 4.575 2 7.75 2zm0 1.5C5.405 3.5 3.5 5.405 3.5 7.75v8.5c0 2.345 1.905 4.25 4.25 4.25h8.5c2.345 0 4.25-1.905 4.25-4.25v-8.5c0-2.345-1.905-4.25-4.25-4.25h-8.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm5.25-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+              </svg>
+            </Link>
+
+          </div>
         </div>
       </div>
     </footer>
   );
 }
+

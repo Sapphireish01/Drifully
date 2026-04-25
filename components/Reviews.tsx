@@ -1,30 +1,32 @@
+"use client";
+
 const REVIEWS = [
   {
     id: "r1",
     title: "Wonderful Experience",
-    stars: 4,
+    stars: 4.5,
     body: "I had a wonderful experience with this vehicle. It was clean, comfortable, and drove perfectly throughout my trip.",
     author: "Sandra Smith",
     date: "30 April 2026",
-    avatar: null,
+    avatar: "https://i.pravatar.cc/150?u=sandra",
   },
   {
     id: "r2",
     title: "Great for family trips",
     stars: 5,
-    body: "Very spacious and comfortable. Perfect for our weekend trip with the kids.",
+    body: "Very spacious and comfortable. Perfect for our weekend trip with the kids. It was exactly what I needed. Stylish and very comfortable.",
     author: "Michael Duble",
     date: "30 April 2026",
-    avatar: null,
+    avatar: "https://i.pravatar.cc/150?u=michael",
   },
   {
     id: "r3",
     title: "Great for family trips",
     stars: 5,
-    body: "Very spacious and comfortable. Perfect for our weekend trip with the kids.",
+    body: "Very spacious and comfortable. Perfect for our weekend trip with the kids. Stylish and very comfortable. Perfect for our weekend trip with the kids. It was exactly what I needed. Stylish and very comfortable.",
     author: "Michael Duble",
     date: "30 April 2026",
-    avatar: null,
+    avatar: "https://i.pravatar.cc/150?u=michael2",
   },
   {
     id: "r4",
@@ -33,25 +35,25 @@ const REVIEWS = [
     body: "I rented this for an event and it was exactly what I needed. Stylish and very comfortable.",
     author: "Aisha Carie",
     date: "30 April 2026",
-    avatar: null,
+    avatar: "https://i.pravatar.cc/150?u=aisha",
   },
   {
     id: "r5",
     title: "Great for family trips",
     stars: 5,
-    body: "Very spacious and comfortable. Perfect for our weekend trip with the kids.",
+    body: "Very spacious and comfortable. Perfect for our weekend trip with the kids. Very spacious and comfortable. Perfect for our weekend trip with the kids.",
     author: "Michael Duble",
     date: "30 April 2026",
-    avatar: null,
+    avatar: "https://i.pravatar.cc/150?u=michael3",
   },
   {
     id: "r6",
     title: "Great for family trips",
     stars: 5,
-    body: "Very spacious and comfortable. Perfect for our weekend trip with the kids.",
+    body: "Very spacious and comfortable. Perfect for our weekend trip with the kids. Very spacious and comfortable. Perfect for our weekend trip with the kids.",
     author: "Michael Duble",
     date: "30 April 2026",
-    avatar: null,
+    avatar: "https://i.pravatar.cc/150?u=michael4",
   },
   {
     id: "r7",
@@ -60,7 +62,7 @@ const REVIEWS = [
     body: "Very spacious and comfortable. Perfect for our weekend trip with the kids.",
     author: "Michael Duble",
     date: "30 April 2026",
-    avatar: null,
+    avatar: "https://i.pravatar.cc/150?u=michael5",
   },
   {
     id: "r8",
@@ -69,16 +71,7 @@ const REVIEWS = [
     body: "I rented this for an event and it was exactly what I needed. Stylish and very comfortable.",
     author: "Aisha Carie",
     date: "30 April 2026",
-    avatar: null,
-  },
-  {
-    id: "r9",
-    title: "Great for family trips",
-    stars: 5,
-    body: "Very spacious and comfortable. Perfect for our weekend trip with the kids.",
-    author: "Michael Duble",
-    date: "30 April 2026",
-    avatar: null,
+    avatar: "https://i.pravatar.cc/150?u=aisha2",
   },
 ];
 
@@ -86,7 +79,7 @@ export default function Reviews() {
   return (
     <section
       id="reviews"
-      className="reviews"
+      className="reviews section"
       aria-labelledby="reviews-heading"
     >
       <div className="container">
@@ -101,52 +94,70 @@ export default function Reviews() {
         </header>
 
         <div className="reviews__grid" role="list">
-          {REVIEWS.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
+          {REVIEWS.map((review, index) => {
+            let className = "";
+            if (index === 0 || index === 4 || index === 7) {
+              className = "review-card--wide";
+            } else if (index === 2) {
+              className = "review-card--tall";
+            }
+            return (
+              <ReviewCard 
+                key={review.id} 
+                review={review} 
+                className={className}
+              />
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
 
-function ReviewCard({ review }: { review: (typeof REVIEWS)[0] }) {
+function StarRating({ stars }: { stars: number }) {
   return (
-    <article className="review-card" role="listitem" id={review.id}>
+    <div className="star-rating" aria-label={`${stars} out of 5 stars`}>
+      <div className="star-rating__bg" aria-hidden="true">
+        {"★★★★★"}
+      </div>
+      <div
+        className="star-rating__fill"
+        aria-hidden="true"
+        style={{ width: `${(stars / 5) * 100}%` }}
+      >
+        {"★★★★★"}
+      </div>
+    </div>
+  );
+}
+
+function ReviewCard({
+  review,
+  className = ""
+}: {
+  review: (typeof REVIEWS)[0],
+  className?: string
+}) {
+  return (
+    <article className={`review-card ${className}`} role="listitem" id={review.id}>
       <div className="review-card__top">
         <h3 className="review-card__title">{review.title}</h3>
-        <div className="review-card__stars" aria-label={`${review.stars} out of 5 stars`}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <span
-              key={i}
-              className="review-card__star"
-              aria-hidden="true"
-            >
-              {i < review.stars ? "★" : "☆"}
-            </span>
-          ))}
-        </div>
+        <StarRating stars={review.stars} />
       </div>
 
       <p className="review-card__body">{review.body}</p>
 
       <div className="review-card__author">
-        {/* Avatar placeholder */}
-        <div
+        <img
+          src={review.avatar || ""}
+          alt={review.author}
           className="review-card__avatar"
-          role="img"
-          aria-label={`${review.author} avatar`}
-          style={{
-            background: "var(--color-border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "1rem",
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(review.author)}&background=random`;
           }}
-        >
-          👤
-        </div>
-        <div>
+        />
+        <div className="review-card__author-info">
           <p className="review-card__name">{review.author}</p>
           <p className="review-card__date">{review.date}</p>
         </div>
@@ -154,3 +165,5 @@ function ReviewCard({ review }: { review: (typeof REVIEWS)[0] }) {
     </article>
   );
 }
+
+
