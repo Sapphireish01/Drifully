@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function CtaSection() {
   return (
@@ -8,9 +9,19 @@ export default function CtaSection() {
         className="cta-section"
         aria-labelledby="cta-heading"
       >
-        {/* Decorative glows */}
-        <div className="cta-section__glow cta-section__glow--left" aria-hidden="true" />
-        <div className="cta-section__glow cta-section__glow--right" aria-hidden="true" />
+        {/* Decorative Cubes */}
+        <img
+          src="/images/1stcube.png"
+          alt=""
+          className="cta-section__cube cta-section__cube--1"
+          aria-hidden="true"
+        />
+        <img
+          src="/images/2ndcube.png"
+          alt=""
+          className="cta-section__cube cta-section__cube--2"
+          aria-hidden="true"
+        />
 
         {/* Copy */}
         <div className="cta-section__content">
@@ -28,8 +39,8 @@ export default function CtaSection() {
               aria-label="Get Drifully on Google Play"
               className="btn btn-white"
             >
-              <GooglePlayIcon />
               Get it on Google Play
+              <GooglePlayIcon />
             </Link>
             <Link
               href="https://apps.apple.com"
@@ -38,84 +49,27 @@ export default function CtaSection() {
               aria-label="Download Drifully on the App Store"
               className="btn btn-ghost-white"
             >
-              <AppleIcon />
               Download on App Store
+              <AppleIcon />
             </Link>
           </div>
         </div>
 
         {/* Phone visuals */}
         <div className="cta-section__visual" aria-hidden="true">
-          {/* Back phone — white splash screen */}
-          <div className="cta-phone cta-phone--back">
-            <div className="cta-phone__screen">
-              <div
-                style={{
-                  height: "100%",
-                  background: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 22,
-                }}
-              >
-                <span className="cta-phone__logo">Drifully</span>
-              </div>
-            </div>
-          </div>
+          {/* Back phone — app screen */}
+          <img
+            src="/images/first-iphone-image.png"
+            alt="Drifully App Interface"
+            className="cta-phone-img cta-phone-img--back"
+          />
 
-          {/* Front phone — dark app screen */}
-          <div className="cta-phone cta-phone--front">
-            <div className="cta-phone__screen">
-              <div className="cta-appscreen">
-                {/* Status bar */}
-                <div className="cta-appscreen__bar">
-                  <span>9:30</span>
-                  <span>●●●</span>
-                </div>
-
-                {/* Greeting */}
-                <p className="cta-appscreen__greeting">Hello Prosper,</p>
-                <p className="cta-appscreen__tag">123 Abingdon Road, Ilford</p>
-
-                {/* Section 1 */}
-                <p className="cta-appscreen__label">Perfect for Family Trips</p>
-                <p className="cta-appscreen__sub">
-                  Spacious vehicles for road trips and family moves
-                </p>
-                <div className="cta-appscreen__card">
-                  <div
-                    style={{
-                      height: 36,
-                      background: "rgba(255,255,255,0.06)",
-                    }}
-                  />
-                  <div className="cta-appscreen__card-info">
-                    <span className="cta-appscreen__car-name">Toyota Highlander</span>
-                    <span className="cta-appscreen__car-price">$3,000 &gt;</span>
-                  </div>
-                </div>
-
-                {/* Section 2 */}
-                <p className="cta-appscreen__label">Popular right now</p>
-                <p className="cta-appscreen__sub">
-                  The most booked vehicles this week
-                </p>
-                <div className="cta-appscreen__card">
-                  <div
-                    style={{
-                      height: 36,
-                      background: "rgba(255,255,255,0.06)",
-                    }}
-                  />
-                  <div className="cta-appscreen__card-info">
-                    <span className="cta-appscreen__car-name">Toyota Corolla 2022</span>
-                    <span className="cta-appscreen__car-price">$3,000 &gt;</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Front phone — splash screen */}
+          <img
+            src="/images/second-iphone-image.png"
+            alt="Drifully Splash Screen"
+            className="cta-phone-img cta-phone-img--front"
+          />
         </div>
       </section>
     </div>
