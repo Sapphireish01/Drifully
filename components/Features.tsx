@@ -78,11 +78,11 @@ export default function Features() {
           <h2 id="features-heading" className="heading-2" style={{ marginBottom: "24px" }}>
             We're Built For Every Journey
           </h2>
-          <div className="features__tags" style={{ display: "flex", justifyContent: "center", gap: "16px", color: "#868C98", fontSize: "14px", flexWrap: "wrap" }}>
+          <div className="features__tags">
             {["Family Trips", "Corporate Travel", "Events & Occasions", "Everyday Use"].map((tag, index, arr) => (
-              <span key={tag} style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <span key={tag} className="features__tag">
                 {tag}
-                {index < arr.length - 1 && <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#868C98" }} aria-hidden="true" />}
+                {index < arr.length - 1 && <span className="features__tag-dot" aria-hidden="true" />}
               </span>
             ))}
           </div>

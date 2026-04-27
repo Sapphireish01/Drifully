@@ -41,24 +41,27 @@ export default function Footer() {
           </div>
 
           {/* Link columns */}
-          <div className="footer__nav-col">
-            <h3 className="footer__col-title">Company</h3>
-            <ul className="footer__links">
-              <li><Link href="/" className="footer__link">Home</Link></li>
-              <li><Link href="/about" className="footer__link">About Us</Link></li>
-              <li><Link href="/blog" className="footer__link">Blog</Link></li>
-              <li><Link href="/contact" className="footer__link">Contact Us</Link></li>
-            </ul>
+          <div className="footer__column__grid">
+            <div className="footer__nav-col ">
+              <h3 className="footer__col-title">Company</h3>
+              <ul className="footer__links">
+                <li><Link href="/" className="footer__link">Home</Link></li>
+                <li><Link href="/about" className="footer__link">About Us</Link></li>
+                <li><Link href="/blog" className="footer__link">Blog</Link></li>
+                <li><Link href="/contact" className="footer__link">Contact Us</Link></li>
+              </ul>
+            </div>
+
+            <div className="footer__nav-col">
+              <h3 className="footer__col-title">Legal</h3>
+              <ul className="footer__links">
+                <li><Link href="/privacy" className="footer__link">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="footer__link">Terms & Conditions</Link></li>
+                <li><Link href="/cancellation" className="footer__link">Cancellation Policy</Link></li>
+              </ul>
+            </div>
           </div>
 
-          <div className="footer__nav-col">
-            <h3 className="footer__col-title">Legal</h3>
-            <ul className="footer__links">
-              <li><Link href="/privacy" className="footer__link">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="footer__link">Terms & Conditions</Link></li>
-              <li><Link href="/cancellation" className="footer__link">Cancellation Policy</Link></li>
-            </ul>
-          </div>
 
           {/* Newsletter column */}
           <div className="footer__newsletter-col">

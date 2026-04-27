@@ -29,12 +29,14 @@ export default function HowItWorks() {
       className="howitworks"
       aria-labelledby="how-heading"
     >
-      <img
-        src="/images/trackmark.png"
-        className="howitworks__trackmark"
-        alt=""
-        aria-hidden="true"
-      />
+      <picture className="howitworks__trackmark">
+        <source media="(max-width: 768px)" srcSet="/images/trackmark-mobile.png" />
+        <img
+          src="/images/trackmark.png"
+          alt=""
+          aria-hidden="true"
+        />
+      </picture>
       <div className="container">
         {/* Header */}
         <header className="howitworks__header">

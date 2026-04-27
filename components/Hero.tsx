@@ -6,29 +6,21 @@ export default function Hero() {
     <section className="hero" aria-labelledby="hero-heading">
       <div className="container">
         <div className="hero__inner">
-          {/* ── Left column: copy ── */}
-          <div className="hero__copy">
-            {/* Eyebrow */}
-            {/* <div className="hero__eyebrow">
-              <span className="hero__eyebrow-dot" aria-hidden="true" />
-              <span className="hero__eyebrow-text">
-                Available for trips, events, business &amp; more
-              </span>
-            </div> */}
-
-            {/* Headline */}
+          {/* ── Headline & Description ── */}
+          <div className="hero__copy-top">
             <h1 id="hero-heading" className="hero__headline">
               Rent a car, your way.
               <br />
               Anytime, anywhere.
             </h1>
 
-            {/* Description */}
             <p className="hero__description">
               Drive yourself or get a chauffeur, book in seconds with Drifully. Fast, flexible, and hassle-free.
             </p>
+          </div>
 
-            {/* CTAs */}
+          {/* ── Actions & Meta ── */}
+          <div className="hero__copy-bottom">
             <div className="hero__actions">
               <Link
                 href="https://play.google.com/store"
@@ -58,14 +50,12 @@ export default function Hero() {
             </p>
           </div>
 
-          {/* ── Right column: app mockup ── */}
+          {/* ── App Mockup (Beneath description on mobile) ── */}
           <div className="hero__visual" aria-hidden="true">
             <div className="hero__mockup-wrapper">
-              {/* Decorative blobs */}
               <div className="hero__blob hero__blob--top" />
               <div className="hero__blob hero__blob--bottom" />
 
-              {/* Hero image */}
               <Image
                 src="/images/iPhone.svg"
                 alt="Drifully app on a phone showing available cars"
@@ -75,25 +65,27 @@ export default function Hero() {
                 className="hero__img"
               />
 
-              {/* Floating badges */}
               <FloatingBadge
-                style={{ top: "8%", left: "-22%" }}
+                className="hero__badge--1"
                 iconSrc="/images/book.png"
                 text="Book in Seconds"
               />
               <FloatingBadge
-                style={{ bottom: "52%", right: "-8%" }}
+                className="hero__badge--2"
                 iconSrc="/images/trust.png"
                 text="Trusted &amp; Reliable"
               />
               <FloatingBadge
-                style={{ bottom: "18%", left: "-14%" }}
+                className="hero__badge--3"
                 iconSrc="/images/car.png"
                 text="Drive Yourself or Chauffeur"
               />
             </div>
           </div>
+
+
         </div>
+
       </div>
 
       {/* Float animation is declared in globals.css */}
@@ -103,16 +95,16 @@ export default function Hero() {
 
 /* ── Floating badge component ── */
 function FloatingBadge({
-  style,
+  className,
   iconSrc,
   text,
 }: {
-  style: React.CSSProperties;
+  className: string;
   iconSrc: string;
   text: string;
 }) {
   return (
-    <div className="hero__badge" style={style}>
+    <div className={`hero__badge ${className}`}>
       <div className="hero__badge-icon" aria-hidden="true">
         <Image src={iconSrc} alt="" width={36} height={36} />
       </div>
