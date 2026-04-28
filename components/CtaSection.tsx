@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DownloadButtons from "./DownloadButtons";
 import Image from "next/image";
 
 export default function CtaSection() {
@@ -31,28 +32,7 @@ export default function CtaSection() {
           <p className="cta-section__sub">
             Download Drifully and start your journey today.
           </p>
-          <div className="cta-section__actions">
-            <Link
-              href="https://play.google.com/store"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Get Drifully on Google Play"
-              className="btn btn-white"
-            >
-              Get it on Google Play
-              <GooglePlayIcon />
-            </Link>
-            <Link
-              href="https://apps.apple.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Download Drifully on the App Store"
-              className="btn btn-ghost-white"
-            >
-              Download on App Store
-              <AppleIcon />
-            </Link>
-          </div>
+          <DownloadButtons variant="cta" />
         </div>
 
         {/* Phone visuals */}

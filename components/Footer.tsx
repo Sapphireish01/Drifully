@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import DownloadButtons from "./DownloadButtons";
 import Image from "next/image";
 
 export default function Footer() {
@@ -28,16 +29,7 @@ export default function Footer() {
               Download the app and take control of your next journey.
             </p>
 
-            <div className="footer__apps">
-              <Link href="#" className="footer__app-btn footer__app-btn--dark">
-                <span>Get it on Google Play</span>
-                <Image src="/icons/google-play.svg" alt="" width={20} height={20} />
-              </Link>
-              <Link href="#" className="footer__app-btn footer__app-btn--outline">
-                <span>Download on App Store</span>
-                <Image src="/icons/apple.svg" alt="" width={20} height={20} />
-              </Link>
-            </div>
+            <DownloadButtons variant="footer" />
           </div>
 
           {/* Link columns */}
@@ -46,9 +38,9 @@ export default function Footer() {
               <h3 className="footer__col-title">Company</h3>
               <ul className="footer__links">
                 <li><Link href="/" className="footer__link">Home</Link></li>
-                <li><Link href="/about" className="footer__link">About Us</Link></li>
+                <li><Link href="/about-us" className="footer__link">About Us</Link></li>
                 <li><Link href="/blog" className="footer__link">Blog</Link></li>
-                <li><Link href="/contact" className="footer__link">Contact Us</Link></li>
+                <li><Link href="/contact-us" className="footer__link">Contact Us</Link></li>
               </ul>
             </div>
 

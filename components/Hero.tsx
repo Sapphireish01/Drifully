@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import DownloadButtons from "./DownloadButtons";
 
 export default function Hero() {
   return (
@@ -21,29 +22,7 @@ export default function Hero() {
 
           {/* ── Actions & Meta ── */}
           <div className="hero__copy-bottom">
-            <div className="hero__actions">
-              <Link
-                href="https://play.google.com/store"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Get Drifully on Google Play"
-                className="btn btn-primary hero__play-btn"
-              >
-                Get it on Google Play
-                <Image src="/icons/google-play.svg" alt="" width={18} height={18} />
-              </Link>
-
-              <Link
-                href="https://apps.apple.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Download Drifully on the App Store"
-                className="btn hero__app-btn"
-              >
-                Download on App Store
-                <Image src="/icons/apple.svg" alt="" width={18} height={18} />
-              </Link>
-            </div>
+            <DownloadButtons variant="hero" />
 
             <p className="hero__meta">
               Available for trips, events, business, and more.
