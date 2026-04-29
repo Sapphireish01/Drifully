@@ -378,7 +378,7 @@
 .about-faq__cta p {
   color: #999999;
   margin-bottom: var(--space-4);
-  fontSize: 15px;
+  font-size: 15px;
 }
 
 .about-faq__cta .contact-btn {
@@ -390,6 +390,7 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
+
   .about-story__grid,
   .about-arrival__grid {
     grid-template-columns: 1fr;

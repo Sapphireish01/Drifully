@@ -1,54 +1,59 @@
 import Link from "next/link";
 import DownloadButtons from "./DownloadButtons";
 import Image from "next/image";
+import styles from "./CtaSection.module.css";
 
 export default function CtaSection() {
   return (
     <div className="container">
       <section
         id="download"
-        className="cta-section"
+        className={styles['cta-section']}
         aria-labelledby="cta-heading"
       >
         {/* Decorative Cubes */}
         <img
           src="/images/1stcube.png"
           alt=""
-          className="cta-section__cube cta-section__cube--1"
+          className={`${styles['cta-section__cube']} ${styles['cta-section__cube--1']}`}
           aria-hidden="true"
         />
         <img
           src="/images/2ndcube.png"
           alt=""
-          className="cta-section__cube cta-section__cube--2"
+          className={`${styles['cta-section__cube']} ${styles['cta-section__cube--2']}`}
           aria-hidden="true"
         />
 
         {/* Copy */}
-        <div className="cta-section__content">
-          <h2 id="cta-heading" className="cta-section__heading">
+        <div className={styles['cta-section__content']}>
+          <h2 id="cta-heading" className={styles['cta-section__heading']}>
             Your ride is just a tap away
           </h2>
-          <p className="cta-section__sub">
+          <p className={styles['cta-section__sub']}>
             Download Drifully and start your journey today.
           </p>
-          <DownloadButtons variant="cta" />
+          <DownloadButtons 
+            variant="cta" 
+            playIconSrc="/images/cta-google_play.png"
+            appIconSrc="/images/cta-appstore.png"
+          />
         </div>
 
         {/* Phone visuals */}
-        <div className="cta-section__visual" aria-hidden="true">
+        <div className={styles['cta-section__visual']} aria-hidden="true">
           {/* Back phone — app screen */}
           <img
             src="/images/first-iphone-image.png"
             alt="Drifully App Interface"
-            className="cta-phone-img cta-phone-img--back"
+            className={`${styles['cta-phone-img']} ${styles['cta-phone-img--back']}`}
           />
 
           {/* Front phone — splash screen */}
           <img
             src="/images/second-iphone-image.png"
             alt="Drifully Splash Screen"
-            className="cta-phone-img cta-phone-img--front"
+            className={`${styles['cta-phone-img']} ${styles['cta-phone-img--front']}`}
           />
         </div>
       </section>
