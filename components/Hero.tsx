@@ -7,26 +7,28 @@ export default function Hero() {
     <section className="hero" aria-labelledby="hero-heading">
       <div className="container">
         <div className="hero__inner">
-          {/* ── Headline & Description ── */}
-          <div className="hero__copy-top">
-            <h1 id="hero-heading" className="hero__headline">
-              Rent a car, your way.
-              <br />
-              Anytime, anywhere.
-            </h1>
+          <div className="hero__left">
+            {/* ── Headline & Description ── */}
+            <div className="hero__copy-top">
+              <h1 id="hero-heading" className="hero__headline">
+                Rent a car, your way.
+                <br />
+                Anytime, anywhere.
+              </h1>
 
-            <p className="hero__description">
-              Drive yourself or get a chauffeur, book in seconds with Drifully. Fast, flexible, and hassle-free.
-            </p>
-          </div>
+              <p className="hero__description">
+                Drive yourself or get a chauffeur, book in seconds with Drifully. Fast, flexible, and hassle-free.
+              </p>
+            </div>
 
-          {/* ── Actions & Meta ── */}
-          <div className="hero__copy-bottom">
-            <DownloadButtons variant="hero" />
+            {/* ── Actions & Meta ── */}
+            <div className="hero__copy-bottom">
+              <DownloadButtons variant="hero" />
 
-            <p className="hero__meta">
-              Available for trips, events, business, and more.
-            </p>
+              <p className="hero__meta">
+                Available for trips, events, business, and more.
+              </p>
+            </div>
           </div>
 
           {/* ── App Mockup (Beneath description on mobile) ── */}
