@@ -1,4 +1,5 @@
 import Image from "next/image";
+import styles from "./Features.module.css";
 
 const FEATURES = [
   {
@@ -70,48 +71,39 @@ const FEATURES = [
 
 export default function Features() {
   return (
-    <section id="why-drifully" className="features" aria-labelledby="features-heading" style={{ background: "#FAFAFA" }}>
-      <div className="container" style={{ paddingBlock: "80px" }}>
+    <section id="why-drifully" className={styles['features']} aria-labelledby="features-heading">
+      <div className={`container ${styles['features__container']}`}>
         {/* Header */}
-        <header className="features__header" style={{ textAlign: "center", marginBottom: "48px" }}>
-          <p className="overline" style={{ marginBottom: "16px", color: "#868C98" }}>Why Use Drifully?</p>
-          <h2 id="features-heading" className="heading-2" style={{ marginBottom: "24px" }}>
+        <header className={styles['features__header']}>
+          <p className={`overline ${styles['features__overline']}`}>Why Use Drifully?</p>
+          <h2 id="features-heading" className={`heading-2 ${styles['features__heading']}`}>
             We're Built For Every Journey
           </h2>
-          <div className="features__tags">
+          <div className={styles['features__tags']}>
             {["Family Trips", "Corporate Travel", "Events & Occasions", "Everyday Use"].map((tag, index, arr) => (
-              <span key={tag} className="features__tag">
+              <span key={tag} className={styles['features__tag']}>
                 {tag}
-                {index < arr.length - 1 && <span className="features__tag-dot" aria-hidden="true" />}
+                {index < arr.length - 1 && <span className={styles['features__tag-dot']} aria-hidden="true" />}
               </span>
             ))}
           </div>
         </header>
 
         {/* 3-Column Grid */}
-        <div className="features__grid">
+        <div className={styles['features__grid']}>
           {/* Row 1, Col 1: Flexible Rentals */}
           <article
-            className="feature-card feature-card--span-4"
+            className={`${styles['feature-card']} ${styles['feature-card--span-4']}`}
             id="flexible-rentals"
-            style={{
-              height: "300px",
-              borderRadius: "12px",
-              padding: "12px",
-              gap: "8px",
-              borderWidth: "1px",
-              opacity: 1,
-              // width: "503px"
-            }}
           >
-            <div className="feature-card__header">
-              <div className="feature-card__icon" style={{ border: "2px solid var(--color-border)", borderRadius: "var(--radius-md)", width: "36px", height: "36px" }}>
+            <div className={styles['feature-card__header']}>
+              <div className={styles['feature-card__icon']}>
                 <Image src={FEATURES[0].iconSrc} alt="" width={20} height={20} />
               </div>
-              <h3 className="feature-card__title">{FEATURES[0].title}</h3>
+              <h3 className={styles['feature-card__title']}>{FEATURES[0].title}</h3>
             </div>
-            <p className="feature-card__desc">{FEATURES[0].description}</p>
-            <div className="feature-card__image-container" style={{ marginTop: "12px", flexGrow: 1, minHeight: "100px", position: "relative", width: "100%", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+            <p className={styles['feature-card__desc']}>{FEATURES[0].description}</p>
+            <div className={styles['feature-card__image-container']}>
               <Image
                 src={FEATURES[0].image!}
                 alt="Flexible Rentals"
@@ -122,17 +114,17 @@ export default function Features() {
           </article>
 
           {/* Row 1, Col 2 & 3: Reliable & Secure */}
-          <article className="feature-card feature-card--span-6" id="reliable-secure" style={{
-            // width: "711px", 
-            height: "300px"
-          }}>
-            <div className="feature-card__header">
-              <div className="feature-card__icon" style={{ border: "2px solid var(--color-border)", borderRadius: "var(--radius-md)", width: "36px", height: "36px" }}>
+          <article 
+            className={`${styles['feature-card']} ${styles['feature-card--span-6']}`} 
+            id="reliable-secure"
+          >
+            <div className={styles['feature-card__header']}>
+              <div className={styles['feature-card__icon']}>
                 <Image src={FEATURES[1].iconSrc} alt="" width={20} height={20} />
               </div>
-              <h3 className="feature-card__title">{FEATURES[1].title}</h3>
+              <h3 className={styles['feature-card__title']}>{FEATURES[1].title}</h3>
             </div>
-            <div className="feature-card__image-container" style={{ marginTop: "12px", flexGrow: 1, minHeight: "100px", position: "relative", width: "100%", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+            <div className={styles['feature-card__image-container']}>
               <Image
                 src={FEATURES[1].image!}
                 alt="Reliable and Secure"
@@ -140,49 +132,58 @@ export default function Features() {
                 style={{ objectFit: "contain", padding: "16px" }}
               />
             </div>
-            <p className="feature-card__desc">{FEATURES[1].description}</p>
+            <p className={styles['feature-card__desc']}>{FEATURES[1].description}</p>
           </article>
 
           {/* Row 2, Col 1: Fast Booking */}
-          <article className="feature-card feature-card--span-3" id="fast-booking" style={{ height: "300px" }}>
-            <div className="feature-card__image-container" style={{ position: "relative", width: "100%", flexGrow: 1, minHeight: "100px", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "16px" }}>
+          <article 
+            className={`${styles['feature-card']} ${styles['feature-card--span-3']}`} 
+            id="fast-booking"
+          >
+            <div className={styles['feature-card__image-container']} style={{ marginBottom: "16px" }}>
               <Image src={FEATURES[2].image!} alt={FEATURES[2].title} fill style={{ objectFit: "contain", padding: "16px" }} />
             </div>
-            <div className="feature-card__header">
-              <div className="feature-card__icon" style={{ border: "2px solid var(--color-border)", borderRadius: "var(--radius-md)", width: "36px", height: "36px" }}>
+            <div className={styles['feature-card__header']}>
+              <div className={styles['feature-card__icon']}>
                 <Image src={FEATURES[2].iconSrc} alt="" width={20} height={20} />
               </div>
-              <h3 className="feature-card__title">{FEATURES[2].title}</h3>
+              <h3 className={styles['feature-card__title']}>{FEATURES[2].title}</h3>
             </div>
-            <p className="feature-card__desc">{FEATURES[2].description}</p>
+            <p className={styles['feature-card__desc']}>{FEATURES[2].description}</p>
           </article>
 
           {/* Row 2, Col 2: Choose from a wide range of vehicles */}
-          <article className="feature-card feature-card--span-4" id="vehicle-range" style={{ height: "300px" }}>
-            <div className="feature-card__header">
-              <div className="feature-card__icon" style={{ border: "2px solid var(--color-border)", borderRadius: "var(--radius-md)", width: "36px", height: "36px" }}>
+          <article 
+            className={`${styles['feature-card']} ${styles['feature-card--span-4']}`} 
+            id="vehicle-range"
+          >
+            <div className={styles['feature-card__header']}>
+              <div className={styles['feature-card__icon']}>
                 <Image src={FEATURES[3].iconSrc} alt="" width={20} height={20} />
               </div>
-              <h3 className="feature-card__title">{FEATURES[3].title}</h3>
+              <h3 className={styles['feature-card__title']}>{FEATURES[3].title}</h3>
             </div>
-            <p className="feature-card__desc">{FEATURES[3].description}</p>
-            <div className="feature-card__image-container" style={{ position: "relative", width: "100%", flexGrow: 1, minHeight: "100px", borderRadius: "var(--radius-md)", overflow: "hidden", marginTop: "12px" }}>
+            <p className={styles['feature-card__desc']}>{FEATURES[3].description}</p>
+            <div className={styles['feature-card__image-container']}>
               <Image src={FEATURES[3].image!} alt={FEATURES[3].title} fill style={{ objectFit: "contain", padding: "16px" }} />
             </div>
           </article>
 
           {/* Row 2, Col 3: 24/7 Support */}
-          <article className="feature-card feature-card--span-3" id="support" style={{ height: "300px" }}>
-            <div className="feature-card__header" style={{ marginBottom: "16px" }}>
-              <div className="feature-card__icon" style={{ border: "2px solid var(--color-border)", borderRadius: "var(--radius-md)", width: "36px", height: "36px" }}>
+          <article 
+            className={`${styles['feature-card']} ${styles['feature-card--span-3']}`} 
+            id="support"
+          >
+            <div className={styles['feature-card__header']} style={{ marginBottom: "16px" }}>
+              <div className={styles['feature-card__icon']}>
                 <Image src={FEATURES[4].iconSrc} alt="" width={20} height={20} />
               </div>
-              <h3 className="feature-card__title">{FEATURES[4].title}</h3>
+              <h3 className={styles['feature-card__title']}>{FEATURES[4].title}</h3>
             </div>
-            <div className="feature-card__image-container" style={{ position: "relative", width: "100%", flexGrow: 1, minHeight: "100px", marginBottom: "16px", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+            <div className={styles['feature-card__image-container']} style={{ marginBottom: "16px" }}>
               <Image src={FEATURES[4].image!} alt={FEATURES[4].title} fill style={{ objectFit: "contain", padding: "16px" }} />
             </div>
-            <p className="feature-card__desc">{FEATURES[4].description}</p>
+            <p className={styles['feature-card__desc']}>{FEATURES[4].description}</p>
           </article>
         </div>
       </div>

@@ -3,9 +3,15 @@ import Image from "next/image";
 
 interface DownloadButtonsProps {
   variant?: "hero" | "cta" | "footer" | "default";
+  playIconSrc?: string;
+  appIconSrc?: string;
 }
 
-export default function DownloadButtons({ variant = "default" }: DownloadButtonsProps) {
+export default function DownloadButtons({ 
+  variant = "default",
+  playIconSrc = "/icons/google-play.svg",
+  appIconSrc = "/icons/apple.svg"
+}: DownloadButtonsProps) {
   let containerClass = "download-buttons";
   let playClass = "btn btn-primary";
   let appClass = "btn";
@@ -43,7 +49,7 @@ export default function DownloadButtons({ variant = "default" }: DownloadButtons
         style={playStyle}
       >
         <span>Get it on Google Play</span>
-        <Image src="/icons/google-play.svg" alt="" width={18} height={18} />
+        <Image src={playIconSrc} alt="" width={18} height={18} />
       </Link>
 
       <Link
@@ -55,7 +61,7 @@ export default function DownloadButtons({ variant = "default" }: DownloadButtons
         style={appStyle}
       >
         <span>Download on App Store</span>
-        <Image src="/icons/apple.svg" alt="" width={18} height={18} />
+        <Image src={appIconSrc} alt="" width={18} height={18} />
       </Link>
     </div>
   );
