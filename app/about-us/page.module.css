@@ -354,18 +354,23 @@
 }
 
 .about-faq__answer {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height var(--transition-normal), padding var(--transition-normal);
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--transition-normal);
   background: #fafafa;
 }
 
 .about-faq__item[data-open="true"] .about-faq__answer {
-  max-height: 200px;
-  padding: var(--space-4) var(--space-6) var(--space-6);
+  grid-template-rows: 1fr;
+}
+
+.about-faq__answer-inner {
+  overflow: hidden;
+  min-height: 0;
 }
 
 .about-faq__answer-text {
+  padding: var(--space-4) var(--space-6) var(--space-6);
   font-size: var(--text-sm);
   color: var(--color-muted);
   line-height: 1.6;
@@ -405,15 +410,19 @@
 }
 
 @media (max-width: 768px) {
+
   /* Hero Section */
   .about-hero {
-    min-height: 100vh;
+    min-height: 70vh;
     padding-top: 120px;
     align-items: flex-start;
-    background-position: center 80%;
+    background-position: center;
+    background-image: linear-gradient(180deg, #000000 0%, rgba(0, 0, 0, 0) 100%), url('/images/about-us-hero-img.jpg');
+    background-blend-mode: overlay;
   }
 
   .about-hero__content {
+    margin-top: 120px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -470,7 +479,7 @@
     gap: var(--space-6);
   }
 
-  .about-story__left-col, 
+  .about-story__left-col,
   .about-story__right-col {
     display: contents;
   }
@@ -583,9 +592,9 @@
     margin-bottom: var(--space-2);
   }
 
-  .about-story__text, 
-  .about-story__text--muted, 
-  .about-story__text--tight-margin, 
+  .about-story__text,
+  .about-story__text--muted,
+  .about-story__text--tight-margin,
   .about-story__text--base-margin {
     font-size: 14px;
   }
