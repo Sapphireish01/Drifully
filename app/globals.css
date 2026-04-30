@@ -474,6 +474,10 @@ h6 {
   display: none;
 }
 
+.navbar__mobile-watermark {
+  display: none;
+}
+
 .navbar__nav {
   display: flex;
   align-items: center;
@@ -494,12 +498,11 @@ h6 {
 
 .navbar__link:hover,
 .navbar__link[data-active] {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  font-weight: 600;
 }
 
 .navbar__link[data-active] {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .navbar__cta-desktop {
@@ -538,6 +541,28 @@ h6 {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+  }
+
+
+  .navbar__mobile-watermark {
+    writing-mode: sideways-lr;
+    text-orientation: mixed;
+    font-family: var(--font-heading);
+    color: rgba(10, 13, 20, 1);
+    opacity: 3%;
+    z-index: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    letter-spacing: -.05em;
+    font-size: 29vw;
+    font-style: italic;
+    font-weight: 900;
+    line-height: 1;
+    display: block;
+    position: absolute;
+    top: 58%;
+    right: -29px;
+    transform: translateY(-50%);
   }
 
   .navbar__mobile-header {
@@ -629,8 +654,7 @@ h6 {
   flex-direction: column;
 }
 
-.hero__visual {
-}
+.hero__visual {}
 
 .hero__badge--1 {
   top: 8%;
@@ -1144,16 +1168,15 @@ h6 {
 
 .howitworks__trackmark,
 .howitworks__trackmark img {
-  position: absolute;
-  top: 17%;
-  left: 4%;
-  width: 88%;
-  height: auto;
   pointer-events: none;
   z-index: 0;
   object-fit: contain;
+  width: 97%;
+  height: auto;
+  position: absolute;
+  top: 17%;
+  left: 1%;
 }
-
 
 
 .howitworks__header {
@@ -1173,14 +1196,14 @@ h6 {
 .howitworks__title-icon {
   position: absolute;
   top: -4px;
-  right: -460px;
+  right: -474px;
   width: 38px;
   height: auto;
 }
 
 .step-card__top-left-icon {
   position: absolute;
-  top: 105px;
+  top: 108px;
   left: 50px;
   width: 38px;
   height: auto;
@@ -1736,18 +1759,6 @@ h6 {
   }
 
 
-
-  .howitworks__title-icon {
-    top: 93px;
-    right: -112px;
-  }
-
-  .howitworks__trackmark,
-  .howitworks__trackmark img {
-    top: 14%;
-    left: 11%;
-  }
-
   .step-card__top-left-icon {
     display: none;
   }
@@ -1758,13 +1769,29 @@ h6 {
 
 }
 
+@media screen and (max-width: 380px) {
+
+  .howitworks__title-icon {
+    top: 90px;
+    right: -68px;
+  }
+
+  .howitworks__trackmark,
+  .howitworks__trackmark img {
+    top: 15%;
+    left: 4%;
+  }
+
+}
+
 /* ============================================================
    16. CONTACT PAGE
    ============================================================ */
 
 .contact-section {
   position: relative;
-  min-height: calc(100vh - 80px); /* Adjust based on navbar */
+  min-height: calc(100vh - 80px);
+  /* Adjust based on navbar */
   padding-top: var(--space-20);
   padding-bottom: var(--space-20);
   background-image: url('/images/contact-bg.png');
@@ -1818,9 +1845,11 @@ h6 {
   color: var(--color-primary);
   margin-bottom: var(--space-2);
 }
+
 .contact-info-item:last-child {
   margin-bottom: 0;
 }
+
 .contact-info-title {
   margin-bottom: var(--space-4);
   color: var(--color-primary-light);
@@ -1855,6 +1884,7 @@ h6 {
   color: var(--color-primary);
   margin-bottom: var(--space-2);
 }
+
 .contact-form-label span {
   color: var(--color-primary-light);
   font-weight: 400;
@@ -1918,6 +1948,7 @@ h6 {
   border-radius: 0;
   background-color: transparent;
 }
+
 .contact-phone-wrapper .contact-form-input:focus,
 .contact-phone-wrapper .contact-form-select:focus {
   border-color: transparent;
@@ -1944,11 +1975,15 @@ h6 {
 }
 
 @media (max-width: 1024px) {
+  .contact-section {
+    padding-top: 140px;
+  }
+
   .contact-grid {
     grid-template-columns: 1fr;
     gap: var(--space-8);
   }
-  
+
   .contact-left {
     max-width: 100%;
   }
@@ -1956,4 +1991,4 @@ h6 {
   .contact-form-row {
     grid-template-columns: 1fr;
   }
-}
+}

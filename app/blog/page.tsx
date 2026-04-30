@@ -29,7 +29,9 @@ export default function BlogPage() {
 
                 <div className={styles.heroButtons}>
                   <Link href="#" className={`${styles.appBtn} ${styles.googlePlayBtn}`}>
-                    Get it on Google Play <Image src="/images/blog-google-play.png" alt="" width={18} height={18} />
+                    <span className={styles.btnTextDesktop}>Get it on Google Play</span>
+                    <span className={styles.btnTextMobile}>Get it on Playstore</span>
+                    <Image src="/images/blog-google-play.png" alt="" width={18} height={18} />
                   </Link>
                   <Link href="#" className={`${styles.appBtn} ${styles.appStoreBtn}`}>
                     Download on App Store <Image src="/images/blog-apple-store.png" alt="" width={18} height={18} />

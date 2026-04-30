@@ -71,6 +71,9 @@ export default function Navbar() {
 
         {/* Nav links / Mobile Menu */}
         <div className={`navbar__menu ${isOpen ? "is-open" : ""}`}>
+          <div className="navbar__mobile-watermark" aria-hidden="true">
+            DRIFULLY
+          </div>
           <div className="navbar__mobile-header">
             <Link href="/" onClick={() => setIsOpen(false)}>
               <Image
