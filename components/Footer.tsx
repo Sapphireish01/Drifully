@@ -40,6 +40,7 @@ export default function Footer() {
               <ul className={styles['footer__links']}>
                 <li><Link href="/" className={styles['footer__link']}>Home</Link></li>
                 <li><Link href="/about-us" className={styles['footer__link']}>About Us</Link></li>
+                <li><Link href="/our-fleet" className={styles['footer__link']}>Our Fleet</Link></li>
                 <li><Link href="/blog" className={styles['footer__link']}>Blog</Link></li>
                 <li><Link href="/contact-us" className={styles['footer__link']}>Contact Us</Link></li>
               </ul>

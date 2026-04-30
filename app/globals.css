@@ -1610,9 +1610,6 @@ h6 {
     margin-top: 32px;
   }
 
-
-
-
   .howitworks__grid {
     grid-template-columns: 1fr;
   }
@@ -1767,7 +1764,7 @@ h6 {
 
 }
 
-@media screen and (max-width: 380px) {
+@media screen and (max-width: 450px) {
 
   .howitworks__title-icon {
     top: 90px;

@@ -354,20 +354,16 @@
 }
 
 .about-faq__answer {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--transition-normal);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-normal);
   background: #fafafa;
 }
 
 .about-faq__item[data-open="true"] .about-faq__answer {
-  grid-template-rows: 1fr;
+  max-height: 500px;
 }
 
-.about-faq__answer-inner {
-  overflow: hidden;
-  min-height: 0;
-}
 
 .about-faq__answer-text {
   padding: var(--space-4) var(--space-6) var(--space-6);
@@ -413,7 +409,7 @@
 
   /* Hero Section */
   .about-hero {
-    min-height: 70vh;
+    min-height: 60vh;
     padding-top: 120px;
     align-items: flex-start;
     background-position: center;
@@ -422,12 +418,12 @@
   }
 
   .about-hero__content {
-    margin-top: 120px;
+    /* margin-top: 60px; */
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    margin: 0 auto;
+    /* margin: 0 auto; */
   }
 
   .about-hero__title {

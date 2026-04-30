@@ -54,7 +54,7 @@ export default function AboutUsPage() {
         <section className={styles['about-hero']}>
           <div className={`container ${styles['about-hero__container']}`}>
             <div className={styles['about-hero__content']}>
-              <h1 className={styles['about-hero__title']}>Move freely.<br />Arrive effortlessly.</h1>
+              <h1 className={styles['about-hero__title']}>Move freely. <br />Arrive effortlessly.</h1>
               <p className={styles['about-hero__desc']}>
                 Every journey matters, whether it's a quick ride across town, a family trip, or a moment that needs to feel just right.
                 <br />
