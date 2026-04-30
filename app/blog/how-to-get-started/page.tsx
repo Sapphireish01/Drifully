@@ -3,10 +3,11 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import styles from "./article.module.css";
+import { ConfirmMockup } from "@/components/HowItWorks";
 
 const ArrowLeftIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -30,8 +31,8 @@ export default function HowToGetStartedPage() {
 
             {/* Section 1 */}
             <section className={styles.imageSection}>
-              <div className={styles.imageWrapper}>
-                <Image src="/images/blog-inner-1.svg" alt="Create Account Screen" width={800} height={450} priority />
+              <div className={`${styles.imageWrapper} ${styles.imageWrapper1}`}>
+                <Image src="/images/blog-inner-1.svg" alt="Create Account Screen" width={500} height={300} className={styles.phoneMockup1} priority />
               </div>
               <div className={styles.textGrid}>
                 <div className={styles.stepBlock}>
@@ -62,8 +63,9 @@ export default function HowToGetStartedPage() {
 
             {/* Section 2 */}
             <section className={styles.imageSection}>
-              <div className={styles.imageWrapper}>
-                <Image src="/images/blog-inner-2.svg" alt="Choose Your Ride Screen" width={800} height={450} />
+              <div className={`${styles.imageWrapper} ${styles.imageWrapperMulti} ${styles.imageWrapper2}`}>
+                <Image src="/images/blog-inner-2.svg" alt="Choose Your Ride Screen" width={350} height={600} className={styles.phoneMockupMulti} />
+                <Image src="/images/blog-inner-3.svg" alt="Choose Your Ride Screen" width={350} height={600} className={styles.phoneMockupMulti} />
               </div>
               <div className={styles.textGrid}>
                 <div className={styles.stepBlock}>
@@ -98,8 +100,9 @@ export default function HowToGetStartedPage() {
 
             {/* Section 3 */}
             <section className={styles.imageSection}>
-              <div className={styles.imageWrapper}>
-                <Image src="/images/blog-inner-3.svg" alt="Add Extras and Confirm Screen" width={800} height={450} />
+              <div className={`${styles.imageWrapper} ${styles.imageWrapperMulti} ${styles.imageWrapper3}`}>
+                <Image src="/images/blog-inner-4.svg" alt="Add Extras Screen" width={350} height={600} className={styles.phoneMockupMulti} />
+                <Image src="/images/blog-inner-5.png" alt="Confirm Screen" width={350} height={600} className={styles.phoneMockupMulti} />
               </div>
               <div className={styles.textGrid}>
                 <div className={styles.stepBlock}>
@@ -137,8 +140,10 @@ export default function HowToGetStartedPage() {
 
             {/* Section 4 */}
             <section className={styles.imageSection}>
-              <div className={styles.successImageWrapper}>
-                <Image src="/images/blog-inner-4.svg" alt="Booking Confirmed" width={400} height={250} style={{ objectFit: 'contain' }} />
+              <div className={styles.successImageWrapper} style={{ alignItems: 'center' }}>
+                <div className={styles.confirmMockupContainer}>
+                  <ConfirmMockup className={styles.confirmMockupInner} />
+                </div>
               </div>
               <div className={styles.stepBlock}>
                 <h2 className={styles.stepTitle}>7. Start Your Journey</h2>
