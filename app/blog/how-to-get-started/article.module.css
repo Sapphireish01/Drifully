@@ -56,13 +56,78 @@
   overflow: hidden;
   background-color: rgba(246, 248, 250, 1);
   display: flex;
+  position: relative;
+  margin-bottom: 48px;
+}
+
+.imageWrapper1 {
   justify-content: flex-end;
   align-items: flex-end;
-  margin-bottom: 48px;
   padding-top: 40px;
   padding-right: 10%;
-  position: relative;
+  background: url('/images/create-acc-bg-image.jpg') no-repeat center center/cover;
 }
+
+.imageWrapperMulti {
+  justify-content: center;
+  gap: 10%;
+  padding: 40px 0 0 0;
+  align-items: flex-end;
+}
+
+
+.phoneMockup1 {
+  position: absolute;
+  bottom: -39px;
+  right: 70px;
+  width: 500px;
+  height: auto;
+}
+
+.phoneMockupMulti {
+  width: 30%;
+  height: auto;
+  transform: translateY(1%);
+}
+
+.confirmMockupContainer {
+  width: 60%;
+  align-content: center;
+}
+
+.confirmMockupInner {
+  width: 60%;
+  margin-inline: auto;
+}
+
+@media (max-width: 768px) {
+  .imageWrapper {
+    height: 40vh;
+  }
+
+  .phoneMockup1 {
+    width: 240px;
+    right: 20px;
+    bottom: -20px;
+  }
+
+  .imageWrapperMulti {
+    gap: 5%;
+  }
+
+  .phoneMockupMulti {
+    width: 42%;
+  }
+
+  .confirmMockupContainer {
+    width: 90%;
+  }
+
+  .confirmMockupInner {
+    width: 100%;
+  }
+}
+
 
 /* For images without internal padding */
 .imageWrapper img {
@@ -155,4 +220,36 @@
 .boldText {
   font-weight: 600;
   color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 28px;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .stepTitle {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .stepDesc {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .stepSubheading {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .stepList li {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
 }

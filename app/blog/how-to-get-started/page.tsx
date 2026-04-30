@@ -31,8 +31,8 @@ export default function HowToGetStartedPage() {
 
             {/* Section 1 */}
             <section className={styles.imageSection}>
-              <div className={styles.imageWrapper} style={{ background: "url('/images/create-acc-bg-image.jpg') no-repeat center center/cover" }}>
-                <Image src="/images/blog-inner-1.svg" alt="Create Account Screen" width={500} height={300} style={{ position: "absolute", bottom: "-39px", right: "70px" }} priority />
+              <div className={`${styles.imageWrapper} ${styles.imageWrapper1}`}>
+                <Image src="/images/blog-inner-1.svg" alt="Create Account Screen" width={500} height={300} className={styles.phoneMockup1} priority />
               </div>
               <div className={styles.textGrid}>
                 <div className={styles.stepBlock}>
@@ -63,9 +63,9 @@ export default function HowToGetStartedPage() {
 
             {/* Section 2 */}
             <section className={styles.imageSection}>
-              <div className={styles.imageWrapper} style={{ justifyContent: 'center', gap: '10%', padding: '40px 0 0 0', alignItems: 'flex-end' }}>
-                <Image src="/images/blog-inner-2.svg" alt="Choose Your Ride Screen" width={350} height={600} style={{ width: '30%', height: 'auto', transform: 'translateY(1%)' }} />
-                <Image src="/images/blog-inner-3.svg" alt="Choose Your Ride Screen" width={350} height={600} style={{ width: '30%', height: 'auto', transform: 'translateY(1%)' }} />
+              <div className={`${styles.imageWrapper} ${styles.imageWrapperMulti} ${styles.imageWrapper2}`}>
+                <Image src="/images/blog-inner-2.svg" alt="Choose Your Ride Screen" width={350} height={600} className={styles.phoneMockupMulti} />
+                <Image src="/images/blog-inner-3.svg" alt="Choose Your Ride Screen" width={350} height={600} className={styles.phoneMockupMulti} />
               </div>
               <div className={styles.textGrid}>
                 <div className={styles.stepBlock}>
@@ -100,9 +100,9 @@ export default function HowToGetStartedPage() {
 
             {/* Section 3 */}
             <section className={styles.imageSection}>
-              <div className={styles.imageWrapper} style={{ justifyContent: 'center', gap: '10%', padding: '40px 0 0 0', alignItems: 'flex-end' }}>
-                <Image src="/images/blog-inner-4.svg" alt="Add Extras Screen" width={350} height={600} style={{ width: '30%', height: 'auto', transform: 'translateY(1%)' }} />
-                <Image src="/images/blog-inner-5.png" alt="Confirm Screen" width={350} height={600} style={{ width: '30%', height: 'auto', transform: 'translateY(1%)' }} />
+              <div className={`${styles.imageWrapper} ${styles.imageWrapperMulti} ${styles.imageWrapper3}`}>
+                <Image src="/images/blog-inner-4.svg" alt="Add Extras Screen" width={350} height={600} className={styles.phoneMockupMulti} />
+                <Image src="/images/blog-inner-5.png" alt="Confirm Screen" width={350} height={600} className={styles.phoneMockupMulti} />
               </div>
               <div className={styles.textGrid}>
                 <div className={styles.stepBlock}>
@@ -141,8 +141,8 @@ export default function HowToGetStartedPage() {
             {/* Section 4 */}
             <section className={styles.imageSection}>
               <div className={styles.successImageWrapper} style={{ alignItems: 'center' }}>
-                <div style={{ width: '60%', alignContent: 'center' }}>
-                  <ConfirmMockup style={{ width: "60%", marginInline: 'auto' }} />
+                <div className={styles.confirmMockupContainer}>
+                  <ConfirmMockup className={styles.confirmMockupInner} />
                 </div>
               </div>
               <div className={styles.stepBlock}>
