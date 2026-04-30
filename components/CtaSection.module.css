@@ -53,7 +53,7 @@
 .cta-section__sub {
   font-family: var(--font-body);
   font-size: var(--text-md);
-  color: var(--color-dark-muted);
+  color: var(--color-white);
   margin-bottom: var(--space-10);
   max-width: 380px;
 }
@@ -93,7 +93,7 @@
 .cta-phone-img--back {
   width: 65%;
   right: 11px;
-  bottom: -67px;
+  top: -43px;
   z-index: 1;
 }
 
@@ -228,12 +228,13 @@
   :global(.cta-section__actions) {
     justify-content: center;
     margin-top: 0;
-    gap: 12px;
+    gap: 8px;
+    flex-wrap: nowrap;
   }
 
   :global(.cta-section__actions) :global(.btn) {
-    gap: 8px;
-    padding: 12px 16px;
+    gap: 6px;
+    padding: 10px 12px;
     font-size: 12px;
   }
 
@@ -248,7 +249,7 @@
 
   .cta-phone-img--back {
     right: 5%;
-    bottom: -58px;
+    top: -9px;
   }
 
   .cta-phone-img--front {

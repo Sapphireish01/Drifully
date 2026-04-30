@@ -346,6 +346,7 @@
 .about-faq__icon {
   transition: transform var(--transition-normal);
   flex-shrink: 0;
+  color: rgba(134, 140, 152, 1);
 }
 
 .about-faq__item[data-open="true"] .about-faq__icon {
@@ -404,17 +405,233 @@
 }
 
 @media (max-width: 768px) {
+  /* Hero Section */
   .about-hero {
-    min-height: 60vh;
-    padding-top: 100px;
+    min-height: 100vh;
+    padding-top: 120px;
+    align-items: flex-start;
+    background-position: center 80%;
+  }
+
+  .about-hero__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .about-hero__title {
+    font-size: 28px;
+    line-height: 1.15;
+    margin-bottom: var(--space-4);
+  }
+
+  .about-hero__title br {
+    display: none;
+  }
+
+  .about-hero__desc {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: var(--space-8);
+    max-width: 100%;
   }
 
   .about-hero__actions {
-    flex-direction: column;
+    flex-direction: row;
     gap: var(--space-3);
+    margin-bottom: var(--space-8);
+    width: 100%;
+    justify-content: center;
+  }
+
+  .about-hero__actions a {
+    flex: 1;
+    padding: 12px 8px;
+    font-size: 13px;
+    max-width: 180px;
+  }
+
+  .about-hero__meta {
+    margin-top: 10px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  /* Our Story Section */
+  .about-story {
+    padding-block: var(--space-12);
+  }
+
+  .about-story__grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .about-story__left-col, 
+  .about-story__right-col {
+    display: contents;
+  }
+
+  .about-story__title {
+    order: 1;
+    font-size: 28px;
+    margin-bottom: -10px;
+  }
+
+  :global(.about-story__lead) {
+    order: 2;
+    font-size: 14px;
+    margin-bottom: 0;
+  }
+
+  .about-story__main-img {
+    order: 3;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+  }
+
+  .about-story__text--top-margin {
+    order: 4;
+    margin-top: 0;
+    font-size: 14px;
+  }
+
+  .about-story__composite {
+    order: 5;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .about-story__composite-img {
+    width: 100%;
+    height: auto;
+  }
+
+  .about-story__composite-text {
+    font-size: 14px;
+  }
+
+  .about-story__composite-img-small {
+    width: 100%;
+    height: auto;
+  }
+
+  .about-story__text--spaced-margin {
+    order: 6;
+    margin-top: 0;
+    font-size: 14px;
+  }
+
+  .about-story__grid .about-arrival__list {
+    order: 7;
+  }
+
+  .about-story__bottom-text {
+    order: 99;
+    font-size: 14px;
+    margin-top: var(--space-2);
+  }
+
+  /* Our Mission Section */
+  .about-mission {
+    padding-block: var(--space-12);
+  }
+
+  .about-mission__title {
+    font-size: 24px;
+    margin-bottom: -10px;
+  }
+
+  .about-mission__content {
+    font-size: 14px;
+    gap: var(--space-4);
+  }
+
+  /* Arrival & Trust Section */
+  .about-arrival {
+    padding-block: var(--space-12);
+  }
+
+  .about-arrival__grid {
+    gap: var(--space-8);
   }
 
   .about-arrival__img-composite {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .about-arrival__img-large {
+    max-width: 100% !important;
+    height: 300px;
+    max-height: 300px;
+    border-radius: 150px !important;
+  }
+
+  .about-arrival__img-small {
+    height: 144px;
+  }
+
+  .about-arrival__section-title {
+    font-size: 24px;
+    margin-bottom: var(--space-2);
+  }
+
+  .about-story__text, 
+  .about-story__text--muted, 
+  .about-story__text--tight-margin, 
+  .about-story__text--base-margin {
+    font-size: 14px;
+  }
+
+  .about-arrival__list-item {
+    font-size: 14px;
+  }
+
+  /* FAQ Section */
+  .about-faq {
+    padding-block: var(--space-12);
+  }
+
+  .about-faq__header {
+    margin-bottom: var(--space-6);
+  }
+
+  .about-faq__title {
+    font-size: 24px;
+  }
+
+  .about-faq__subtitle {
+    font-size: 14px;
+  }
+
+  .about-faq__grid {
     grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .about-faq__question {
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+
+  .about-faq__cta {
+    margin-top: var(--space-8);
+  }
+
+  .about-faq__cta p {
+    font-size: 14px;
+  }
+
+  .about-faq__cta .contact-btn {
+    width: 100%;
+    display: block;
+    text-align: center;
   }
 }

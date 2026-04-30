@@ -108,14 +108,14 @@ export default function Features() {
                 src={FEATURES[0].image!}
                 alt="Flexible Rentals"
                 fill
-                style={{ objectFit: "contain", padding: "16px" }}
+                style={{ objectFit: "cover" }}
               />
             </div>
           </article>
 
           {/* Row 1, Col 2 & 3: Reliable & Secure */}
-          <article 
-            className={`${styles['feature-card']} ${styles['feature-card--span-6']}`} 
+          <article
+            className={`${styles['feature-card']} ${styles['feature-card--span-6']}`}
             id="reliable-secure"
           >
             <div className={styles['feature-card__header']}>
@@ -129,19 +129,19 @@ export default function Features() {
                 src={FEATURES[1].image!}
                 alt="Reliable and Secure"
                 fill
-                style={{ objectFit: "contain", padding: "16px" }}
+                style={{ objectFit: "cover" }}
               />
             </div>
             <p className={styles['feature-card__desc']}>{FEATURES[1].description}</p>
           </article>
 
           {/* Row 2, Col 1: Fast Booking */}
-          <article 
-            className={`${styles['feature-card']} ${styles['feature-card--span-3']}`} 
+          <article
+            className={`${styles['feature-card']} ${styles['feature-card--span-3']}`}
             id="fast-booking"
           >
             <div className={styles['feature-card__image-container']} style={{ marginBottom: "16px" }}>
-              <Image src={FEATURES[2].image!} alt={FEATURES[2].title} fill style={{ objectFit: "contain", padding: "16px" }} />
+              <Image src={FEATURES[2].image!} alt={FEATURES[2].title} fill style={{ objectFit: "cover" }} />
             </div>
             <div className={styles['feature-card__header']}>
               <div className={styles['feature-card__icon']}>
@@ -153,8 +153,8 @@ export default function Features() {
           </article>
 
           {/* Row 2, Col 2: Choose from a wide range of vehicles */}
-          <article 
-            className={`${styles['feature-card']} ${styles['feature-card--span-4']}`} 
+          <article
+            className={`${styles['feature-card']} ${styles['feature-card--span-4']}`}
             id="vehicle-range"
           >
             <div className={styles['feature-card__header']}>
@@ -165,13 +165,13 @@ export default function Features() {
             </div>
             <p className={styles['feature-card__desc']}>{FEATURES[3].description}</p>
             <div className={styles['feature-card__image-container']}>
-              <Image src={FEATURES[3].image!} alt={FEATURES[3].title} fill style={{ objectFit: "contain", padding: "16px" }} />
+              <Image src={FEATURES[3].image!} alt={FEATURES[3].title} fill style={{ objectFit: "cover" }} />
             </div>
           </article>
 
           {/* Row 2, Col 3: 24/7 Support */}
-          <article 
-            className={`${styles['feature-card']} ${styles['feature-card--span-3']}`} 
+          <article
+            className={`${styles['feature-card']} ${styles['feature-card--span-2']}`}
             id="support"
           >
             <div className={styles['feature-card__header']} style={{ marginBottom: "16px" }}>
@@ -181,7 +181,7 @@ export default function Features() {
               <h3 className={styles['feature-card__title']}>{FEATURES[4].title}</h3>
             </div>
             <div className={styles['feature-card__image-container']} style={{ marginBottom: "16px" }}>
-              <Image src={FEATURES[4].image!} alt={FEATURES[4].title} fill style={{ objectFit: "contain", padding: "16px" }} />
+              <Image src={FEATURES[4].image!} alt={FEATURES[4].title} fill style={{ objectFit: "cover" }} />
             </div>
             <p className={styles['feature-card__desc']}>{FEATURES[4].description}</p>
           </article>
