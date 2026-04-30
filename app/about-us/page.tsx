@@ -259,7 +259,9 @@ export default function AboutUsPage() {
                         </span>
                       </button>
                       <div className={styles['about-faq__answer']}>
-                        <p className={styles['about-faq__answer-text']}>{item.answer}</p>
+                        <div className={styles['about-faq__answer-inner']}>
+                          <p className={styles['about-faq__answer-text']}>{item.answer}</p>
+                        </div>
                       </div>
                     </div>
                   );
@@ -290,7 +292,9 @@ export default function AboutUsPage() {
                         </span>
                       </button>
                       <div className={styles['about-faq__answer']}>
-                        <p className={styles['about-faq__answer-text']}>{item.answer}</p>
+                        <div className={styles['about-faq__answer-inner']}>
+                          <p className={styles['about-faq__answer-text']}>{item.answer}</p>
+                        </div>
                       </div>
                     </div>
                   );
