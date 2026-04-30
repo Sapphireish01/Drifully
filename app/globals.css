@@ -654,8 +654,6 @@ h6 {
   flex-direction: column;
 }
 
-.hero__visual {}
-
 .hero__badge--1 {
   top: 8%;
   left: -22%;
@@ -1913,7 +1911,7 @@ h6 {
 .contact-form-input:focus,
 .contact-form-select:focus,
 .contact-form-textarea:focus {
-  border-color: var(--color-border-dark);
+  border-color: var(--color-border);
 }
 
 .contact-form-textarea {
@@ -1952,6 +1950,15 @@ h6 {
 .contact-phone-wrapper .contact-form-input:focus,
 .contact-phone-wrapper .contact-form-select:focus {
   border-color: transparent;
+}
+
+.contact-form-select option {
+  color: var(--color-primary);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+  padding: 12px;
+
 }
 
 .contact-submit-btn {

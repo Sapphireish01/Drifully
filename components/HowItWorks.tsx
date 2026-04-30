@@ -206,9 +206,9 @@ function DatePickerMockup() {
 }
 
 /* ── Visual: booking confirmed for Step 3 ── */
-function ConfirmMockup() {
+export function ConfirmMockup(props: any) {
   return (
-    <div className="step-card__confirm-box" style={{ width: "77%", backgroundColor: "#ffffff", borderRadius: "var(--radius-xl)" }}>
+    <div className="step-card__confirm-box" style={{ width: "77%", backgroundColor: "#ffffff", borderRadius: "var(--radius-xl)", ...props.style }}>
       <div className="step-card__confirm-icon-wrapper">
         <div className="step-card__confirm-pulse"></div>
         <div className="step-card__confirm-icon">
