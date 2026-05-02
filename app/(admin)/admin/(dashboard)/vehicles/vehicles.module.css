@@ -1,0 +1,612 @@
+/* ============================================================
+   ADMIN VEHICLES — Scoped styles (CSS Module)
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Stats Grid ─── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.emptyCard {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: var(--radius-md, 10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px;
+  min-height: 540px;
+}
+
+.illustration {
+  margin-bottom: 12px;
+  opacity: 0.85;
+}
+
+.illustrationImg {
+  width: 200px;
+  height: auto;
+  max-width: none;
+}
+
+.emptyTitle {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.emptySubtitle {
+  font-size: 13.5px;
+  color: var(--admin-section-label, #868C98);
+  margin: 0 0 24px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 40px;
+  background: var(--admin-active-bg, #111111);
+  color: var(--admin-active-text, #ffffff);
+  border: none;
+  border-radius: var(--radius-md, 10px);
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.addBtn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.addBtn:active {
+  transform: translateY(0);
+}
+
+.devToggleWrap {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Search */
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 36px;
+  background: var(--admin-card-bg, #ffffff);
+  min-width: 180px;
+}
+
+.searchBox svg {
+  flex-shrink: 0;
+  color: var(--admin-section-label, #868C98);
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text, #111111);
+  width: 100%;
+}
+
+.searchInput::placeholder {
+  color: var(--admin-section-label, #868C98);
+}
+
+/* Tool buttons (Filter, Sort) */
+.toolBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  background: var(--admin-card-bg, #ffffff);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.toolBtn:hover {
+  border-color: #D1D1D6;
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.toolBtn svg {
+  color: var(--admin-section-label, #868C98);
+}
+
+/* View toggle */
+.viewToggle {
+  display: flex;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 34px;
+  border: none;
+  background: var(--admin-card-bg, #ffffff);
+  color: var(--admin-section-label, #868C98);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.viewBtn:first-child {
+  border-right: 1px solid var(--admin-card-border, #E2E4E9);
+}
+
+.viewBtn:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.viewBtnActive {
+  background: var(--admin-content-bg, #F6F8FA);
+  color: var(--color-text, #111111);
+}
+
+/* State toggle */
+.stateToggle {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px dashed var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  background: var(--admin-card-bg, #ffffff);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--admin-section-label, #868C98);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.stateToggle:hover {
+  border-color: var(--color-text, #111111);
+  color: var(--color-text, #111111);
+}
+
+/* Add Vehicle (toolbar) */
+.addBtnSmall {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  background: var(--admin-active-bg, #111111);
+  color: var(--admin-active-text, #ffffff);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.addBtnSmall:hover {
+  opacity: 0.88;
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.tableCard {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--admin-section-label, #868C98);
+  background: var(--admin-content-bg, #F6F8FA);
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.table td {
+  padding: 12px 16px;
+  color: var(--color-text, #111111);
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr {
+  transition: background 0.1s ease;
+}
+
+.table tbody tr:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.rowSelected {
+  background: rgba(17, 17, 17, 0.02);
+}
+
+/* Checkbox column */
+.checkCol {
+  width: 44px;
+  text-align: center;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  accent-color: var(--admin-active-bg, #111111);
+  cursor: pointer;
+}
+
+/* Vehicle cell */
+.vehicleCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vehicleThumb {
+  width: 40px;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--admin-content-bg, #F6F8FA);
+  flex-shrink: 0;
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: none;
+}
+
+.vehicleInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.vehicleName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+}
+
+.vehicleBrand {
+  font-size: 11.5px;
+  color: var(--admin-section-label, #868C98);
+}
+
+/* Status badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusAvailable {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.statusAvailable .badgeDot {
+  background: #059669;
+}
+
+.statusMaintenance {
+  background: #FFFBEB;
+  color: #D97706;
+}
+
+.statusMaintenance .badgeDot {
+  background: #D97706;
+}
+
+.statusBooked {
+  background: #FEF2F2;
+  color: #DC2626;
+}
+
+.statusBooked .badgeDot {
+  background: #DC2626;
+}
+
+/* Chassis */
+.chassisCell {
+  color: var(--admin-section-label, #868C98);
+  font-size: 12.5px;
+}
+
+/* More actions */
+.actionsCol {
+  width: 44px;
+  text-align: center;
+}
+
+.moreBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--admin-section-label, #868C98);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.moreBtn:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+  color: var(--color-text, #111111);
+}
+
+
+
+/* ============================================================
+   CARD / GRID VIEW
+   ============================================================ */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.vehicleCard {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.vehicleCard:hover {
+  border-color: #D1D1D6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Card Image */
+.cardImage {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: none;
+  transition: transform 0.25s ease;
+}
+
+.vehicleCard:hover .cardImg {
+  transform: scale(1.03);
+}
+
+/* Card Body */
+.cardBody {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Meta Row (Location, Price, Capacity) */
+.cardMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--admin-section-label, #868C98);
+}
+
+.cardLocation {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 400;
+}
+
+.cardPrice {
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  font-size: 13px;
+}
+
+.cardPriceUnit {
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--admin-section-label, #868C98);
+}
+
+.cardCapacity {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 400;
+}
+
+/* Vehicle Name */
+.cardName {
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer Row (Category, Status, Chassis) */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cardCategory {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: var(--admin-content-bg, #F6F8FA);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: var(--radius-full, 9999px);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--admin-section-label, #868C98);
+}
+
+.cardChassis {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--admin-section-label, #868C98);
+  font-weight: 400;
+}
+
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbarLeft,
+  .toolbarRight {
+    flex-wrap: wrap;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cardGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .emptyCard {
+    padding: 60px 24px;
+    min-height: 320px;
+  }
+
+  .searchBox {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}
