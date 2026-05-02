@@ -1610,9 +1610,6 @@ h6 {
     margin-top: 32px;
   }
 
-
-
-
   .howitworks__grid {
     grid-template-columns: 1fr;
   }
@@ -1767,7 +1764,7 @@ h6 {
 
 }
 
-@media screen and (max-width: 380px) {
+@media screen and (max-width: 450px) {
 
   .howitworks__title-icon {
     top: 90px;
@@ -1998,4 +1995,37 @@ h6 {
   .contact-form-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* ============================================================
+   ADMIN DASHBOARD — Design Tokens
+   These CSS custom properties are consumed by admin CSS Modules.
+   No component styles here — only tokens for consistency.
+   ============================================================ */
+:root {
+  /* Sidebar */
+  --admin-sidebar-bg: #ffffff;
+  --admin-sidebar-width: 240px;
+  --admin-sidebar-border: #E2E4E9;
+
+  /* Content area */
+  --admin-content-bg: #F6F8FA;
+
+  /* Active nav */
+  --admin-active-bg: #111111;
+  --admin-active-text: #ffffff;
+
+  /* Nav text */
+  --admin-nav-text: #6b6b72;
+  --admin-section-label: #868C98;
+
+  /* Cards */
+  --admin-card-bg: #ffffff;
+  --admin-card-border: #E2E4E9;
+
+  /* Stat accent colors */
+  --admin-stat-accent-1: #111111;
+  --admin-stat-accent-2: #22C55E;
+  --admin-stat-accent-3: #3B82F6;
+  --admin-stat-accent-4: #F59E0B;
 }

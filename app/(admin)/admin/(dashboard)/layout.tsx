@@ -1,0 +1,30 @@
+import type { Metadata } from "next";
+import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminTopbar from "@/components/admin/AdminTopbar";
+import styles from "./layout.module.css";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Admin Dashboard",
+    template: "%s | Drifully Admin",
+  },
+  description: "Drifully admin dashboard — manage vehicles, bookings, users, and payments.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className={styles.dashboard}>
+      <AdminSidebar />
+      <div className={styles.main}>
+        <AdminTopbar />
+        <main className={styles.content} id="admin-content">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
