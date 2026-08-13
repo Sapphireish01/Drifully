@@ -15,7 +15,7 @@ export default function CookiePolicyPage() {
 
       <div className={styles.container}>
         <h1 className={styles.title}>COOKIE POLICY</h1>
-        <p className={styles.effectiveDate}>Effective Date: 04-07-2026</p>
+        <p className={styles.effectiveDate}>Effective Date: July 4, 2026</p>
 
         <div className={styles.intro}>
           <p className={styles.text}>

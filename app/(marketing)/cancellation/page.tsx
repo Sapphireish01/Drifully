@@ -15,7 +15,7 @@ export default function CancellationPolicyPage() {
 
       <div className={styles.container}>
         <h1 className={styles.title}>DRIFULLY RESERVATION CANCELLATION, MODIFICATION &amp; REFUND POLICY</h1>
-        <p className={styles.effectiveDate}>Effective Date: 04--072026</p>
+        <p className={styles.effectiveDate}>Effective Date: July 4, 2026</p>
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>1. PURPOSE</h2>
@@ -58,7 +58,7 @@ export default function CancellationPolicyPage() {
           <p className={styles.text}>If cancelled before the pickup time:</p>
           <p className={styles.text}>Customer forfeits</p>
           <ul className={styles.list}>
-            <li className={styles.listItem}>50% of the total reservation cost.</li>
+            <li className={styles.listItem}>50% of the Day 1 reservation cost. The remaining amount will be refunded.</li>
           </ul>
 
           <h3 className={styles.subSectionTitle}>After Pickup Time</h3>

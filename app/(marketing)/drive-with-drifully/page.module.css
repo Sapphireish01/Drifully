@@ -199,7 +199,7 @@
 .whyDesc {
   color: #000000;
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.7;
   letter-spacing: -0.5px;
 }
@@ -242,7 +242,7 @@
 
 .whyCardTitle {
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
   color: #111;
   line-height: 59.99%;
   letter-spacing: -0.5px;
@@ -259,14 +259,24 @@
   margin-bottom: 48px;
 }
 
-.verificationTitle {
-  font-family: 'DM Sans', sans-serif;
-  font-style: normal;
+.verificationHeading {
+  font-family: var(--font-heading), 'DM Sans', sans-serif;
   font-weight: 600;
-  font-size: 40px;
+  font-size: 36px;
   line-height: 125%;
-  letter-spacing: -1.3px;
+  letter-spacing: -1px;
   color: #000000;
+  margin-bottom: 12px;
+}
+
+.verificationText {
+  font-family: var(--font-body), 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: -0.5px;
+  color: #000000;
+  max-width: 800px;
 }
 
 .verificationGrid {
@@ -333,6 +343,7 @@
   padding-left: 20px;
   margin-bottom: 8px;
   font-size: 0.95rem;
+  font-weight: 500;
   color: #111;
   line-height: 1.5;
 }
@@ -480,6 +491,7 @@
   /* margin-bottom: 6px; */
   font-size: 0.95rem;
   color: #111;
+  font-weight: 500;
 }
 
 .earnList li::before {
@@ -565,6 +577,7 @@
 .faqA {
   font-family: "DM Sans", sans-serif;
   font-size: 1rem;
+  font-weight: 500;
   color: #000;
   line-height: 1.5;
   letter-spacing: -0.5px;
@@ -581,7 +594,7 @@
 
 .faqFooterText {
   font-family: "DM Sans", sans-serif;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 16px;
   line-height: 170%;
   letter-spacing: -0.5px;
