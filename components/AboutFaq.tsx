@@ -7,7 +7,7 @@ import { Faq } from "@/types/faq";
 import styles from "@/app/(marketing)/about-us/page.module.css";
 
 export default function AboutFaq() {
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [openFaqIndices, setOpenFaqIndices] = useState<number[]>([]);
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +31,9 @@ export default function AboutFaq() {
   }, []);
 
   const toggleFaq = (index: number) => {
-    setOpenFaqIndex(openFaqIndex === index ? null : index);
+    setOpenFaqIndices((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
   };
 
   const midpoint = Math.ceil(faqs.length / 2);
@@ -60,7 +62,7 @@ export default function AboutFaq() {
             <div className={styles['about-faq__col']}>
               {leftColumn.map((item, index) => {
                 const globalIndex = index;
-                const isOpen = openFaqIndex === globalIndex;
+                const isOpen = openFaqIndices.includes(globalIndex);
                 return (
                   <div
                     key={item.id}
@@ -93,7 +95,7 @@ export default function AboutFaq() {
             <div className={styles['about-faq__col']}>
               {rightColumn.map((item, index) => {
                 const globalIndex = index + midpoint;
-                const isOpen = openFaqIndex === globalIndex;
+                const isOpen = openFaqIndices.includes(globalIndex);
                 return (
                   <div
                     key={item.id}

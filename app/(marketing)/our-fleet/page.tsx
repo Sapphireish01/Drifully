@@ -16,11 +16,19 @@ const CATEGORIES = ["All", "Jeep", "Hatchback", "Luxury", "SUVs", "Sedan", "Van"
 
 export default function OurFleetPage() {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [selectedBrand, setSelectedBrand] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currency, setCurrency] = useState<string>("USD");
+
+  // Reset page when category or brand filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, selectedBrand]);
 
   // Detect user's local currency via IP — cached in localStorage to avoid repeat calls
   useEffect(() => {
@@ -61,7 +69,7 @@ export default function OurFleetPage() {
           vehiclesService.getBrandsAndCategories()
         ]);
         setVehicles(data);
-        setBrands(optionsData.brands);
+        setBrands(optionsData.brands || []);
       } catch (err: any) {
         setError("Failed to load vehicles. Please try again later.");
         console.error("Error fetching vehicles:", err);
@@ -72,6 +80,27 @@ export default function OurFleetPage() {
 
     fetchVehicles();
   }, [activeCategory]);
+
+  const availableBrandNames = ["All", ...Array.from(new Set([
+    ...brands.map((b: any) => b.name),
+    ...vehicles.map(v => {
+      const b = brands.find(brand => brand.id === v.brand_id);
+      return b ? b.name : (v.name ? v.name.split(' ')[0] : '');
+    }).filter(Boolean)
+  ]))];
+
+  const displayedVehicles = vehicles.filter(vehicle => {
+    if (selectedBrand === "All") return true;
+    const brandObj = brands.find(b => b.id === vehicle.brand_id);
+    const brandName = brandObj ? brandObj.name : vehicle.name.split(' ')[0];
+    return brandName.toLowerCase() === selectedBrand.toLowerCase();
+  });
+
+  const totalPages = Math.ceil(displayedVehicles.length / ITEMS_PER_PAGE);
+  const paginatedVehicles = displayedVehicles.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <>
@@ -152,15 +181,35 @@ export default function OurFleetPage() {
 
             {/* Filter Tabs */}
             <div className={styles['fleet-filters']}>
-              {CATEGORIES.map(category => (
-                <button
-                  key={category}
-                  className={`${styles['filter-tab']} ${activeCategory === category ? styles.active : ''}`}
-                  onClick={() => setActiveCategory(category)}
-                >
-                  {category}
-                </button>
-              ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#6B7280', minWidth: '70px' }}>Category:</span>
+                  {CATEGORIES.map(category => (
+                    <button
+                      key={category}
+                      className={`${styles['filter-tab']} ${activeCategory === category ? styles.active : ''}`}
+                      onClick={() => setActiveCategory(category)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+
+                {availableBrandNames.length > 1 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#6B7280', minWidth: '70px' }}>Brand:</span>
+                    {availableBrandNames.map(brandName => (
+                      <button
+                        key={brandName}
+                        className={`${styles['filter-tab']} ${selectedBrand === brandName ? styles.active : ''}`}
+                        onClick={() => setSelectedBrand(brandName)}
+                      >
+                        {brandName}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Vehicle Grid */}
@@ -171,10 +220,10 @@ export default function OurFleetPage() {
                 </div>
               ) : error ? (
                 <div className={styles.error}>{error}</div>
-              ) : vehicles.length === 0 ? (
-                <div className={styles.empty}>No vehicles found in this category.</div>
+              ) : displayedVehicles.length === 0 ? (
+                <div className={styles.empty}>No vehicles found matching your criteria.</div>
               ) : (
-                vehicles.map(vehicle => (
+                paginatedVehicles.map(vehicle => (
                   <Link href={`/our-fleet/${vehicle.id}`} key={vehicle.id} className={styles['fleet-card-link']}>
                     <div className={styles['fleet-card']}>
                       <div className={styles['fleet-card__img-wrapper']}>
@@ -227,10 +276,25 @@ export default function OurFleetPage() {
             </div>
 
             {/* Pagination */}
-            <div className={styles['fleet-pagination']}>
-              <button className={`${styles['pagination-btn']} ${styles.active}`}>1</button>
-              <button className={styles['pagination-btn']}>2</button>
-            </div>
+            {totalPages > 1 && (
+              <div className={styles['fleet-pagination']}>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    className={`${styles['pagination-btn']} ${currentPage === pageNum ? styles.active : ''}`}
+                    onClick={() => {
+                      setCurrentPage(pageNum);
+                      const fleetSection = document.querySelector(`.${styles['fleet-section']}`);
+                      if (fleetSection) {
+                        fleetSection.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>

@@ -122,14 +122,23 @@ export default function HomepageModal() {
             anywhere.
           </p>
 
-          <a
-            href={downloadLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.downloadBtn}
-          >
-            Download App
-          </a>
+          <div className={styles.actionsGroup}>
+            <a
+              href={downloadLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.downloadBtn}
+            >
+              Download App
+            </a>
+            <button
+              type="button"
+              className={styles.proceedBtn}
+              onClick={() => setIsOpen(false)}
+            >
+              Proceed to site
+            </button>
+          </div>
         </div>
       </div>
     </div>

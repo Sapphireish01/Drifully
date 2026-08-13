@@ -173,6 +173,15 @@
   margin: 0;
 }
 
+.actionsGroup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
 .downloadBtn {
   background-color: #18181B;
   color: #ffffff;
@@ -190,13 +199,36 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 4px;
 }
 
 .downloadBtn:hover {
   background-color: #000000;
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.proceedBtn {
+  background-color: #F3F4F6;
+  color: #1F2937;
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 10px;
+  line-height: 170%;
+  letter-spacing: -0.5px;
+  border: 1px solid #E5E7EB;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proceedBtn:hover {
+  background-color: #E5E7EB;
+  color: #111827;
+  border-color: #D1D5DB;
 }
 
 @media (max-width: 768px) {

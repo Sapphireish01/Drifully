@@ -130,9 +130,10 @@ export default function DriveWithDrifullyPage() {
       <section className={styles.verificationSection}>
         <div className={styles.container}>
           <div className={styles.verificationHeader}>
-            <h2 className={styles.verificationTitle}>
+            <h2 className={styles.verificationHeading}>Safety First</h2>
+            <p className={styles.verificationText}>
               At Drifully, safety comes first. Every driver must successfully complete multiple verification stages before being approved to drive on the platform.
-            </h2>
+            </p>
           </div>
           <div className={styles.verificationGrid}>
             <div className={styles.verifyCard}>

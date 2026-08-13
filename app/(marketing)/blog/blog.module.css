@@ -89,12 +89,13 @@
 }
 
 .appStoreBtn {
-  background: transparent;
-  color: white;
+  background: white;
+  color: #000000;
+  border: 1px solid white;
 }
 
 .appStoreBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #f0f0f0;
 }
 
 .btnTextMobile {
