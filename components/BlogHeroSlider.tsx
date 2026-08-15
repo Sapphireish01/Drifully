@@ -54,7 +54,7 @@ export default function BlogHeroSlider() {
               <Image src="/images/blog-google-play.png" alt="" width={18} height={18} />
             </Link>
             <Link href="#" className={`${styles.appBtn} ${styles.appStoreBtn}`}>
-              Download on App Store <Image src="/images/blog-apple-store.png" alt="" width={18} height={18} />
+              Download on App Store <Image src="/icons/apple.svg" alt="" width={18} height={18} />
             </Link>
           </div>
         </div>

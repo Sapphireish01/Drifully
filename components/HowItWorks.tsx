@@ -97,9 +97,9 @@ function StepCard({
       >
         {index === 0 && (
           <img
-            src="/images/1st-card.svg"
+            src="/images/pick a ride.png"
             alt="Pick A Ride Phone"
-            style={{ width: "71%", height: "auto", objectFit: "contain" }}
+            style={{ width: "48%", height: "auto", objectFit: "contain" }}
           />
         )}
         {index === 1 && <DatePickerMockup />}
