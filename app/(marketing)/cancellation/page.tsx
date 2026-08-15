@@ -58,7 +58,7 @@ export default function CancellationPolicyPage() {
           <p className={styles.text}>If cancelled before the pickup time:</p>
           <p className={styles.text}>Customer forfeits</p>
           <ul className={styles.list}>
-            <li className={styles.listItem}>50% of the Day 1 reservation cost. The remaining amount will be refunded.</li>
+            <li className={styles.listItem}>50% of the first day's reservation cost. The remaining amount will be refunded.</li>
           </ul>
 
           <h3 className={styles.subSectionTitle}>After Pickup Time</h3>
