@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { performSearch } from "@/lib/searchData";
+import SearchDropdown from "@/components/search/SearchDropdown";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -16,12 +18,18 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
   const [downloadLink, setDownloadLink] = useState("https://play.google.com/store/apps/details?id=com.drifully.app");
 
-  // Close menu when route changes
+  // Close menu & search when route changes
   useEffect(() => {
     setIsOpen(false);
+    setIsSearchExpanded(false);
+    setSearchQuery("");
   }, [pathname]);
 
   // Prevent scroll when menu is open
@@ -33,10 +41,12 @@ export default function Navbar() {
     }
   }, [isOpen]);
 
+  // Detect iOS download link
   useEffect(() => {
     if (typeof window !== "undefined" && window.navigator) {
       const userAgent = window.navigator.userAgent.toLowerCase();
-      const isIOS = /ipad|iphone|ipod/.test(userAgent) ||
+      const isIOS =
+        /ipad|iphone|ipod/.test(userAgent) ||
         (window.navigator.maxTouchPoints && window.navigator.maxTouchPoints > 2 && /macintosh/.test(userAgent));
       if (isIOS) {
         setDownloadLink("https://apps.apple.com/ng/app/drifully/id6782419021");
@@ -44,7 +54,64 @@ export default function Navbar() {
     }
   }, []);
 
+  // Handle click outside to close search popover
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchExpanded(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Keyboard shortcut listener (Cmd+K / Ctrl+K / Escape)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchExpanded(true);
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      } else if (e.key === "Escape") {
+        setIsSearchExpanded(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  const handleSearchClick = () => {
+    setIsSearchExpanded(true);
+    setTimeout(() => searchInputRef.current?.focus(), 50);
+  };
+
+  const handleCloseSearch = () => {
+    setIsSearchExpanded(false);
+    setSearchQuery("");
+  };
+
+  const searchResults = performSearch(searchQuery);
+
+  const SearchIcon = (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M9.58464 17.5C13.9569 17.5 17.5013 13.9555 17.5013 9.58329C17.5013 5.21104 13.9569 1.66663 9.58464 1.66663C5.21238 1.66663 1.66797 5.21104 1.66797 9.58329C1.66797 13.9555 5.21238 17.5 9.58464 17.5Z"
+        stroke="#868C98"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M18.3346 18.3333L16.668 16.6666"
+        stroke="#868C98"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 
   return (
     <nav className="navbar" aria-label="Main navigation">
@@ -55,13 +122,7 @@ export default function Navbar() {
           className={`navbar__logo-link ${isOpen ? "navbar__logo-link--hidden" : ""}`}
           aria-label="Drifully home"
         >
-          <Image
-            src="/images/logo.svg"
-            alt="Drifully"
-            width={120}
-            height={36}
-            priority
-          />
+          <Image src="/images/logo.svg" alt="Drifully" width={120} height={36} priority />
         </Link>
 
         {/* Mobile Toggle Button */}
@@ -89,12 +150,7 @@ export default function Navbar() {
           </div>
           <div className="navbar__mobile-header">
             <Link href="/" onClick={() => setIsOpen(false)}>
-              <Image
-                src="/images/logo.svg"
-                alt="Drifully"
-                width={120}
-                height={36}
-              />
+              <Image src="/images/logo.svg" alt="Drifully" width={120} height={36} />
             </Link>
           </div>
 
@@ -123,13 +179,62 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Desktop CTA */}
-        <Link href={downloadLink} className="btn btn-primary btn-sm navbar__cta-desktop">
-          Download App
-        </Link>
+        {/* Actions Container (Search + Download App CTA) */}
+        <div className="navbar__actions">
+          {/* Search Container */}
+          <div ref={searchRef} className={`navbar__search ${isSearchExpanded ? "navbar__search--expanded" : ""}`}>
+            {isSearchExpanded ? (
+              <div className="navbar__search-input-wrapper">
+                <span className="navbar__search-icon">{SearchIcon}</span>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  className="navbar__search-input"
+                  placeholder="What would you like to search for"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search Drifully"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    className="navbar__search-clear"
+                    onClick={() => setSearchQuery("")}
+                    aria-label="Clear search"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 6L6 18M6 6L18 18" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="navbar__search-btn"
+                onClick={handleSearchClick}
+                aria-label="Open search"
+                title="Search (Cmd+K / Ctrl+K)"
+              >
+                {SearchIcon}
+              </button>
+            )}
+
+            {/* Dropdown Results Popover */}
+            {isSearchExpanded && searchQuery.trim().length > 0 && (
+              <SearchDropdown query={searchQuery} results={searchResults} onItemClick={handleCloseSearch} />
+            )}
+          </div>
+
+          {/* Desktop CTA */}
+          <Link href={downloadLink} className="btn btn-primary btn-sm navbar__cta-desktop">
+            Download App
+          </Link>
+        </div>
       </div>
     </nav>
   );
 }
+
 
 
