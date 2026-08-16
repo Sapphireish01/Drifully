@@ -725,16 +725,94 @@
   transform: scale(0.98);
 }
 
+@media (max-width: 1024px) {
+  .heroContent {
+    margin-left: 0;
+    margin-top: 80px;
+    padding: 0 20px;
+    max-width: 100%;
+  }
+
+  .whyTitle {
+    width: 100%;
+    height: auto;
+    font-size: 32px;
+  }
+}
+
 @media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+    padding: 100px 0 60px;
+  }
+
   .heroBackground {
     width: 100%;
-    opacity: 0.4;
+    opacity: 0.35;
     mask-image: none;
     -webkit-mask-image: none;
   }
 
+  .heroBackground2,
+  .heroBackground3 {
+    display: none;
+  }
+
+  .heroContent {
+    margin-top: 20px;
+    padding: 0 20px;
+  }
+
   .heroTitle {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
+    line-height: 1.2;
+  }
+
+  .heroSubtitle {
+    font-size: 15px;
+  }
+
+  .whySection {
+    padding: 48px 20px;
+  }
+
+  .whyLayout {
+    gap: 32px;
+  }
+
+  .whyTitle {
+    font-size: 28px;
+    line-height: 1.25;
+  }
+
+  .whyCard {
+    padding: 18px 16px;
+  }
+
+  .verificationSection {
+    padding: 48px 20px;
+  }
+
+  .verificationHeading {
+    font-size: 28px;
+  }
+
+  .verificationGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .ctaSection {
+    padding: 60px 20px;
+  }
+
+  .ctaTitle {
+    font-size: 30px;
+    line-height: 1.25;
+  }
+
+  .ctaDesc {
+    font-size: 15px;
   }
 
   .ctaImages {
