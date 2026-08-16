@@ -125,60 +125,6 @@ export default function Navbar() {
           <Image src="/images/logo.svg" alt="Drifully" width={120} height={36} priority />
         </Link>
 
-        {/* Mobile Toggle Button */}
-        <button
-          className="navbar__toggle"
-          onClick={toggleMenu}
-          aria-expanded={isOpen}
-          aria-label="Toggle navigation"
-        >
-          {isOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </button>
-
-        {/* Nav links / Mobile Menu */}
-        <div className={`navbar__menu ${isOpen ? "is-open" : ""}`}>
-          <div className="navbar__mobile-watermark" aria-hidden="true">
-            DRIFULLY
-          </div>
-          <div className="navbar__mobile-header">
-            <Link href="/" onClick={() => setIsOpen(false)}>
-              <Image src="/images/logo.svg" alt="Drifully" width={120} height={36} />
-            </Link>
-          </div>
-
-          <ul className="navbar__nav" role="list">
-            {NAV_LINKS.map((item) => {
-              const isActive = pathname === item.href;
-
-              return (
-                <li key={item.label} className="navbar__nav-item">
-                  <Link
-                    href={item.href}
-                    className="navbar__link"
-                    data-active={isActive ? true : undefined}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-
-          {/* Mobile CTA */}
-          <Link href={downloadLink} className="btn btn-primary navbar__cta-mobile" onClick={() => setIsOpen(false)}>
-            Download App
-          </Link>
-        </div>
-
         {/* Actions Container (Search + Download App CTA) */}
         <div className="navbar__actions">
           {/* Search Container */}
@@ -231,6 +177,24 @@ export default function Navbar() {
             Download App
           </Link>
         </div>
+
+        {/* Mobile Toggle Button */}
+        <button
+          className="navbar__toggle"
+          onClick={toggleMenu}
+          aria-expanded={isOpen}
+          aria-label="Toggle navigation"
+        >
+          {isOpen ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
       </div>
     </nav>
   );
