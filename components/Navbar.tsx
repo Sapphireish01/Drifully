@@ -125,10 +125,47 @@ export default function Navbar() {
           <Image src="/images/logo.svg" alt="Drifully" width={120} height={36} priority />
         </Link>
 
+        {/* Nav links / Mobile Menu */}
+        <div className={`navbar__menu ${isOpen ? "is-open" : ""}`}>
+          <div className="navbar__mobile-watermark" aria-hidden="true">
+            DRIFULLY
+          </div>
+          <div className="navbar__mobile-header">
+            <Link href="/" onClick={() => setIsOpen(false)}>
+              <Image src="/images/logo.svg" alt="Drifully" width={120} height={36} />
+            </Link>
+          </div>
+
+          <ul className="navbar__nav" role="list">
+            {NAV_LINKS.map((item) => {
+              const isActive = pathname === item.href;
+
+              return (
+                <li key={item.label} className="navbar__nav-item">
+                  <Link
+                    href={item.href}
+                    className="navbar__link"
+                    data-active={isActive ? true : undefined}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Mobile CTA */}
+          <Link href={downloadLink} className="btn btn-primary navbar__cta-mobile" onClick={() => setIsOpen(false)}>
+            Download App
+          </Link>
+        </div>
+
         {/* Actions Container (Search + Download App CTA) */}
-        <div className="navbar__actions">
-          {/* Search Container */}
-          <div ref={searchRef} className={`navbar__search ${isSearchExpanded ? "navbar__search--expanded" : ""}`}>
+        {!isOpen && (
+          <div className="navbar__actions">
+            {/* Search Container */}
+            <div ref={searchRef} className={`navbar__search ${isSearchExpanded ? "navbar__search--expanded" : ""}`}>
             {isSearchExpanded ? (
               <div className="navbar__search-input-wrapper">
                 <span className="navbar__search-icon">{SearchIcon}</span>
@@ -177,6 +214,7 @@ export default function Navbar() {
             Download App
           </Link>
         </div>
+        )}
 
         {/* Mobile Toggle Button */}
         <button
