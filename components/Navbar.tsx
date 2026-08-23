@@ -209,7 +209,10 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Desktop CTA */}
+          {/* Desktop account and app actions */}
+          <Link href="/customer/login" className="navbar__join-desktop">
+            Join/Login
+          </Link>
           <Link href={downloadLink} className="btn btn-primary btn-sm navbar__cta-desktop">
             Download App
           </Link>

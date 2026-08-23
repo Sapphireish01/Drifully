@@ -40,10 +40,12 @@ publicApi.interceptors.response.use(
     const method = error.config?.method?.toLowerCase() ?? '';
     const skipToast = error.config?.skipToast;
 
-    // Redirect to login on 401 (preserve existing behaviour)
+    // Keep customer sessions in the customer authentication flow.
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
-        window.location.href = '/admin/login';
+        window.location.href = window.location.pathname.startsWith('/customer')
+          ? '/customer/login'
+          : '/admin/login';
       }
     }
 

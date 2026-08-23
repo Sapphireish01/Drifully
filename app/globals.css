@@ -510,6 +510,28 @@ h6 {
   display: flex;
 }
 
+.navbar__join-desktop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  color: #868C98;
+  background: #ffffff;
+  font-size: var(--text-base);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.navbar__join-desktop:hover {
+  border-color: #C9D0D9;
+  color: var(--color-primary);
+  background: #F8FAFC;
+}
+
 .navbar__actions {
   display: flex;
   align-items: center;
@@ -871,6 +893,10 @@ h6 {
 
   .navbar__cta-desktop {
     display: none !important;
+  }
+
+  .navbar__join-desktop {
+    display: none;
   }
 }
 

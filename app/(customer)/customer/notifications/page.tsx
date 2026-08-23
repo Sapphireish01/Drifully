@@ -1,0 +1,4 @@
+import styles from "@/components/customer/CustomerShell.module.css";
+
+const notifications = ["Your profile is ready for its first booking.", "Earn rewards when you invite a friend to Drifully.", "Need help with a trip? Our support team is available."];
+export default function NotificationsPage() { return <div><p className={styles.eyebrow}>STAY UP TO DATE</p><h1 className={styles.title}>Notifications</h1><p className={styles.subtitle}>Booking updates and useful reminders will appear here.</p><div className={styles.list}>{notifications.map((notification) => <div className={styles.card} key={notification}><p className={styles.notice}><span className={styles.noticeDot} />{notification}</p><span className={styles.muted}>Today</span></div>)}</div></div>; }

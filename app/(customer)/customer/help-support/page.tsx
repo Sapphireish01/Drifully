@@ -1,0 +1,5 @@
+import Link from "next/link";
+import styles from "@/components/customer/CustomerShell.module.css";
+
+const tabs = [{ label: "Emergency Contacts", href: "emergency-contacts" }, { label: "Report a Problem", href: "report-problem" }, { label: "Chat with Support", href: "chat" }, { label: "FAQs", href: "faqs" }, { label: "Contact Us", href: "contact-us" }];
+export default function HelpSupportPage() { return <div><p className={styles.eyebrow}>WE ARE HERE TO HELP</p><h1 className={styles.title}>Help & Support</h1><p className={styles.subtitle}>Find answers or speak with the Drifully support team.</p><nav className={styles.tabs} aria-label="Support options">{tabs.map((tab, index) => <Link className={`${styles.tab} ${index === 2 ? styles.tabActive : ""}`} href={`/customer/help-support/${tab.href}`} key={tab.href}>{tab.label}</Link>)}</nav><section className={styles.chatCard}><p className={styles.chatMessage}>Need help with a booking or payment?</p><p className={styles.muted}>Start a conversation and our team will get back to you.</p><Link href="/customer/help-support/chat" className={styles.primaryButton}>Chat with support</Link></section></div>; }
