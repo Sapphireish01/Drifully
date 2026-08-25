@@ -1,0 +1,685 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* max-width: 1000px; */
+}
+
+/* Sub-Navigation Tabs */
+.tabsRow {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+  /* overflow-x: auto; */
+}
+
+.tabBtn {
+  font-size: 12px;
+  font-weight: 400;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0 0 6px 0;
+  white-space: nowrap;
+  position: relative;
+}
+
+.activeTab {
+  color: #0f172a;
+  font-weight: 400;
+}
+
+.activeTab::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #0f172a;
+}
+
+/* ─── TAB 1: EMERGENCY CONTACTS ─── */
+.emergencyList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.emergencyRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.emergencyLabel {
+  width: 200px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #0f172a;
+}
+
+.contactInputsWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.copyInputBox {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.inputField {
+  width: 100%;
+  height: 48px;
+  padding: 0 44px 0 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  color: #0f172a;
+  outline: none;
+}
+
+.copyIconBtn {
+  position: absolute;
+  right: 14px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.trashBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.addContactBtn {
+  align-self: flex-end;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+/* ─── TAB 2: REPORT A PROBLEM ─── */
+.reportForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.formLabel span {
+  color: #ef4444;
+}
+
+.selectInput {
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  color: #0f172a;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+}
+
+.textareaWrap {
+  position: relative;
+}
+
+.textarea {
+  width: 100%;
+  height: 140px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  color: #0f172a;
+  outline: none;
+  resize: vertical;
+}
+
+.charCounter {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.evidenceDropzone {
+  padding: 24px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.cloudIcon {
+  color: #94a3b8;
+}
+
+.dropTitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: #0f172a;
+}
+
+.dropHint {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.browseBtn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.uploadedFileCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  max-width: 400px;
+}
+
+.fileLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pdfBadge {
+  width: 36px;
+  height: 40px;
+  border-radius: 8px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fileMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fileName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.fileStatusRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.completedText {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.submitBtn {
+  align-self: flex-end;
+  padding: 14px 32px;
+  border-radius: 12px;
+  border: none;
+  background: #f1f5f9;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: not-allowed;
+  margin-top: 8px;
+}
+
+.submittedBtn {
+  background: #0f172a;
+  color: #ffffff;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.submittedCheck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 11px;
+}
+
+/* History Section */
+.historySection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.historyTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid #f1f5f9;
+}
+
+.historyTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.historyTable th {
+  background: #f8fafc;
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.historyTable td {
+  padding: 16px 20px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.historyTable tr:last-child td {
+  border-bottom: none;
+}
+
+.badgeSent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #f0fdf4;
+  color: #16a34a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badgePending {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ─── TAB 3: CHAT WITH SUPPORT ─── */
+.chatContainer {
+  display: flex;
+  flex-direction: column;
+  height: 580px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  position: relative;
+}
+
+.chatMessages {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.aiPromptCenter {
+  align-self: center;
+  margin-top: auto;
+  font-size: 14px;
+  color: #94a3b8;
+  font-weight: 400;
+  text-align: center;
+}
+
+.aiCard {
+  align-self: flex-start;
+  max-width: 260px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aiTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+  margin: 0;
+}
+
+.optionChip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.optionChip:hover {
+  border-color: #0f172a;
+}
+
+.userMessageBubble {
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.userBubbleText {
+  padding: 12px 18px;
+  border-radius: 16px 16px 4px 16px;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.msgTimestamp {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.chatInputBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.attachIconBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.chatInputWrap {
+  flex: 1;
+}
+
+.chatInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 20px;
+  border-radius: 24px;
+  border: 1px solid #f1f5f9;
+  background: #f8fafc;
+  font-size: 14px;
+  font-weight: 400;
+  color: #0f172a;
+  outline: none;
+}
+
+.sendIconBtn {
+  background: transparent;
+  border: none;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+/* ─── TAB 4: FAQS ACCORDION ─── */
+.faqsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faqSearchInput {
+  height: 48px;
+  padding: 0 16px 0 44px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3ccircle cx='11' cy='11' r='8'/%3e%3cline x1='21' y1='21' x2='16.65' y2='16.65'/%3e%3c/svg%3e") no-repeat 16px center / 16px;
+  font-size: 14px;
+  color: #0f172a;
+  outline: none;
+}
+
+.faqCard {
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.faqHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  cursor: pointer;
+}
+
+.faqQuestion {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.faqBody {
+  padding: 0 24px 18px;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* ─── TAB 6: TWO FACTOR AUTHENTICATION ─── */
+.twoFactorCenter {
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+.twoFactorCard {
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 32px;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.shieldCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.twoFactorSub {
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.turnOnRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.turnOnText {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.changePinBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #ffffff;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked+.slider {
+  background-color: #0f172a;
+  border-color: #0f172a;
+}
+
+input:checked+.slider:before {
+  transform: translateX(20px);
+}

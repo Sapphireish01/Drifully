@@ -32,7 +32,7 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
     category: "Our Fleet" as const,
     tag: car.type || car.category || "Jeep",
     rating: car.rating || "4.8",
-    reviewsCount: car.reviews || 124,
+    reviewsCount: car.reviewsCount || 124,
     keywords: [car.name, car.type, car.category, car.fuel, car.location, car.transmission],
   })),
 

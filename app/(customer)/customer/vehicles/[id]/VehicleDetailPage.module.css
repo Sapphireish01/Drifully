@@ -1,0 +1,429 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.topHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background: #f8fafc;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.star {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.rating {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.reviewsCount {
+  color: #64748b;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 536px;
+  gap: 24px;
+  align-items: start;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mainPhotoHero {
+  position: relative;
+  width: 100%;
+  height: 352px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.subPhotosCollage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  height: 414px;
+}
+
+.subPhoto {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.img {
+  object-fit: cover;
+}
+
+.chipsRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionHeading {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 24px;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reviewCard {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reviewTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.reviewStars {
+  font-size: 11px;
+  color: #0f172a;
+}
+
+.reviewComment {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.reviewerMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.authorName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.reviewDate {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+/* Sidebar styling */
+.rightSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 20px;
+}
+
+.bookingCard {
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid #E2E4E9;
+}
+
+.bookingTitle {
+  font-size: 20px;
+  font-weight: 600;
+  /* color: #0f172a; */
+  /* margin: 0 0 2px 0; */
+}
+
+.bookingSubtitle {
+  font-size: 14px;
+  color: #868C98;
+  margin: 0;
+}
+
+.dateFields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 500;
+  /* color: 9; */
+}
+
+.dateInputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dateInput {
+  width: 100%;
+  padding: 10px;
+  border-radius: 1px;
+  border: 1px solid #e2e8f0;
+  font-size: 12px;
+  color: #334155;
+  /* background: #ffffff; */
+  outline: none;
+  cursor: pointer;
+}
+
+.calIcon {
+  position: absolute;
+  right: 12px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.checkBtn {
+  width: 140px;
+  height: 44px;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #f8fafc;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.activeCheckBtn {
+  background: #18191f;
+  color: #ffffff;
+}
+
+.activeCheckBtn:hover {
+  background: #0f172a;
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.totalLabel {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.totalAmount {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.availabilityBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  color: #016630;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.availabilityBanner svg {
+  flex-shrink: 0;
+}
+
+.priceCard {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.priceHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.priceAmount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.priceUnit {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.taxText {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.bookNowBtn {
+  width: 100%;
+  height: 44px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.activeBookNowBtn {
+  background: #18191f;
+  color: #ffffff;
+  border-color: #18191f;
+}
+
+.activeBookNowBtn:hover {
+  background: #0f172a;
+  border-color: #0f172a;
+}
+
+.warningText {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ef4444;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}

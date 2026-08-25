@@ -1,4 +1,17 @@
-import Link from "next/link";
-import styles from "@/components/customer/CustomerShell.module.css";
+"use client";
 
-export default function DeactivateAccountPage() { return <div><p className={styles.eyebrow}>ACCOUNT SETTINGS</p><h1 className={styles.title}>Deactivate account</h1><p className={styles.subtitle}>We are sorry to see you go. Review what happens before continuing.</p><section className={styles.card}><h2 className={styles.cardTitle}>Before you deactivate</h2><div className={styles.noticeList}><p className={styles.notice}><span className={styles.noticeDot} />You will lose access to your trip history and rewards.</p><p className={styles.notice}><span className={styles.noticeDot} />Any eligible refund will still be processed.</p><p className={styles.notice}><span className={styles.noticeDot} />This action requires account verification.</p></div><div className={styles.actions}><Link href="/customer/help-support/chat" className={styles.secondaryButton}>Talk to support first</Link><button className={styles.dangerButton}>Deactivate account</button></div></section></div>; }
+import React, { useState } from "react";
+import DeactivateAccountModal from "@/components/customer/DeactivateAccountModal";
+
+export default function DeactivateAccountPage() {
+  const [isModalOpen, setIsModalOpen] = useState(true);
+
+  return (
+    <div style={{ padding: "40px 0" }}>
+      <DeactivateAccountModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </div>
+  );
+}

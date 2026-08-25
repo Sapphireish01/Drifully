@@ -1,0 +1,229 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  /* max-width: 1100px; */
+}
+
+.searchFilterRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.searchWrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  color: #94a3b8;
+}
+
+.searchInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px 0 44px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 14px;
+  color: #0f172a;
+  outline: none;
+}
+
+.filterBtn {
+  height: 48px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterBtn:hover {
+  background: #f8fafc;
+}
+
+.tripsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tripCardWrap {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.tripCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.titleWithBadge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.readyBadge {
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.modeInline {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.pickupCodeCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.pickupCodeLabel {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.pickupCodeBoxes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.codeDigit {
+  width: 32px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.uploadBarRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 24px 16px 24px;
+}
+
+.uploadVehicleBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.uploadVehicleBtn:hover {
+  background: #f8fafc;
+}
+
+
+.tripMain {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vehicleTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.tripDates {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.pickupLoc {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin: 0;
+}
+
+.tripMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.scheduled {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.ongoing {
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #ffedd5;
+}
+
+.completed {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.cancelled {
+  background: #f8fafc;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.modeText {
+  font-size: 11px;
+  color: #94a3b8;
+}
