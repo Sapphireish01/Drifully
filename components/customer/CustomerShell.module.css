@@ -8,11 +8,15 @@
 .sidebar {
   width: 214px;
   flex: 0 0 214px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
   display: flex;
   flex-direction: column;
   padding: 22px 14px 18px;
   background: #fff;
   border-right: 1px solid #e7eaee;
+  overflow-y: auto;
 }
 
 .brand {
@@ -55,9 +59,9 @@
   padding: 0 11px;
   border: 1px solid #e2e6eb;
   border-radius: 8px;
-  color: #7d8793;
+  color: #868C98;
   background: #fff;
-  font-size: 11px;
+  font-size: 14px;
   outline: none;
 }
 
@@ -93,8 +97,8 @@
   gap: 11px;
   padding: 0 10px;
   border-radius: 7px;
-  color: #929ba6;
-  font-size: 11px;
+  color: #868C98;
+  font-size: 14px;
   transition: background .15s ease, color .15s ease;
 }
 
@@ -212,6 +216,12 @@
   object-fit: cover;
   width: 100%;
   height: 100%;
+}
+
+.avatarText {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .onlineDot {

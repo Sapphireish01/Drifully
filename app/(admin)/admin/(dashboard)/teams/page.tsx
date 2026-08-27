@@ -113,7 +113,7 @@ export default function TeamsPage() {
   const fetchTeamMembers = async () => {
     try {
       setLoadingTeamMembers(true);
-      const data = await accountsService.getTeamMembers();
+      const data: any = await accountsService.getTeamMembers();
       const membersData = Array.isArray(data) ? data : data?.results || data?.data || [];
       const mapped = membersData.map((m: any) => ({
         id: m.id || m._id || `tm-${Date.now()}-${Math.random()}`,

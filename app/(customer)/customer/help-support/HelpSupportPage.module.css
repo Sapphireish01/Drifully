@@ -47,20 +47,20 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .emergencyRow {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #f1f5f9;
 }
 
 .emergencyLabel {
   width: 200px;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   color: #0f172a;
 }
 
@@ -74,14 +74,16 @@
 .copyInputBox {
   position: relative;
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
 }
 
 .inputField {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 48px;
-  padding: 0 44px 0 16px;
+  padding: 0 16px;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
@@ -89,6 +91,58 @@
   font-weight: 400;
   color: #0f172a;
   outline: none;
+}
+
+.copyInputBox .inputField {
+  padding-right: 44px;
+}
+
+.inputField:read-only,
+.inputField:disabled {
+  color: #0f172a !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+.phoneGroup {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  position: relative;
+  min-width: 220px;
+}
+
+.phoneGroup:focus-within {
+  border-color: #0f172a;
+}
+
+.countrySelect {
+  display: flex;
+  align-items: center;
+  width: 110px;
+  height: 100%;
+  padding-right: 4px;
+  border-right: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  position: relative;
+}
+
+.phoneInput {
+  flex: 1;
+  height: 100%;
+  padding: 0 16px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  font-weight: 400;
+  color: #0f172a;
+  background: transparent;
 }
 
 .copyIconBtn {

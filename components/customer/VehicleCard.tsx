@@ -32,7 +32,7 @@ export default function VehicleCard({ vehicle, variant = "standard" }: VehicleCa
             {vehicle.location}
           </span>
           <div className={styles.priceTag}>
-            <span className={styles.price}>${vehicle.price}</span>
+            <span className={styles.price}>₦{vehicle.price}</span>
             <span className={styles.perDay}>/day</span>
           </div>
         </div>

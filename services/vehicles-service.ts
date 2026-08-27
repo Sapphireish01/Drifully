@@ -1,7 +1,20 @@
 import { publicApi } from '@/lib/api-client';
-import { AdminVehicle } from '@/data/admin-vehicles';
 
 export const vehiclesService = {
+  /**
+   * Fetches all available vehicle features
+   */
+  getFeatures: async () => {
+    try {
+      const response = await publicApi.get("", {
+        params: { path: "api/v1/vehicles/features/" }
+      });
+      return Array.isArray(response.data) ? response.data : response.data?.results || [];
+    } catch (error) {
+      console.error("Failed to fetch features:", error);
+      return [];
+    }
+  },
   /**
    * Fetches all dynamic options for vehicle forms (brands, colors, fuels, transmissions, features)
    */
@@ -27,6 +40,202 @@ export const vehiclesService = {
     } catch (error) {
       console.error("Failed to fetch vehicle options:", error);
       throw error;
+    }
+  },
+
+  /**
+   * Uploads identification document linked to booking reference
+   */
+  uploadIdentification: async (bookingRef: string, identificationType: string, file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("identification_type", identificationType);
+      formData.append("identification_file", file);
+
+      const response = await publicApi.post("", formData, {
+        params: { path: "api/v1/bookings/upload/id/", booking_ref: bookingRef },
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      return { success: true, data: response.data };
+    } catch {
+      try {
+        const formData = new FormData();
+        formData.append("identification_type", identificationType);
+        formData.append("identification_file", file);
+
+        const fallbackRes = await publicApi.post("", formData, {
+          params: { path: "bookings/upload/id/", booking_ref: bookingRef },
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        return { success: true, data: fallbackRes.data };
+      } catch (fallbackErr: unknown) {
+        const err = fallbackErr as any;
+        console.error("Failed to upload identification:", fallbackErr);
+        return {
+          success: false,
+          message: err?.response?.data?.message || err?.response?.data || "Failed to upload identification."
+        };
+      }
+    }
+  },
+
+  /**
+   * Uploads driver's license images linked to booking reference
+   */
+  uploadLicense: async (bookingRef: string, frontImage: File, backImage?: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("front_image", frontImage);
+      if (backImage) {
+        formData.append("back_image", backImage);
+      }
+
+      const response = await publicApi.post("", formData, {
+        params: { path: "api/v1/bookings/upload/license/", booking_ref: bookingRef },
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      try {
+        const formData = new FormData();
+        formData.append("front_image", frontImage);
+        if (backImage) {
+          formData.append("back_image", backImage);
+        }
+
+        const fallbackRes = await publicApi.post("", formData, {
+          params: { path: "bookings/upload/license/", booking_ref: bookingRef },
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        return { success: true, data: fallbackRes.data };
+      } catch (fallbackErr: unknown) {
+        const err = fallbackErr as any;
+        console.error("Failed to upload driver license:", fallbackErr);
+        return {
+          success: false,
+          message: err?.response?.data?.message || err?.response?.data || "Failed to upload driver license."
+        };
+      }
+    }
+  },
+
+  /**
+   * Initiates a booking for a vehicle
+   */
+  initiateBooking: async (vehicleId: number | string, driveType: string) => {
+    try {
+      const formData = new FormData();
+      const driveTypeValue = driveType === "self" || driveType === "self_drive" ? "self_drive" : "chauffeur";
+      formData.append("drive_type", driveTypeValue);
+
+      const response = await publicApi.post("", formData, {
+        params: { path: "api/v1/bookings/initiate/", vehicle_id: vehicleId },
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      try {
+        const formData = new FormData();
+        const driveTypeValue = driveType === "self" || driveType === "self_drive" ? "Self_drive" : "Chauffeur_drive";
+        formData.append("drive_type", driveTypeValue);
+
+        const fallbackRes = await publicApi.post("", formData, {
+          params: { path: "bookings/initiate/", vehicle_id: vehicleId },
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        return { success: true, data: fallbackRes.data };
+      } catch (fallbackErr: unknown) {
+        const err = fallbackErr as any;
+        console.error("Failed to initiate booking:", fallbackErr);
+        return {
+          success: false,
+          message: err?.response?.data?.message || err?.response?.data || "Failed to initiate booking."
+        };
+      }
+    }
+  },
+
+  /**
+   * Checks vehicle availability for given pickup and dropoff dates
+   */
+  checkAvailability: async (vehicleId: number | string, pickupDate: string, dropoffDate: string) => {
+    try {
+      const response = await publicApi.get("", {
+        params: {
+          path: "api/v1/bookings/check-availability/",
+          vehicle_id: vehicleId,
+          pickup_date: pickupDate,
+          dropoff_date: dropoffDate,
+        }
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      try {
+        const fallbackRes = await publicApi.get("", {
+          params: {
+            path: "bookings/check-availability/",
+            vehicle_id: vehicleId,
+            pickup_date: pickupDate,
+            dropoff_date: dropoffDate,
+          }
+        });
+        return { success: true, data: fallbackRes.data };
+      } catch (fallbackErr: unknown) {
+        const err = fallbackErr as any;
+        console.error("Failed to check vehicle availability:", fallbackErr);
+        return {
+          success: false,
+          message: err?.response?.data?.message || err?.response?.data || "Vehicle is not available for selected dates."
+        };
+      }
+    }
+  },
+
+  /**
+   * Fetches home page vehicles grouped by tags at vehicles/manage/
+   */
+  getManagedVehicles: async (): Promise<Record<string, { description: string; vehicles: any[] }>> => {
+    try {
+      const response = await publicApi.get("", {
+        params: { path: "api/v1/vehicles/manage/" }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch managed vehicles:", error);
+      return {};
+    }
+  },
+
+  /**
+   * Fetches reviews for a booking reference
+   */
+  getReviews: async (bookingRef?: string) => {
+    try {
+      const params: Record<string, string> = { path: "bookings/review/" };
+      if (bookingRef) params.booking_ref = bookingRef;
+      const response = await publicApi.get("", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch reviews:", error);
+      return null;
+    }
+  },
+
+  /**
+   * Fetches single vehicle detail from api/v1/vehicles/manage/?vehicle_id=ID
+   */
+  getVehicleDetail: async (vehicleId: number | string) => {
+    try {
+      const response = await publicApi.get("", {
+        params: { path: "api/v1/vehicles/manage/", vehicle_id: vehicleId }
+      });
+      if (Array.isArray(response.data)) {
+        return response.data[0] || null;
+      }
+      return response.data || null;
+    } catch (error) {
+      console.error("Failed to fetch vehicle detail:", error);
+      return null;
     }
   },
 

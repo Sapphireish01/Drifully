@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { accountsService, formatApiError } from "@/services/accounts-service";
 import styles from "./TurnOffTwoFactorModal.module.css";
 
 interface TurnOffTwoFactorModalProps {
@@ -14,7 +15,25 @@ export default function TurnOffTwoFactorModal({
   onClose,
   onConfirmTurnOff,
 }: TurnOffTwoFactorModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   if (!isOpen) return null;
+
+  const handleTurnOff = async () => {
+    setIsLoading(true);
+    setErrorMsg("");
+    try {
+      await accountsService.deactivate2FA();
+      await accountsService.manage2FA({ mfa_enabled: "False", mfa_method: "2FA_PIN" });
+      onConfirmTurnOff();
+    } catch (err: any) {
+      console.error("Failed to turn off 2FA:", err);
+      setErrorMsg(formatApiError(err, "Failed to turn off 2FA."));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className={styles.backdrop} onClick={onClose} role="presentation">
@@ -31,12 +50,18 @@ export default function TurnOffTwoFactorModal({
 
         <p className={styles.subtitle}>Are you sure you want to turn off two factor authentication</p>
 
+        {errorMsg && (
+          <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "8px", textAlign: "center" }}>
+            {errorMsg}
+          </p>
+        )}
+
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.cancelBtn} onClick={onClose}>
+          <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={isLoading}>
             Cancel
           </button>
-          <button type="button" className={styles.turnOffBtn} onClick={onConfirmTurnOff}>
-            Turn Off
+          <button type="button" className={styles.turnOffBtn} onClick={handleTurnOff} disabled={isLoading}>
+            {isLoading ? "Turning off..." : "Turn Off"}
           </button>
         </div>
       </div>

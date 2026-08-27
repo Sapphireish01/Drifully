@@ -105,7 +105,7 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
                           key={`min-${val}`}
                           type="button"
                           className={styles.presetBtn}
-                          onClick={() => setMinPrice(`N${val}`)}
+                          onClick={() => setMinPrice(`₦${val}`)}
                         >
                           {val}
                         </button>
@@ -127,7 +127,7 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
                           key={`max-${val}`}
                           type="button"
                           className={styles.presetBtn}
-                          onClick={() => setMaxPrice(`N${val}`)}
+                          onClick={() => setMaxPrice(`₦${val}`)}
                         >
                           {val}
                         </button>

@@ -63,7 +63,7 @@ export default function EnhanceTripModal({
             <div className={styles.extraContent}>
               <div className={styles.extraHeader}>
                 <span className={styles.extraTitle}>Family Bundle</span>
-                <span className={styles.extraPrice}>$20–$25<small>/day</small></span>
+                <span className={styles.extraPrice}>₦20,000–₦25,000<small>/day</small></span>
               </div>
               <p className={styles.extraSub}>• Child Seat (1) &nbsp;• Stroller</p>
             </div>
@@ -74,7 +74,7 @@ export default function EnhanceTripModal({
             <div className={styles.extraContent}>
               <div className={styles.extraHeader}>
                 <span className={styles.extraTitle}>Convenience Bundle</span>
-                <span className={styles.extraPrice}>$15</span>
+                <span className={styles.extraPrice}>₦15,000</span>
               </div>
               <p className={styles.extraSub}>• Charger &nbsp;• GPS &nbsp;• Mount</p>
             </div>
@@ -85,7 +85,7 @@ export default function EnhanceTripModal({
             <div className={styles.extraContent}>
               <div className={styles.extraHeader}>
                 <span className={styles.extraTitle}>Vacation Bundle</span>
-                <span className={styles.extraPrice}>$30 – $40</span>
+                <span className={styles.extraPrice}>₦30,000 – ₦40,000</span>
               </div>
               <p className={styles.extraSub}>• Umbrella &nbsp;• Chairs &nbsp;• Cooler</p>
             </div>
@@ -96,7 +96,7 @@ export default function EnhanceTripModal({
             <div className={styles.extraContent}>
               <div className={styles.extraHeader}>
                 <span className={styles.extraTitle}>Business Bundle</span>
-                <span className={styles.extraPrice}>$20 – $30<small>/day</small></span>
+                <span className={styles.extraPrice}>₦20,000 – ₦30,000<small>/day</small></span>
               </div>
               <p className={styles.extraSub}>• WiFi &nbsp;• Charger &nbsp;• Mount</p>
             </div>
@@ -110,7 +110,7 @@ export default function EnhanceTripModal({
             <div className={styles.extraContent}>
               <div className={styles.extraHeader}>
                 <span className={styles.extraTitle}>Airport Assistance</span>
-                <span className={styles.extraPrice}>$100</span>
+                <span className={styles.extraPrice}>₦100,000</span>
               </div>
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function EnhanceTripModal({
             <div className={styles.extraContent}>
               <div className={styles.extraHeader}>
                 <span className={styles.extraTitle}>Pre-paid Fuel</span>
-                <span className={styles.extraPrice}>$70</span>
+                <span className={styles.extraPrice}>₦70,000</span>
               </div>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function EnhanceTripModal({
             <div className={styles.extraContent}>
               <div className={styles.extraHeader}>
                 <span className={styles.extraTitle}>Additional Mileage</span>
-                <span className={styles.extraPrice}>$70<small>/per 10km</small></span>
+                <span className={styles.extraPrice}>₦70,000<small>/per 10km</small></span>
               </div>
             </div>
           </div>

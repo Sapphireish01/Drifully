@@ -1,28 +1,121 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import VehicleCard from "@/components/customer/VehicleCard";
 import FilterModal from "@/components/customer/FilterModal";
-import { VEHICLES, CATEGORIES } from "@/data/vehicles";
+import Spinner from "@/components/customer/Spinner";
+import { vehiclesService } from "@/services/vehicles-service";
+import { Vehicle } from "@/data/vehicles";
 import styles from "./CategoryPage.module.css";
+
+interface VehicleImage {
+  is_primary?: boolean;
+  image?: string;
+}
+
+interface ApiVehicle {
+  id: number | string;
+  slug?: string;
+  brand_name?: string;
+  model?: string;
+  year?: string | number;
+  category_name?: string;
+  type?: string;
+  transmission?: string;
+  seats?: number;
+  price_per_day?: string | number;
+  location?: string;
+  images?: VehicleImage[];
+  fuel_type?: string;
+  features?: string[];
+}
+
+interface TagGroup {
+  description: string;
+  vehicles: ApiVehicle[];
+}
+
+function transformApiVehicle(item: ApiVehicle): Vehicle {
+  const primaryImg = item.images?.find((img) => img.is_primary)?.image || item.images?.[0]?.image || "/images/hero-img.png";
+  const gallery = item.images?.map((img) => img.image).filter((img): img is string => Boolean(img)) || [primaryImg];
+
+  const rawPrice = Number(item.price_per_day || 0);
+  const formattedPrice = rawPrice > 0 
+    ? rawPrice.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    : "15,000";
+
+  return {
+    id: typeof item.id === "string" ? parseInt(item.id, 10) || 0 : item.id,
+    slug: item.slug || `${(item.model || 'car').toLowerCase().replace(/\s+/g, '-')}-${item.id}`,
+    name: `${item.brand_name || ''} ${item.model || ''} ${item.year || ''}`.trim() || `Vehicle #${item.id}`,
+    type: item.category_name || item.type || "Sedan",
+    transmission: item.transmission ? (item.transmission.charAt(0).toUpperCase() + item.transmission.slice(1)) : "Automatic",
+    capacity: item.seats || 4,
+    price: formattedPrice,
+    priceNumber: rawPrice,
+    location: item.location || "Houston, Texas",
+    image: primaryImg,
+    category: "all",
+    rating: "4.9",
+    reviewsCount: 12,
+    fuel: item.fuel_type ? (item.fuel_type.charAt(0).toUpperCase() + item.fuel_type.slice(1)) : "Petrol",
+    gallery: gallery.length > 0 ? gallery : ["/images/hero-img.png"],
+    features: Array.isArray(item.features) ? item.features.map(String) : [],
+    reviews: [],
+  };
+}
 
 export default function CategoryPage() {
   const params = useParams();
   const slug = params.slug as string;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [categoryTitle, setCategoryTitle] = useState("Vehicles");
+  const [categorySubtitle, setCategorySubtitle] = useState("Explore available vehicles for rent.");
 
-  const category = CATEGORIES.find((c) => c.slug === slug) || {
-    id: "all",
-    title: "All Vehicles",
-    subtitle: "Explore our complete fleet available for rent.",
-    slug: "all"
-  };
+  useEffect(() => {
+    let isMounted = true;
+    vehiclesService.getManagedVehicles()
+      .then((data: Record<string, TagGroup>) => {
+        if (!isMounted || !data || typeof data !== "object") return;
+        
+        let foundVehicles: ApiVehicle[] = [];
+        let matchingTitle = "";
+        let matchingDesc = "";
 
-  const filteredVehicles = VEHICLES.filter(
-    (v) => category.id === "all" || v.category === category.id
-  );
+        for (const [tagTitle, group] of Object.entries(data)) {
+          const tagSlug = tagTitle.toLowerCase().replace(/\s+/g, "-");
+          if (tagSlug === slug || slug === "all") {
+            foundVehicles = [...foundVehicles, ...(group.vehicles || [])];
+            if (!matchingTitle) {
+              matchingTitle = tagTitle;
+              matchingDesc = group.description;
+            }
+          }
+        }
+
+        if (foundVehicles.length > 0) {
+          setVehicles(foundVehicles.map(transformApiVehicle));
+          if (matchingTitle) {
+            setCategoryTitle(matchingTitle);
+            setCategorySubtitle(matchingDesc);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load category vehicles:", err);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
 
   return (
     <div className={styles.container}>
@@ -34,8 +127,8 @@ export default function CategoryPage() {
           </svg>
         </Link>
         <div>
-          <h1 className={styles.title}>{category.title}</h1>
-          <p className={styles.subtitle}>{category.subtitle}</p>
+          <h1 className={styles.title}>{categoryTitle}</h1>
+          <p className={styles.subtitle}>{categorySubtitle}</p>
         </div>
         <button type="button" className={styles.filterBtn} onClick={() => setIsFilterOpen(true)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -53,11 +146,19 @@ export default function CategoryPage() {
         </button>
       </div>
 
-      <div className={styles.grid}>
-        {filteredVehicles.map((vehicle) => (
-          <VehicleCard key={vehicle.id} vehicle={vehicle} variant="family" />
-        ))}
-      </div>
+      {isLoading ? (
+        <Spinner label="Loading category vehicles..." />
+      ) : vehicles.length > 0 ? (
+        <div className={styles.grid}>
+          {vehicles.map((vehicle) => (
+            <VehicleCard key={vehicle.id} vehicle={vehicle} variant="family" />
+          ))}
+        </div>
+      ) : (
+        <div style={{ padding: "60px 20px", textAlign: "center", color: "#64748b" }}>
+          <p style={{ fontSize: "16px", fontWeight: 500 }}>No vehicles found in this category.</p>
+        </div>
+      )}
 
       <FilterModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
     </div>

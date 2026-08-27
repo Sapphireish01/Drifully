@@ -18,10 +18,21 @@ const NAV_ITEMS = [
 
 const SIDEBAR_ICON_PATH = "/customer app/customer-sidebar-icons";
 
+function getInitials(name: string) {
+  if (!name) return "U";
+  const parts = name.trim().split(" ").filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
 export default function CustomerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+
   const [authenticated] = useState(() =>
     typeof window !== "undefined" && Boolean(localStorage.getItem("drifully_customer_user"))
   );
@@ -29,17 +40,37 @@ export default function CustomerShell({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (!authenticated) {
       router.replace("/customer/login");
+      return;
     }
+
+    accountsService.getProfile()
+      .then((data) => {
+        if (data) {
+          setUserProfile(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load profile for customer shell:", err);
+      });
   }, [authenticated, router]);
 
   const handleLogout = async () => {
-    try { await accountsService.logout(); } finally {
+    try {
+      await accountsService.logout();
+    } finally {
       localStorage.removeItem("drifully_customer_user");
       router.push("/customer/login");
     }
   };
 
   if (!authenticated) return null;
+
+  const fullName = userProfile?.full_name || "User";
+  const firstName = fullName.split(" ")[0];
+  const email = userProfile?.email || "";
+  const address = userProfile?.address_line_1 || "No address provided";
+  const avatarUrl = userProfile?.profile_picture || null;
+  const initials = getInitials(fullName);
 
   return (
     <div className={styles.shell}>
@@ -57,9 +88,17 @@ export default function CustomerShell({ children }: { children: React.ReactNode 
         <nav className={styles.nav} aria-label="Customer navigation">
           {NAV_ITEMS.map((item) => {
             const active = pathname === item.href || (item.href !== "/customer" && pathname.startsWith(`${item.href}/`));
-            return <Link key={item.href} href={item.href} className={`${styles.navLink} ${active ? styles.active : ""}`}><Image className={styles.icon} src={`${SIDEBAR_ICON_PATH}/${item.icon}`} alt="" width={15} height={15} />{item.label}</Link>;
+            return (
+              <Link key={item.href} href={item.href} className={`${styles.navLink} ${active ? styles.active : ""}`}>
+                <Image className={styles.icon} src={`${SIDEBAR_ICON_PATH}/${item.icon}`} alt="" width={15} height={15} />
+                {item.label}
+              </Link>
+            );
           })}
-          <Link href="/customer/deactivate-account" className={`${styles.navLink} ${pathname.startsWith("/customer/deactivate-account") ? styles.active : ""}`}><Image className={styles.icon} src={`${SIDEBAR_ICON_PATH}/deactivate.svg`} alt="" width={15} height={15} />Deactivate Account</Link>
+          <Link href="/customer/deactivate-account" className={`${styles.navLink} ${pathname.startsWith("/customer/deactivate-account") ? styles.active : ""}`}>
+            <Image className={styles.icon} src={`${SIDEBAR_ICON_PATH}/deactivate.svg`} alt="" width={15} height={15} />
+            Deactivate Account
+          </Link>
         </nav>
         <div className={styles.sidebarBottom}>
           <button
@@ -71,10 +110,18 @@ export default function CustomerShell({ children }: { children: React.ReactNode 
             Logout
           </button>
           <div className={styles.profile}>
-            <span className={styles.avatar}>JB</span>
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={fullName}
+                style={{ width: 30, height: 30, borderRadius: "50%", objectFit: "cover" }}
+              />
+            ) : (
+              <span className={styles.avatar}>{initials}</span>
+            )}
             <span>
-              <span className={styles.profileName}>James Brown</span>
-              <span className={styles.profileEmail}>james@drifully.com</span>
+              <span className={styles.profileName}>{fullName}</span>
+              <span className={styles.profileEmail}>{email}</span>
             </span>
             <span className={styles.profileArrow}>›</span>
           </div>
@@ -91,13 +138,21 @@ export default function CustomerShell({ children }: { children: React.ReactNode 
           <div className={styles.welcome}>
             <div className={styles.welcomeAvatarWrap}>
               <span className={styles.welcomeAvatar}>
-                <Image src="/customer app/icons/driveyourself.png" alt="Prosper" width={36} height={36} className={styles.avatarImg} />
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={fullName}
+                    className={styles.avatarImg}
+                  />
+                ) : (
+                  <span className={styles.avatarText}>{initials}</span>
+                )}
               </span>
               <span className={styles.onlineDot} />
             </div>
             <div className={styles.welcomeTextGroup}>
-              <span className={styles.welcomeTitle}>Hello Prosper,</span>
-              <span className={styles.welcomeAddress}>42 Montgomery Road</span>
+              <span className={styles.welcomeTitle}>Hello {firstName},</span>
+              <span className={styles.welcomeAddress}>{address}</span>
             </div>
           </div>
           <div className={styles.topActions}>

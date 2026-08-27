@@ -1,19 +1,98 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import VehicleCard from "@/components/customer/VehicleCard";
 import FilterModal from "@/components/customer/FilterModal";
-import { VEHICLES } from "@/data/vehicles";
+import Spinner from "@/components/customer/Spinner";
+import { vehiclesService } from "@/services/vehicles-service";
+import { Vehicle } from "@/data/vehicles";
 import styles from "./CustomerHome.module.css";
+
+interface VehicleImage {
+  is_primary?: boolean;
+  image?: string;
+}
+
+interface ApiVehicle {
+  id: number | string;
+  slug?: string;
+  brand_name?: string;
+  model?: string;
+  year?: string | number;
+  category_name?: string;
+  type?: string;
+  transmission?: string;
+  seats?: number;
+  price_per_day?: string | number;
+  location?: string;
+  images?: VehicleImage[];
+  fuel_type?: string;
+  features?: string[];
+}
+
+interface TagGroup {
+  description: string;
+  vehicles: ApiVehicle[];
+}
+
+function transformApiVehicle(item: ApiVehicle): Vehicle {
+  const primaryImg = item.images?.find((img) => img.is_primary)?.image || item.images?.[0]?.image || "/images/hero-img.png";
+  const gallery = item.images?.map((img) => img.image).filter((img): img is string => Boolean(img)) || [primaryImg];
+
+  const rawPrice = Number(item.price_per_day || 0);
+  const formattedPrice = rawPrice > 0 
+    ? rawPrice.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    : "15,000";
+
+  return {
+    id: typeof item.id === "string" ? parseInt(item.id, 10) || 0 : item.id,
+    slug: item.slug || `${(item.model || 'car').toLowerCase().replace(/\s+/g, '-')}-${item.id}`,
+    name: `${item.brand_name || ''} ${item.model || ''} ${item.year || ''}`.trim() || `Vehicle #${item.id}`,
+    type: item.category_name || item.type || "Sedan",
+    transmission: item.transmission ? (item.transmission.charAt(0).toUpperCase() + item.transmission.slice(1)) : "Automatic",
+    capacity: item.seats || 4,
+    price: formattedPrice,
+    priceNumber: rawPrice,
+    location: item.location || "Houston, Texas",
+    image: primaryImg,
+    category: "all",
+    rating: "4.9",
+    reviewsCount: 12,
+    fuel: item.fuel_type ? (item.fuel_type.charAt(0).toUpperCase() + item.fuel_type.slice(1)) : "Petrol",
+    gallery: gallery.length > 0 ? gallery : ["/images/hero-img.png"],
+    features: Array.isArray(item.features) ? item.features.map(String) : [],
+    reviews: [],
+  };
+}
 
 export default function CustomerHomePage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [managedVehicles, setManagedVehicles] = useState<Record<string, TagGroup>>({});
+  const [isLoading, setIsLoading] = useState(true);
 
-  const familyVehicles = VEHICLES.filter((v) => v.category === "family");
-  const popularVehicles = VEHICLES.filter((v) => v.category === "popular");
-  const eventVehicles = VEHICLES.filter((v) => v.category === "event");
+  useEffect(() => {
+    let isMounted = true;
+    vehiclesService.getManagedVehicles()
+      .then((data) => {
+        if (isMounted && data && typeof data === "object" && Object.keys(data).length > 0) {
+          setManagedVehicles(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load home page vehicles:", err);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const hasManagedData = Object.keys(managedVehicles).length > 0;
 
   return (
     <div className={styles.container}>
@@ -48,59 +127,46 @@ export default function CustomerHomePage() {
         </button>
       </div>
 
-      {/* Section 1: Perfect for Family Trips */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div>
-            <h2 className={styles.sectionTitle}>Perfect for Family Trips</h2>
-            <p className={styles.sectionSubtitle}>Spacious vehicles for road trips and family travel.</p>
-          </div>
-          <Link href="/customer/category/perfect-for-family-trips" className={styles.seeAll}>
-            See all
-          </Link>
-        </div>
-        <div className={styles.familyGrid}>
-          {familyVehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} variant="family" />
-          ))}
-        </div>
-      </section>
+      {isLoading ? (
+        <Spinner label="Loading available vehicles..." />
+      ) : hasManagedData ? (
+        // Dynamic API sections from vehicles/manage/
+        Object.entries(managedVehicles).map(([tagTitle, group]) => {
+          const transformedVehicles = (group.vehicles || []).map(transformApiVehicle);
+          const filtered = transformedVehicles.filter((v) => {
+            if (!searchQuery.trim()) return true;
+            const q = searchQuery.toLowerCase();
+            return v.name.toLowerCase().includes(q) || v.type.toLowerCase().includes(q);
+          });
 
-      {/* Section 2: Popular right now */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div>
-            <h2 className={styles.sectionTitle}>Popular right now</h2>
-            <p className={styles.sectionSubtitle}>The most booked vehicles this week</p>
-          </div>
-          <Link href="/customer/category/popular-right-now" className={styles.seeAll}>
-            See all
-          </Link>
-        </div>
-        <div className={styles.popularGrid}>
-          {popularVehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} variant="popular" />
-          ))}
-        </div>
-      </section>
+          if (filtered.length === 0) return null;
 
-      {/* Section 3: Event Ready */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div>
-            <h2 className={styles.sectionTitle}>Event Ready</h2>
-            <p className={styles.sectionSubtitle}>Make every occasion memorable.</p>
-          </div>
-          <Link href="/customer/category/event-ready" className={styles.seeAll}>
-            See all
-          </Link>
+          const categorySlug = tagTitle.toLowerCase().replace(/\s+/g, "-");
+
+          return (
+            <section key={tagTitle} className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2 className={styles.sectionTitle}>{tagTitle}</h2>
+                  <p className={styles.sectionSubtitle}>{group.description}</p>
+                </div>
+                <Link href={`/customer/category/${categorySlug}`} className={styles.seeAll}>
+                  See all
+                </Link>
+              </div>
+              <div className={styles.popularGrid}>
+                {filtered.map((vehicle) => (
+                  <VehicleCard key={vehicle.id} vehicle={vehicle} variant="popular" />
+                ))}
+              </div>
+            </section>
+          );
+        })
+      ) : (
+        <div style={{ padding: "60px 20px", textAlign: "center", color: "#64748b" }}>
+          <p style={{ fontSize: "16px", fontWeight: 500 }}>No vehicles available at the moment.</p>
         </div>
-        <div className={styles.eventGrid}>
-          {eventVehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} variant="event" />
-          ))}
-        </div>
-      </section>
+      )}
 
       {/* Filter Modal */}
       <FilterModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />

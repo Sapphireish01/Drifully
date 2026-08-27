@@ -12,6 +12,7 @@ interface BookingConfirmedModalProps {
   pickupDate: string;
   dropOffDate: string;
   selectedMode: "self" | "chauffeur";
+  bookingReference?: string;
 }
 
 export default function BookingConfirmedModal({
@@ -21,6 +22,7 @@ export default function BookingConfirmedModal({
   pickupDate,
   dropOffDate,
   selectedMode,
+  bookingReference,
 }: BookingConfirmedModalProps) {
   if (!isOpen) return null;
 
@@ -45,6 +47,12 @@ export default function BookingConfirmedModal({
           <p className={styles.subtitle}>Your vehicle has been successfully reserved for your selected dates.</p>
 
           <div className={styles.summaryCard}>
+            {bookingReference && (
+              <div className={styles.summaryRow}>
+                <span className={styles.label}>Booking Reference</span>
+                <span className={styles.val} style={{ fontWeight: 700, color: "#16a34a" }}>{bookingReference}</span>
+              </div>
+            )}
             <div className={styles.summaryRow}>
               <span className={styles.modeBadge}>
                 {selectedMode === "self" ? "Drive Yourself" : "Chauffeur Service"}

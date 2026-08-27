@@ -53,7 +53,15 @@ export default function CustomerAuth({ mode }: { mode: AuthMode }) {
     setLoading(true);
     try {
       if (isRegister) {
-        await accountsService.register({ full_name: form.fullName, email: form.email, phone_number: form.phone, password: form.password, confirm_password: form.confirmPassword, country_code: phonePrefix ? Number(phonePrefix) : 1 });
+        await accountsService.register({
+          full_name: form.fullName,
+          email: form.email,
+          phone_number: form.phone,
+          password: form.password,
+          confirm_password: form.confirmPassword,
+          country_code: phonePrefix ? Number(phonePrefix) : 1,
+          referral_code: form.referral ? form.referral.trim() : undefined,
+        });
         setMessage("Account created. Please sign in to continue.");
         setTimeout(() => router.push("/customer/login"), 900);
       } else {
