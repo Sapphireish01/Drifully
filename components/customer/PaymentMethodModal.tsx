@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { paymentsService } from "@/services/payments-service";
+import Spinner from "@/components/customer/Spinner";
 import styles from "./PaymentMethodModal.module.css";
 
 interface PaymentMethodModalProps {
@@ -9,6 +11,7 @@ interface PaymentMethodModalProps {
   onClose: () => void;
   onBack?: () => void;
   onConfirm: () => void;
+  bookingRef?: string;
 }
 
 export default function PaymentMethodModal({
@@ -16,15 +19,45 @@ export default function PaymentMethodModal({
   onClose,
   onBack,
   onConfirm,
+  bookingRef,
 }: PaymentMethodModalProps) {
-  const [selectedMethod, setSelectedMethod] = useState<string>("card");
+  const [selectedMethod, setSelectedMethod] = useState<string>("paystack");
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const methods = [
     {
+      id: "paystack",
+      label: "Pay with Paystack",
+      disabled: false,
+      icon: (
+        <Image
+          src="/customer app/icons/paypal.svg"
+          alt="Paystack"
+          width={22}
+          height={22}
+        />
+      ),
+    },
+    {
+      id: "stripe",
+      label: "Pay with Stripe",
+      disabled: false,
+      icon: (
+        <Image
+          src="/customer app/icons/stripe.svg"
+          alt="Stripe"
+          width={22}
+          height={22}
+        />
+      ),
+    },
+    {
       id: "card",
       label: "Pay with Card",
+      disabled: true,
       icon: (
         <Image
           src="/customer app/icons/card.svg"
@@ -37,6 +70,7 @@ export default function PaymentMethodModal({
     {
       id: "transfer",
       label: "Pay with Bank Transfer",
+      disabled: true,
       icon: (
         <Image
           src="/customer app/icons/bank.svg"
@@ -46,31 +80,41 @@ export default function PaymentMethodModal({
         />
       ),
     },
-    {
-      id: "paypal",
-      label: "Pay with PayPal",
-      icon: (
-        <Image
-          src="/customer app/icons/paypal.svg"
-          alt="PayPal"
-          width={22}
-          height={22}
-        />
-      ),
-    },
-    {
-      id: "stripe",
-      label: "Pay with Stripe",
-      icon: (
-        <Image
-          src="/customer app/icons/stripe.svg"
-          alt="Stripe"
-          width={22}
-          height={22}
-        />
-      ),
-    },
   ];
+
+  const handlePayClick = async () => {
+    if (!bookingRef) {
+      onConfirm();
+      return;
+    }
+
+    setIsProcessing(true);
+    setErrorMsg(null);
+
+    try {
+      if (selectedMethod === "paystack") {
+        const res = await paymentsService.initiatePaystackPayment(bookingRef);
+        const redirectUrl = res?.data?.authorization_url || res?.authorization_url || res?.data?.url;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+          return;
+        }
+      } else if (selectedMethod === "stripe") {
+        const res = await paymentsService.initiateStripePayment(bookingRef);
+        const redirectUrl = res?.url || res?.data?.url;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+          return;
+        }
+      }
+      onConfirm();
+    } catch (err: any) {
+      console.error("Payment initiation failed:", err);
+      setErrorMsg("Failed to initiate payment checkout. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className={styles.backdrop} onClick={onClose} role="presentation">
@@ -94,26 +138,40 @@ export default function PaymentMethodModal({
           </button>
         </div>
 
+        {errorMsg && <div className={styles.errorText}>{errorMsg}</div>}
+
         <div className={styles.methodsList}>
-          {methods.map((method) => (
-            <div
-              key={method.id}
-              className={`${styles.methodCard} ${
-                selectedMethod === method.id ? styles.selectedCard : ""
-              }`}
-              onClick={() => setSelectedMethod(method.id)}
-            >
-              <div className={styles.methodLeft}>
-                <div className={styles.iconBox}>{method.icon}</div>
-                <span className={styles.methodLabel}>{method.label}</span>
+          {methods.map((method) => {
+            const isSelected = selectedMethod === method.id;
+            const isDisabled = method.disabled;
+
+            return (
+              <div
+                key={method.id}
+                className={`${styles.methodCard} ${isSelected ? styles.selectedCard : ""} ${isDisabled ? styles.disabledCard : ""}`}
+                onClick={() => {
+                  if (!isDisabled) setSelectedMethod(method.id);
+                }}
+              >
+                <div className={styles.methodLeft}>
+                  <div className={styles.iconBox}>{method.icon}</div>
+                  <span className={styles.methodLabel}>
+                    {method.label} {isDisabled && <small className={styles.comingSoon}>(Disabled)</small>}
+                  </span>
+                </div>
+                <span className={styles.arrowIcon}>›</span>
               </div>
-              <span className={styles.arrowIcon}>›</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        <button type="button" className={styles.confirmBtn} onClick={onConfirm}>
-          Confirm & Pay
+        <button
+          type="button"
+          className={styles.confirmBtn}
+          onClick={handlePayClick}
+          disabled={isProcessing}
+        >
+          {isProcessing ? "Redirecting to Payment..." : "Confirm & Pay"}
         </button>
       </div>
     </div>

@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { bookingsService, BookingExtra } from "@/services/bookings-service";
+import Spinner from "@/components/customer/Spinner";
 import styles from "./EnhanceTripModal.module.css";
 
 interface EnhanceTripModalProps {
   isOpen: boolean;
   onClose: () => void;
   onBack?: () => void;
-  onContinue: () => void;
+  onContinue: (selectedExtraIds?: string[]) => void;
+  selectedExtras?: string[];
+  onToggleExtra?: (id: string) => void;
 }
 
 export default function EnhanceTripModal({
@@ -15,15 +19,63 @@ export default function EnhanceTripModal({
   onClose,
   onBack,
   onContinue,
+  selectedExtras: externalSelectedExtras,
+  onToggleExtra,
 }: EnhanceTripModalProps) {
-  const [selectedExtras, setSelectedExtras] = useState<string[]>(["family"]);
+  const [internalSelectedExtras, setInternalSelectedExtras] = useState<string[]>([]);
+  const [extras, setExtras] = useState<BookingExtra[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const selectedExtras = externalSelectedExtras !== undefined ? externalSelectedExtras : internalSelectedExtras;
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let isMounted = true;
+    setLoading(true);
+    setError(null);
+
+    bookingsService
+      .getBookingExtras()
+      .then((data) => {
+        if (isMounted) {
+          setExtras(Array.isArray(data) ? data : []);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load extras:", err);
+        if (isMounted) {
+          setError("Failed to load extras. Please try again.");
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const toggleExtra = (id: string) => {
-    setSelectedExtras((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    if (onToggleExtra) {
+      onToggleExtra(id);
+    } else {
+      setInternalSelectedExtras((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      );
+    }
+  };
+
+  const formatPrice = (priceStr: string) => {
+    const num = parseFloat(priceStr);
+    if (isNaN(num)) return `₦${priceStr}`;
+    return `₦${num.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
   return (
@@ -52,91 +104,48 @@ export default function EnhanceTripModal({
           Add optional extras to make your journey smoother and more comfortable.
         </p>
 
-        <div className={styles.infoBanner}>
-          This booking includes 132 km of mileage. Additional mileage will attract extra charges.
-        </div>
-
-        <div className={styles.extrasList}>
-          {/* Bundles */}
-          <div className={styles.extraItem} onClick={() => toggleExtra("family")}>
-            <input type="checkbox" checked={selectedExtras.includes("family")} readOnly />
-            <div className={styles.extraContent}>
-              <div className={styles.extraHeader}>
-                <span className={styles.extraTitle}>Family Bundle</span>
-                <span className={styles.extraPrice}>₦20,000–₦25,000<small>/day</small></span>
-              </div>
-              <p className={styles.extraSub}>• Child Seat (1) &nbsp;• Stroller</p>
-            </div>
+        {loading ? (
+          <div className={styles.centerContainer}>
+            <Spinner />
+            <p className={styles.loadingText}>Loading extras...</p>
           </div>
-
-          <div className={styles.extraItem} onClick={() => toggleExtra("convenience")}>
-            <input type="checkbox" checked={selectedExtras.includes("convenience")} readOnly />
-            <div className={styles.extraContent}>
-              <div className={styles.extraHeader}>
-                <span className={styles.extraTitle}>Convenience Bundle</span>
-                <span className={styles.extraPrice}>₦15,000</span>
-              </div>
-              <p className={styles.extraSub}>• Charger &nbsp;• GPS &nbsp;• Mount</p>
-            </div>
+        ) : error ? (
+          <div className={styles.errorBanner}>
+            {error}
           </div>
-
-          <div className={styles.extraItem} onClick={() => toggleExtra("vacation")}>
-            <input type="checkbox" checked={selectedExtras.includes("vacation")} readOnly />
-            <div className={styles.extraContent}>
-              <div className={styles.extraHeader}>
-                <span className={styles.extraTitle}>Vacation Bundle</span>
-                <span className={styles.extraPrice}>₦30,000 – ₦40,000</span>
-              </div>
-              <p className={styles.extraSub}>• Umbrella &nbsp;• Chairs &nbsp;• Cooler</p>
-            </div>
+        ) : (
+          <div className={styles.extrasList}>
+            {extras.map((item) => {
+              const isChecked = selectedExtras.includes(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={`${styles.extraItem} ${isChecked ? styles.extraItemSelected : ""}`}
+                  onClick={() => toggleExtra(item.id)}
+                >
+                  <input type="checkbox" checked={isChecked} readOnly />
+                  <div className={styles.extraContent}>
+                    <div className={styles.extraHeader}>
+                      <span className={styles.extraTitle}>{item.name}</span>
+                      <span className={styles.extraPrice}>
+                        {formatPrice(item.price_per_booking)}
+                      </span>
+                    </div>
+                    {item.description && (
+                      <p className={styles.extraSub}>{item.description}</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
+        )}
 
-          <div className={styles.extraItem} onClick={() => toggleExtra("business")}>
-            <input type="checkbox" checked={selectedExtras.includes("business")} readOnly />
-            <div className={styles.extraContent}>
-              <div className={styles.extraHeader}>
-                <span className={styles.extraTitle}>Business Bundle</span>
-                <span className={styles.extraPrice}>₦20,000 – ₦30,000<small>/day</small></span>
-              </div>
-              <p className={styles.extraSub}>• WiFi &nbsp;• Charger &nbsp;• Mount</p>
-            </div>
-          </div>
-
-          {/* Additional Services */}
-          <h3 className={styles.sectionHeading}>Additional Services</h3>
-
-          <div className={styles.extraItem} onClick={() => toggleExtra("airport")}>
-            <input type="checkbox" checked={selectedExtras.includes("airport")} readOnly />
-            <div className={styles.extraContent}>
-              <div className={styles.extraHeader}>
-                <span className={styles.extraTitle}>Airport Assistance</span>
-                <span className={styles.extraPrice}>₦100,000</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.extraItem} onClick={() => toggleExtra("fuel")}>
-            <input type="checkbox" checked={selectedExtras.includes("fuel")} readOnly />
-            <div className={styles.extraContent}>
-              <div className={styles.extraHeader}>
-                <span className={styles.extraTitle}>Pre-paid Fuel</span>
-                <span className={styles.extraPrice}>₦70,000</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.extraItem} onClick={() => toggleExtra("mileage")}>
-            <input type="checkbox" checked={selectedExtras.includes("mileage")} readOnly />
-            <div className={styles.extraContent}>
-              <div className={styles.extraHeader}>
-                <span className={styles.extraTitle}>Additional Mileage</span>
-                <span className={styles.extraPrice}>₦70,000<small>/per 10km</small></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button type="button" className={styles.continueBtn} onClick={onContinue}>
+        <button
+          type="button"
+          className={styles.continueBtn}
+          onClick={() => onContinue(selectedExtras)}
+        >
           Continue
         </button>
       </div>

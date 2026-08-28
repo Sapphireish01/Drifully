@@ -119,6 +119,32 @@
   color: #94a3b8;
 }
 
+.disabledCard {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f1f5f9;
+}
+
+.disabledCard:hover {
+  background: #f1f5f9;
+}
+
+.comingSoon {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.errorText {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #ef4444;
+  font-size: 12px;
+  text-align: center;
+}
+
 .confirmBtn {
   width: 100%;
   padding: 14px;

@@ -14,6 +14,8 @@ import BookingConfirmedModal from "@/components/customer/BookingConfirmedModal";
 import VehicleGalleryModal from "@/components/customer/VehicleGalleryModal";
 import Spinner from "@/components/customer/Spinner";
 import { vehiclesService } from "@/services/vehicles-service";
+import { bookingsService } from "@/services/bookings-service";
+import { paymentsService } from "@/services/payments-service";
 import { Vehicle } from "@/data/vehicles";
 import styles from "./VehicleDetailPage.module.css";
 
@@ -204,17 +206,37 @@ export default function VehicleDetailPage() {
   const [dropOffDate, setDropOffDate] = useState("");
   const [activeDateTarget, setActiveDateTarget] = useState<"pickup" | "dropoff" | null>(null);
 
-  // Booking Flow Steps State:
-  // 1: RentalModeModal ("Start Your Journey")
-  // 2: UploadDocumentsModal ("Upload Your Documents")
-  // 3: EnhanceTripModal ("Enhance Your Trip")
-  // 4: ReviewBookingModal ("Review Your Booking")
-  // 5: VehicleGalleryModal ("Vehicle Gallery / Confirm & Pay")
   const [bookingStep, setBookingStep] = useState<number>(0);
   const [selectedRentalMode, setSelectedRentalMode] = useState<"self" | "chauffeur">("self");
   const [bookingId, setBookingId] = useState<string>("");
   const [bookingReference, setBookingReference] = useState<string>("");
   const [isInitiatingBooking, setIsInitiatingBooking] = useState<boolean>(false);
+
+  // Payment Verification on Redirect Return
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const trxref = urlParams.get("trxref") || urlParams.get("reference");
+    const bookingRefFromUrl = urlParams.get("booking_ref");
+
+    if (trxref) {
+      const refToVerify = bookingRefFromUrl || bookingReference;
+      if (refToVerify) {
+        paymentsService
+          .verifyPaystackPayment(trxref, refToVerify)
+          .then((res: any) => {
+            console.log("Payment verified successfully:", res);
+            if (res?.booking_reference) {
+              setBookingReference(res.booking_reference);
+            }
+            setBookingStep(6); // Open Booking Confirmed modal
+          })
+          .catch((err: any) => {
+            console.error("Payment verification failed:", err);
+          });
+      }
+    }
+  }, [bookingReference]);
 
   const handleSelectRentalMode = async (mode: "self" | "chauffeur") => {
     setSelectedRentalMode(mode);
@@ -229,6 +251,26 @@ export default function VehicleDetailPage() {
       if (result.data.reference) setBookingReference(result.data.reference);
     }
     setBookingStep(2);
+  };
+
+  const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([]);
+  const [isSavingExtras, setIsSavingExtras] = useState<boolean>(false);
+
+  const handleContinueEnhanceTrip = async (ids?: string[]) => {
+    const extrasToSave = ids || selectedExtraIds;
+    setSelectedExtraIds(extrasToSave);
+
+    if (bookingReference && extrasToSave.length > 0) {
+      try {
+        setIsSavingExtras(true);
+        await bookingsService.addExtras(bookingReference, extrasToSave);
+      } catch (err) {
+        console.error("Failed to save extras to booking:", err);
+      } finally {
+        setIsSavingExtras(false);
+      }
+    }
+    setBookingStep(4);
   };
 
   const [showWarning, setShowWarning] = useState(false);
@@ -595,7 +637,13 @@ export default function VehicleDetailPage() {
         isOpen={bookingStep === 3}
         onClose={() => setBookingStep(0)}
         onBack={() => setBookingStep(2)}
-        onContinue={() => setBookingStep(4)}
+        onContinue={handleContinueEnhanceTrip}
+        selectedExtras={selectedExtraIds}
+        onToggleExtra={(id) =>
+          setSelectedExtraIds((prev) =>
+            prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+          )
+        }
       />
 
       {/* Step 4: Review Your Booking */}
@@ -604,10 +652,15 @@ export default function VehicleDetailPage() {
         onClose={() => setBookingStep(0)}
         onBack={() => setBookingStep(3)}
         onConfirm={() => setBookingStep(5)}
+        onEditDates={() => {
+          setBookingStep(0);
+          setActiveDateTarget("pickup");
+        }}
         vehicle={vehicle}
         pickupDate={pickupDate}
         dropOffDate={dropOffDate}
         selectedMode={selectedRentalMode}
+        bookingRef={bookingReference}
       />
 
       {/* Step 5: Choose a Payment Method */}
@@ -616,6 +669,7 @@ export default function VehicleDetailPage() {
         onClose={() => setBookingStep(0)}
         onBack={() => setBookingStep(4)}
         onConfirm={() => setBookingStep(6)}
+        bookingRef={bookingReference}
       />
 
       {/* Step 6: Booking Confirmed 🎉 */}

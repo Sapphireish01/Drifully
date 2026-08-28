@@ -69,6 +69,36 @@ export const paymentsService = {
   },
 
   /**
+   * Initiates Paystack payment session
+   */
+  initiatePaystackPayment: async (bookingRef: string) => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/payments/paystack/pay/', booking_ref: bookingRef }
+    });
+    return response.data;
+  },
+
+  /**
+   * Verifies Paystack payment session
+   */
+  verifyPaystackPayment: async (referenceCode: string, bookingRef: string) => {
+    const response = await publicApi.get('', {
+      params: { path: `api/v1/payments/paystack/${referenceCode}/verify/`, booking_ref: bookingRef }
+    });
+    return response.data;
+  },
+
+  /**
+   * Initiates Stripe payment session
+   */
+  initiateStripePayment: async (bookingRef: string) => {
+    const response = await publicApi.post('', {}, {
+      params: { path: 'api/v1/payments/stripe/initiate/', booking_ref: bookingRef }
+    });
+    return response.data;
+  },
+
+  /**
    * Fetches payment details
    */
   getPaymentDetails: async (paymentId: string): Promise<any> => {

@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useParams } from "next/navigation";
+import { bookingsService, ExpandedTripData } from "@/services/bookings-service";
+import Spinner from "@/components/customer/Spinner";
 import RateTripModal from "@/components/customer/RateTripModal";
 import GetHelpModal from "@/components/customer/GetHelpModal";
 import CancelReservationModal from "@/components/customer/CancelReservationModal";
@@ -13,6 +16,13 @@ import ExtensionConfirmedModal from "@/components/customer/ExtensionConfirmedMod
 import styles from "./TripDetailsPage.module.css";
 
 export default function TripDetailsPage() {
+  const params = useParams();
+  const bookingRef = (params.id as string) || "";
+
+  const [tripData, setTripData] = useState<ExpandedTripData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -21,7 +31,56 @@ export default function TripDetailsPage() {
   const [extendStep, setExtendStep] = useState<number>(0);
   const [newReturnDate, setNewReturnDate] = useState<string>("30 Mar 2026");
 
-  const [status, setStatus] = useState<"Scheduled" | "Ongoing" | "Completed">("Ongoing");
+  useEffect(() => {
+    if (!bookingRef) return;
+    let isMounted = true;
+    setIsLoading(true);
+
+    bookingsService
+      .getExpandedTripDetail(bookingRef)
+      .then((data) => {
+        if (isMounted) {
+          setTripData(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load trip detail:", err);
+        if (isMounted) {
+          setErrorMsg("Failed to load trip details. Showing summary.");
+        }
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bookingRef]);
+
+  const vehicleInfo = tripData?.vehicle_info;
+  const bookingInfo = tripData?.booking_info;
+  const priceInfo = tripData?.price_info;
+  const extrasInfo = tripData?.extras_info || [];
+
+  const rawStatus = bookingInfo?.status || "Scheduled";
+  const normalizedStatus: "Scheduled" | "Ongoing" | "Completed" =
+    rawStatus.toLowerCase().includes("ongoing")
+      ? "Ongoing"
+      : rawStatus.toLowerCase().includes("complete")
+      ? "Completed"
+      : "Scheduled";
+
+  const vehicleTitle = vehicleInfo
+    ? `${vehicleInfo.brand || ""} ${vehicleInfo.model || ""}`.trim() || bookingInfo?.vehicle || "Vehicle"
+    : bookingInfo?.vehicle || "Vehicle Details";
+
+  const formatPrice = (val?: number | string) => {
+    if (val === undefined || val === null) return "₦0";
+    const num = typeof val === "number" ? val : parseFloat(String(val));
+    if (isNaN(num)) return `₦${val}`;
+    return `₦${num.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  };
 
   return (
     <div className={styles.container}>
@@ -34,11 +93,11 @@ export default function TripDetailsPage() {
               <polyline points="12 19 5 12 12 5" />
             </svg>
           </Link>
-          <h1 className={styles.title}>Toyota Highlander 2026</h1>
+          <h1 className={styles.title}>{vehicleTitle}</h1>
         </div>
 
         <div className={styles.actionsRight}>
-          {status === "Scheduled" && (
+          {normalizedStatus === "Scheduled" && (
             <button
               type="button"
               className={styles.cancelBtn}
@@ -48,7 +107,7 @@ export default function TripDetailsPage() {
             </button>
           )}
 
-          {status === "Ongoing" && (
+          {normalizedStatus === "Ongoing" && (
             <button
               type="button"
               className={styles.cancelBtn}
@@ -58,7 +117,7 @@ export default function TripDetailsPage() {
             </button>
           )}
 
-          {status === "Completed" && (
+          {normalizedStatus === "Completed" && (
             <>
               <button type="button" className={styles.rebookBtn}>
                 Rebook Vehicle
@@ -89,65 +148,78 @@ export default function TripDetailsPage() {
         </div>
       </div>
 
-      {/* Main Detail Card */}
-      <div className={styles.card}>
-        <div className={styles.vehicleHeader}>
-          <div>
-            <h3 className={styles.vehicleName}>Toyota Corolla 2026</h3>
-            <span className={styles.serviceMode}>Drive Yourself</span>
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
+          <Spinner />
+        </div>
+      ) : (
+        /* Main Detail Card */
+        <div className={styles.card}>
+          <div className={styles.vehicleHeader}>
+            <div>
+              <h3 className={styles.vehicleName}>{vehicleTitle}</h3>
+              <span className={styles.serviceMode}>
+                {bookingInfo?.drive_type || "Drive Yourself"}
+              </span>
+            </div>
+            <span className={styles.arrowIcon}>›</span>
           </div>
-          <span className={styles.arrowIcon}>›</span>
-        </div>
 
-        <div className={styles.sectionDivider}>Booking Summary</div>
+          <div className={styles.sectionDivider}>Booking Summary</div>
 
-        <div className={styles.datesRow}>
-          <div>
-            <span className={styles.label}>Booking Dates</span>
-            <div className={styles.datesVal}>30 Mar 2025 – 11 May 2025</div>
+          <div className={styles.datesRow}>
+            <div>
+              <span className={styles.label}>Booking Dates</span>
+              <div className={styles.datesVal}>{bookingInfo?.date || "Dates N/A"}</div>
+            </div>
+            <span className={`${styles.statusBadge} ${styles[normalizedStatus.toLowerCase()]}`}>
+              {normalizedStatus}
+            </span>
           </div>
-          <span className={`${styles.statusBadge} ${styles[status.toLowerCase()]}`}>
-            {status}
-          </span>
-        </div>
 
-        <div className={styles.locationGroup}>
-          <span className={styles.label}>Pick Up & Drop Off Location</span>
-          <div className={styles.locationVal}>Murtala Muhammed Airport</div>
-        </div>
+          <div className={styles.locationGroup}>
+            <span className={styles.label}>Pick Up & Drop Off Location</span>
+            <div className={styles.locationVal}>Murtala Muhammed International Airport Lagos</div>
+          </div>
 
-        <div className={styles.sectionDivider}>Extras</div>
-        <div className={styles.priceRow}>
-          <span>Extra Fuel</span>
-          <strong>N10,000</strong>
-        </div>
-        <div className={styles.priceRow}>
-          <span>Child Seat (2)</span>
-          <strong>N20,000</strong>
-        </div>
+          <div className={styles.sectionDivider}>Extras</div>
+          {extrasInfo.length > 0 ? (
+            extrasInfo.map((extra, i) => (
+              <div key={i} className={styles.priceRow}>
+                <span>{extra.name}</span>
+                <strong>{formatPrice(extra.line_total || extra.unit_price)}</strong>
+              </div>
+            ))
+          ) : (
+            <div className={styles.priceRow}>
+              <span>No Extras</span>
+              <strong>₦0</strong>
+            </div>
+          )}
 
-        <div className={styles.sectionDivider}>Price Breakdown</div>
-        <div className={styles.priceRow}>
-          <span>Subtotal</span>
-          <strong>N10,000</strong>
-        </div>
-        <div className={styles.priceRow}>
-          <span>Extras</span>
-          <strong>N30,000</strong>
-        </div>
-        <div className={styles.priceRow}>
-          <span>Taxes</span>
-          <strong>N10,000</strong>
-        </div>
-        <div className={`${styles.priceRow} ${styles.totalRow}`}>
-          <span>Total</span>
-          <strong>N150,000.</strong>
-        </div>
+          <div className={styles.sectionDivider}>Price Breakdown</div>
+          <div className={styles.priceRow}>
+            <span>Subtotal</span>
+            <strong>{formatPrice(priceInfo?.subtotal)}</strong>
+          </div>
+          <div className={styles.priceRow}>
+            <span>Extras</span>
+            <strong>{formatPrice(priceInfo?.extras)}</strong>
+          </div>
+          <div className={styles.priceRow}>
+            <span>Taxes</span>
+            <strong>{formatPrice(priceInfo?.taxes)}</strong>
+          </div>
+          <div className={`${styles.priceRow} ${styles.totalRow}`}>
+            <span>Total</span>
+            <strong>{formatPrice(priceInfo?.total)}</strong>
+          </div>
 
-        <div className={styles.cancelPolicyBanner}>
-          Free cancellation within 24 hours. After that, a cancellation fee applies.
+          <div className={styles.cancelPolicyBanner}>
+            Free cancellation within 24 hours. After that, a cancellation fee applies.
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Modals */}
       <RateTripModal
@@ -192,6 +264,7 @@ export default function TripDetailsPage() {
         onClose={() => setExtendStep(0)}
         onBack={() => setExtendStep(2)}
         onConfirm={() => setExtendStep(4)}
+        bookingRef={bookingRef}
       />
 
       <ExtensionConfirmedModal

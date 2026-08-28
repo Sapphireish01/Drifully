@@ -61,6 +61,14 @@ export default function UploadDocumentsModal({
     }
   };
 
+  const getFileIconSrc = (filename: string) => {
+    const ext = filename.split(".").pop()?.toLowerCase();
+    if (ext === "png" || ext === "jpg" || ext === "jpeg" || ext === "svg" || ext === "webp") {
+      return "/customer app/icons/png.svg";
+    }
+    return "/customer app/icons/pdf-file.svg";
+  };
+
   const isFormComplete = Boolean(licenseFrontFile && residencyFile);
 
   const handleContinueSubmit = async () => {
@@ -107,7 +115,7 @@ export default function UploadDocumentsModal({
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close">
             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="1" y1="1" x2="11" y2="11" />
-              <line x1="1" y1="1" x2="11" y2="1" />
+              <line x1="1" y1="11" x2="11" y2="1" />
             </svg>
           </button>
         </div>
@@ -126,7 +134,7 @@ export default function UploadDocumentsModal({
               {licenseFrontFile ? (
                 <div className={styles.fileCard}>
                   <div className={styles.fileIcon}>
-                    <Image src="/customer app/icons/pdf-file.svg" alt="PDF" width={28} height={28} />
+                    <Image src={getFileIconSrc(licenseFrontFile.name)} alt="File" width={28} height={28} />
                   </div>
                   <div className={styles.fileMeta}>
                     <span className={styles.fileName}>{licenseFrontFile.name}</span>
@@ -144,7 +152,7 @@ export default function UploadDocumentsModal({
                   </button>
                 </div>
               ) : (
-                <div className={styles.dropzone}>
+                <label className={styles.dropzone}>
                   <div className={styles.cloudIcon}>
                     <Image src="/customer app/icons/upload.svg" alt="Upload" width={24} height={24} />
                   </div>
@@ -152,11 +160,9 @@ export default function UploadDocumentsModal({
                     <span className={styles.dropTitle}>Front Photo</span>
                     <span className={styles.dropHint}>JPEG, PNG, PDF</span>
                   </div>
-                  <label className={styles.browseBtn}>
-                    Browse
-                    <input type="file" accept="image/*,.pdf" onChange={handleFrontLicenseChange} className={styles.hiddenInput} />
-                  </label>
-                </div>
+                  <span className={styles.browseBtn}>Browse</span>
+                  <input type="file" accept="image/*,.pdf" onChange={handleFrontLicenseChange} className={styles.hiddenInput} />
+                </label>
               )}
             </div>
 
@@ -166,7 +172,7 @@ export default function UploadDocumentsModal({
               {licenseBackFile ? (
                 <div className={styles.fileCard}>
                   <div className={styles.fileIcon}>
-                    <Image src="/customer app/icons/pdf-file.svg" alt="PDF" width={28} height={28} />
+                    <Image src={getFileIconSrc(licenseBackFile.name)} alt="File" width={28} height={28} />
                   </div>
                   <div className={styles.fileMeta}>
                     <span className={styles.fileName}>{licenseBackFile.name}</span>
@@ -184,7 +190,7 @@ export default function UploadDocumentsModal({
                   </button>
                 </div>
               ) : (
-                <div className={styles.dropzone}>
+                <label className={styles.dropzone}>
                   <div className={styles.cloudIcon}>
                     <Image src="/customer app/icons/upload.svg" alt="Upload" width={24} height={24} />
                   </div>
@@ -192,11 +198,9 @@ export default function UploadDocumentsModal({
                     <span className={styles.dropTitle}>Back Photo</span>
                     <span className={styles.dropHint}>JPEG, PNG, PDF</span>
                   </div>
-                  <label className={styles.browseBtn}>
-                    Browse
-                    <input type="file" accept="image/*,.pdf" onChange={handleBackLicenseChange} className={styles.hiddenInput} />
-                  </label>
-                </div>
+                  <span className={styles.browseBtn}>Browse</span>
+                  <input type="file" accept="image/*,.pdf" onChange={handleBackLicenseChange} className={styles.hiddenInput} />
+                </label>
               )}
             </div>
           </div>
@@ -221,7 +225,7 @@ export default function UploadDocumentsModal({
           {residencyFile ? (
             <div className={styles.fileCard}>
               <div className={styles.fileIcon}>
-                <Image src="/customer app/icons/pdf-file.svg" alt="PDF" width={28} height={28} />
+                <Image src={getFileIconSrc(residencyFile.name)} alt="File" width={28} height={28} />
               </div>
               <div className={styles.fileMeta}>
                 <span className={styles.fileName}>{residencyFile.name}</span>
@@ -239,7 +243,7 @@ export default function UploadDocumentsModal({
               </button>
             </div>
           ) : (
-            <div className={styles.dropzone}>
+            <label className={styles.dropzone}>
               <div className={styles.cloudIcon}>
                 <Image src="/customer app/icons/upload.svg" alt="Upload" width={28} height={28} />
               </div>
@@ -247,11 +251,9 @@ export default function UploadDocumentsModal({
                 <span className={styles.dropTitle}>Choose a file or drag & drop it here.</span>
                 <span className={styles.dropHint}>JPEG, PNG, PDF formats, up to 50 MB.</span>
               </div>
-              <label className={styles.browseBtn}>
-                Browse File
-                <input type="file" accept="image/*,.pdf" onChange={handleResidencyChange} className={styles.hiddenInput} />
-              </label>
-            </div>
+              <span className={styles.browseBtn}>Browse File</span>
+              <input type="file" accept="image/*,.pdf" onChange={handleResidencyChange} className={styles.hiddenInput} />
+            </label>
           )}
         </div>
 
