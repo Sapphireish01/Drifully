@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { performSearch } from "@/lib/searchData";
+import { performSearch, hydrateSearchIndex } from "@/lib/searchData";
 import SearchDropdown from "@/components/search/SearchDropdown";
 
 const NAV_LINKS = [
@@ -24,6 +24,11 @@ export default function Navbar() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
   const [downloadLink, setDownloadLink] = useState("https://play.google.com/store/apps/details?id=com.drifully.app");
+
+  // Hydrate search index in background on mount
+  useEffect(() => {
+    hydrateSearchIndex();
+  }, []);
 
   // Close menu & search when route changes
   useEffect(() => {

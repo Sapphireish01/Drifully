@@ -54,32 +54,32 @@ export default function PaymentMethodModal({
         />
       ),
     },
-    {
-      id: "card",
-      label: "Pay with Card",
-      disabled: true,
-      icon: (
-        <Image
-          src="/customer app/icons/card.svg"
-          alt="Card"
-          width={22}
-          height={22}
-        />
-      ),
-    },
-    {
-      id: "transfer",
-      label: "Pay with Bank Transfer",
-      disabled: true,
-      icon: (
-        <Image
-          src="/customer app/icons/bank.svg"
-          alt="Bank Transfer"
-          width={22}
-          height={22}
-        />
-      ),
-    },
+    // {
+    //   id: "card",
+    //   label: "Pay with Card",
+    //   disabled: true,
+    //   icon: (
+    //     <Image
+    //       src="/customer app/icons/card.svg"
+    //       alt="Card"
+    //       width={22}
+    //       height={22}
+    //     />
+    //   ),
+    // },
+    // {
+    //   id: "transfer",
+    //   label: "Pay with Bank Transfer",
+    //   disabled: true,
+    //   icon: (
+    //     <Image
+    //       src="/customer app/icons/bank.svg"
+    //       alt="Bank Transfer"
+    //       width={22}
+    //       height={22}
+    //     />
+    //   ),
+    // },
   ];
 
   const handlePayClick = async () => {

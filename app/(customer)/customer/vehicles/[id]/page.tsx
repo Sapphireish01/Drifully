@@ -250,7 +250,12 @@ export default function VehicleDetailPage() {
       if (result.data.booking_id) setBookingId(result.data.booking_id);
       if (result.data.reference) setBookingReference(result.data.reference);
     }
-    setBookingStep(2);
+
+    if (mode === "chauffeur") {
+      setBookingStep(3); // Skip UploadDocumentsModal and proceed to Enhance Your Trip
+    } else {
+      setBookingStep(2);
+    }
   };
 
   const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([]);
@@ -621,6 +626,7 @@ export default function VehicleDetailPage() {
         isOpen={bookingStep === 1}
         onClose={() => setBookingStep(0)}
         onSelectMode={handleSelectRentalMode}
+        isLoading={isInitiatingBooking}
       />
 
       {/* Step 2: Upload Your Documents */}
@@ -636,7 +642,7 @@ export default function VehicleDetailPage() {
       <EnhanceTripModal
         isOpen={bookingStep === 3}
         onClose={() => setBookingStep(0)}
-        onBack={() => setBookingStep(2)}
+        onBack={() => setBookingStep(selectedRentalMode === "chauffeur" ? 1 : 2)}
         onContinue={handleContinueEnhanceTrip}
         selectedExtras={selectedExtraIds}
         onToggleExtra={(id) =>

@@ -10,7 +10,7 @@ interface SearchDropdownProps {
 }
 
 export default function SearchDropdown({ query, results, onItemClick }: SearchDropdownProps) {
-  const { fleet, blog, company, legal, totalResults } = results;
+  const { fleet, blog, company, legal, faq, totalResults } = results;
 
   return (
     <div className="navbar__search-dropdown" role="region" aria-label="Search results">
@@ -119,6 +119,26 @@ export default function SearchDropdown({ query, results, onItemClick }: SearchDr
             <div className="search-dropdown__section-title">Company</div>
             <div className="search-dropdown__list">
               {company.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.url}
+                  className="search-dropdown__card"
+                  onClick={onItemClick}
+                >
+                  <h4 className="search-dropdown__card-title">{item.title}</h4>
+                  <p className="search-dropdown__card-desc">{item.description}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Section: FAQs */}
+        {faq && faq.length > 0 && (
+          <div className="search-dropdown__section">
+            <div className="search-dropdown__section-title">Help & FAQs</div>
+            <div className="search-dropdown__list">
+              {faq.map((item) => (
                 <Link
                   key={item.id}
                   href={item.url}

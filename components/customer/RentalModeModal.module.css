@@ -11,6 +11,7 @@
 }
 
 .modal {
+  position: relative;
   background: #ffffff;
   border-radius: 20px;
   width: 100%;
@@ -20,6 +21,18 @@
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.2s ease-out;
+}
+
+.overlaySpinner {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(2px);
+  border-radius: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes fadeIn {
@@ -100,6 +113,12 @@
 
 .optionCard:hover {
   background: #f1f5f9;
+}
+
+.disabledCard {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .selectedCard {

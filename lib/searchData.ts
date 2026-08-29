@@ -1,11 +1,13 @@
 import { VEHICLES } from "@/data/vehicles";
+import { marketingService } from "@/services/marketing-service";
+import Fuse from "fuse.js";
 
 export interface SearchItem {
   id: string;
   title: string;
   description: string;
   url: string;
-  category: "Our Fleet" | "Blog" | "Company" | "Legal";
+  category: "Our Fleet" | "Blog" | "Company" | "Legal" | "FAQ";
   tag?: string;
   rating?: string;
   reviewsCount?: number;
@@ -18,6 +20,7 @@ export interface CategorizedSearchResults {
   blog: SearchItem[];
   company: SearchItem[];
   legal: SearchItem[];
+  faq: SearchItem[];
   totalResults: number;
 }
 
@@ -27,16 +30,23 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
   ...VEHICLES.map((car) => ({
     id: `fleet-${car.id}`,
     title: car.name,
-    description: `A stylish, comfortable ${car.type} built for smooth everyday drives and longer journeys`,
+    description: `A stylish, comfortable ${car.type} built for smooth everyday drives and longer journeys (${car.fuel}, ${car.capacity} Seats, ${car.transmission})`,
     url: `/our-fleet/${car.id}`,
     category: "Our Fleet" as const,
     tag: car.type || car.category || "Jeep",
     rating: car.rating || "4.8",
     reviewsCount: car.reviewsCount || 124,
-    keywords: [car.name, car.type, car.category, car.fuel, car.location, car.transmission],
+    keywords: [
+      car.name,
+      car.type,
+      car.category,
+      car.fuel,
+      car.location,
+      car.transmission,
+      ...(car.features || []),
+    ],
   })),
 
-  // Pre-added Chevrolet item if not in vehicles list for direct UI mockup parity
   {
     id: "fleet-chevrolet-demo",
     title: "Chevrolet",
@@ -46,7 +56,7 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
     tag: "Jeep",
     rating: "4.8",
     reviewsCount: 124,
-    keywords: ["chevrolet", "chevy", "suv", "jeep"],
+    keywords: ["chevrolet", "chevy", "suv", "jeep", "automatic", "luxury"],
   },
 
   // Blog posts
@@ -85,7 +95,7 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
     description: "Discover Drifully's mission to revolutionize flexible car rentals across Nigeria.",
     url: "/about-us",
     category: "Company",
-    keywords: ["about", "mission", "company", "drifully", "story"],
+    keywords: ["about", "mission", "company", "drifully", "story", "vision", "values"],
   },
   {
     id: "company-fleet",
@@ -93,7 +103,7 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
     description: "Explore our wide range of premium vans, sedans, SUVs, and luxury rental cars.",
     url: "/our-fleet",
     category: "Company",
-    keywords: ["fleet", "cars", "vehicles", "all cars", "sedan", "suv"],
+    keywords: ["fleet", "cars", "vehicles", "all cars", "sedan", "suv", "luxury"],
   },
   {
     id: "company-drive",
@@ -101,7 +111,7 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
     description: "Join as a driver partner or list your vehicle to start earning with Drifully.",
     url: "/drive-with-drifully",
     category: "Company",
-    keywords: ["driver", "partner", "earn", "list vehicle", "apply"],
+    keywords: ["driver", "partner", "earn", "list vehicle", "apply", "chauffeur driver"],
   },
   {
     id: "company-contact",
@@ -109,7 +119,7 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
     description: "Get in touch with our 24/7 customer support team for inquiries and help.",
     url: "/contact-us",
     category: "Company",
-    keywords: ["contact", "support", "help", "phone", "email"],
+    keywords: ["contact", "support", "help", "phone", "email", "customer service"],
   },
 
   // Legal pages
@@ -127,7 +137,7 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
     description: "How we collect, protect, and handle your personal data and account info.",
     url: "/privacy",
     category: "Legal",
-    keywords: ["privacy", "data", "security", "personal information"],
+    keywords: ["privacy", "data", "security", "personal information", "protection"],
   },
   {
     id: "legal-cancellation",
@@ -135,7 +145,7 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
     description: "Understand refund timelines, booking cancellations, and modification policies.",
     url: "/cancellation",
     category: "Legal",
-    keywords: ["cancellation", "refund", "modify", "policy"],
+    keywords: ["cancellation", "refund", "modify", "policy", "cancel booking"],
   },
   {
     id: "legal-cookies",
@@ -143,12 +153,96 @@ export const STATIC_SEARCH_ITEMS: SearchItem[] = [
     description: "Information regarding cookies and web tracking standard practices on Drifully.",
     url: "/cookie-policy",
     category: "Legal",
-    keywords: ["cookie", "cookies", "tracking", "browsing"],
+    keywords: ["cookie", "cookies", "tracking", "browsing", "analytics"],
   },
 ];
 
-export function performSearch(query: string, items: SearchItem[] = STATIC_SEARCH_ITEMS): CategorizedSearchResults {
-  const normalized = query.trim().toLowerCase();
+// In-memory cache for merged search index
+let cachedSearchItems: SearchItem[] = [...STATIC_SEARCH_ITEMS];
+let isHydrated = false;
+let isHydrating = false;
+
+// Async function to hydrate search index with live API data (Vehicles, Blogs, FAQs)
+export async function hydrateSearchIndex(): Promise<SearchItem[]> {
+  if (isHydrated || isHydrating) return cachedSearchItems;
+
+  isHydrating = true;
+  try {
+    const [apiVehicles, apiBlogs, apiFaqs] = await Promise.allSettled([
+      marketingService.getVehicles(),
+      marketingService.getBlogs(),
+      marketingService.getFaqs(),
+    ]);
+
+    const dynamicItems: SearchItem[] = [];
+
+    // Process API Vehicles
+    if (apiVehicles.status === "fulfilled" && Array.isArray(apiVehicles.value)) {
+      apiVehicles.value.forEach((v) => {
+        dynamicItems.push({
+          id: `api-fleet-${v.id}`,
+          title: v.name,
+          description: `${v.type} - ${v.fuel} transmission ${v.transmission}. Capacity ${v.capacity} persons.`,
+          url: `/our-fleet/${v.id}`,
+          category: "Our Fleet",
+          tag: v.type || v.category || "Vehicle",
+          rating: String(v.rating || "4.8"),
+          reviewsCount: Number(v.reviews || 0),
+          keywords: [v.name, v.type, v.category, v.fuel, v.transmission, ...(v.features || [])],
+        });
+      });
+    }
+
+    // Process API Blogs
+    if (apiBlogs.status === "fulfilled" && Array.isArray(apiBlogs.value)) {
+      apiBlogs.value.forEach((b: any) => {
+        dynamicItems.push({
+          id: `api-blog-${b.id}`,
+          title: b.title || b.name,
+          description: b.excerpt || b.summary || b.description || "Read latest insights on Drifully Blog",
+          url: `/blog/${b.id}`,
+          category: "Blog",
+          date: b.created_at || b.date || "Recent",
+          keywords: [b.title, b.category, b.author, ...(b.tags || [])],
+        });
+      });
+    }
+
+    // Process API FAQs
+    if (apiFaqs.status === "fulfilled" && Array.isArray(apiFaqs.value)) {
+      apiFaqs.value.forEach((f: any) => {
+        dynamicItems.push({
+          id: `api-faq-${f.id}`,
+          title: f.question || f.title,
+          description: f.answer || f.content || "Frequently Asked Question",
+          url: "/customer/help-support",
+          category: "FAQ",
+          keywords: ["faq", "help", "support", f.question, f.category],
+        });
+      });
+    }
+
+    if (dynamicItems.length > 0) {
+      // Deduplicate by URL or title
+      const existingUrls = new Set(cachedSearchItems.map((i) => i.url));
+      const filteredDynamic = dynamicItems.filter((item) => !existingUrls.has(item.url));
+
+      cachedSearchItems = [...cachedSearchItems, ...filteredDynamic];
+    }
+
+    isHydrated = true;
+  } catch (err) {
+    console.warn("Search index hydration failed, using static fallback:", err);
+  } finally {
+    isHydrating = false;
+  }
+
+  return cachedSearchItems;
+}
+
+// Perform search using Fuse.js fuzzy matching
+export function performSearch(query: string, items: SearchItem[] = cachedSearchItems): CategorizedSearchResults {
+  const normalized = query.trim();
 
   if (!normalized) {
     return {
@@ -156,31 +250,37 @@ export function performSearch(query: string, items: SearchItem[] = STATIC_SEARCH
       blog: [],
       company: [],
       legal: [],
+      faq: [],
       totalResults: 0,
     };
   }
 
-  // Helper matching logic
-  const matches = items.filter((item) => {
-    const inTitle = item.title.toLowerCase().includes(normalized);
-    const inDesc = item.description.toLowerCase().includes(normalized);
-    const inCategory = item.category.toLowerCase().includes(normalized);
-    const inTag = item.tag ? item.tag.toLowerCase().includes(normalized) : false;
-    const inKeywords = item.keywords ? item.keywords.some((k) => k.toLowerCase().includes(normalized)) : false;
-
-    return inTitle || inDesc || inCategory || inTag || inKeywords;
+  const fuse = new Fuse(items, {
+    keys: [
+      { name: "title", weight: 0.5 },
+      { name: "keywords", weight: 0.3 },
+      { name: "description", weight: 0.2 },
+      { name: "tag", weight: 0.1 },
+    ],
+    threshold: 0.35,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
   });
 
-  const fleet = matches.filter((i) => i.category === "Our Fleet");
-  const blog = matches.filter((i) => i.category === "Blog");
-  const company = matches.filter((i) => i.category === "Company");
-  const legal = matches.filter((i) => i.category === "Legal");
+  const searchResults = fuse.search(normalized).map((res) => res.item);
+
+  const fleet = searchResults.filter((i) => i.category === "Our Fleet");
+  const blog = searchResults.filter((i) => i.category === "Blog");
+  const company = searchResults.filter((i) => i.category === "Company");
+  const legal = searchResults.filter((i) => i.category === "Legal");
+  const faq = searchResults.filter((i) => i.category === "FAQ");
 
   return {
     fleet,
     blog,
     company,
     legal,
-    totalResults: matches.length,
+    faq,
+    totalResults: searchResults.length,
   };
 }

@@ -2,42 +2,46 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Spinner from "@/components/customer/Spinner";
 import styles from "./RentalModeModal.module.css";
 
 interface RentalModeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectMode?: (mode: "self" | "chauffeur") => void;
+  onSelectMode?: (mode: "self" | "chauffeur") => void | Promise<void>;
+  isLoading?: boolean;
 }
 
 export default function RentalModeModal({
   isOpen,
   onClose,
   onSelectMode,
+  isLoading = false,
 }: RentalModeModalProps) {
   const [selectedMode, setSelectedMode] = useState<"self" | "chauffeur">("self");
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
-    if (onSelectMode) {
-      onSelectMode(selectedMode);
-    } else {
-      onClose();
-    }
-  };
-
-  const handleSelectCard = (mode: "self" | "chauffeur") => {
+  const handleSelectCard = async (mode: "self" | "chauffeur") => {
+    if (isProcessing || isLoading) return;
     setSelectedMode(mode);
     if (onSelectMode) {
-      onSelectMode(mode);
+      setIsProcessing(true);
+      try {
+        await onSelectMode(mode);
+      } finally {
+        setIsProcessing(false);
+      }
     } else {
       onClose();
     }
   };
 
+  const showLoading = isProcessing || isLoading;
+
   return (
-    <div className={styles.backdrop} onClick={onClose} role="presentation">
+    <div className={styles.backdrop} onClick={showLoading ? undefined : onClose} role="presentation">
       <div
         className={styles.modal}
         onClick={(e) => e.stopPropagation()}
@@ -45,6 +49,12 @@ export default function RentalModeModal({
         aria-modal="true"
         aria-labelledby="rental-mode-heading"
       >
+        {showLoading && (
+          <div className={styles.overlaySpinner}>
+            <Spinner label="Processing..." />
+          </div>
+        )}
+
         <div className={styles.header}>
           <h2 id="rental-mode-heading" className={styles.title}>
             Start Your Journey
@@ -54,6 +64,7 @@ export default function RentalModeModal({
             className={styles.closeBtn}
             onClick={onClose}
             aria-label="Close"
+            disabled={showLoading}
           >
             <svg
               width="6"
@@ -77,7 +88,7 @@ export default function RentalModeModal({
           <div className={styles.optionCol}>
             <div
               className={`${styles.optionCard} ${selectedMode === "self" ? styles.selectedCard : ""
-                }`}
+                } ${showLoading ? styles.disabledCard : ""}`}
               onClick={() => handleSelectCard("self")}
             >
               <div className={styles.cardTop}>
@@ -104,7 +115,7 @@ export default function RentalModeModal({
           <div className={styles.optionCol}>
             <div
               className={`${styles.optionCard} ${selectedMode === "chauffeur" ? styles.selectedCard : ""
-                }`}
+                } ${showLoading ? styles.disabledCard : ""}`}
               onClick={() => handleSelectCard("chauffeur")}
             >
               <div className={styles.cardTop}>

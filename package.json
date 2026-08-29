@@ -12,6 +12,7 @@
     "apexcharts": "^5.13.0",
     "axios": "^1.16.1",
     "critters": "^0.0.23",
+    "fuse.js": "^7.5.0",
     "jodit": "^4.12.2",
     "jodit-react": "^5.3.21",
     "lucide-react": "^1.33.0",
