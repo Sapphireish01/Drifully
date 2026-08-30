@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import DatePickerModal from "@/components/customer/DatePickerModal";
 import RentalModeModal from "@/components/customer/RentalModeModal";
 import UploadDocumentsModal from "@/components/customer/UploadDocumentsModal";
@@ -167,6 +167,7 @@ function transformApiDetailToVehicle(item: ApiVehicleDetail, allFeatures: Featur
 
 export default function VehicleDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const idStr = params.id as string;
   const vehicleId = parseInt(idStr, 10);
 
@@ -211,6 +212,35 @@ export default function VehicleDetailPage() {
   const [bookingId, setBookingId] = useState<string>("");
   const [bookingReference, setBookingReference] = useState<string>("");
   const [isInitiatingBooking, setIsInitiatingBooking] = useState<boolean>(false);
+
+  // Pre-fill dates from searchParams if translated from marketing or deep links
+  useEffect(() => {
+    const queryPickup = searchParams.get("pickupDate");
+    const queryDropoff = searchParams.get("dropOffDate");
+
+    if (queryPickup) setPickupDate(queryPickup);
+    if (queryDropoff) setDropOffDate(queryDropoff);
+
+    if (queryPickup && queryDropoff && vehicle) {
+      const d1 = new Date(queryPickup);
+      const d2 = new Date(queryDropoff);
+      if (!isNaN(d1.getTime()) && !isNaN(d2.getTime())) {
+        const diffTime = Math.abs(d2.getTime() - d1.getTime());
+        const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+        const total = diffDays * (vehicle.priceNumber || 0);
+        if (total > 0) {
+          setCalculatedTotal(total.toLocaleString("en-US"));
+        }
+      }
+    }
+  }, [searchParams, vehicle]);
+
+  // Auto-open booking modal if navigated with autoOpenBooking=true
+  useEffect(() => {
+    if (!isLoading && vehicle && searchParams.get("autoOpenBooking") === "true") {
+      setBookingStep(1);
+    }
+  }, [isLoading, vehicle, searchParams]);
 
   // Payment Verification on Redirect Return
   useEffect(() => {

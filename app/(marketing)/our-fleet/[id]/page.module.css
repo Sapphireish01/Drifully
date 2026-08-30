@@ -195,10 +195,54 @@
   color: var(--color-muted);
 }
 
-.priceTaxes {
-  font-size: 12px;
-  color: var(--color-muted);
-  text-align: end;
+.dateFields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.dateInputWrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.dateInputWrap:hover {
+  border-color: #cbd5e1;
+}
+
+.dateInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: #0f172a;
+  width: 100%;
+  cursor: pointer;
+}
+
+.calIcon {
+  color: #64748b;
+  flex-shrink: 0;
 }
 
 .bookBtn {

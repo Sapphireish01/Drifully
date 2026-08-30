@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { accountsService } from "@/services/accounts-service";
 import Navbar from "@/components/Navbar";
 import CustomSelect from "@/components/admin/CustomSelect";
@@ -14,6 +14,10 @@ type AuthMode = "login" | "register";
 
 export default function CustomerAuth({ mode }: { mode: AuthMode }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const targetRedirect = redirectParam ? decodeURIComponent(redirectParam) : "/customer";
+
   const [form, setForm] = useState({ fullName: "", email: "", phone: "", password: "", confirmPassword: "", referral: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -63,17 +67,21 @@ export default function CustomerAuth({ mode }: { mode: AuthMode }) {
           referral_code: form.referral ? form.referral.trim() : undefined,
         });
         setMessage("Account created. Please sign in to continue.");
-        setTimeout(() => router.push("/customer/login"), 900);
+        const loginUrl = redirectParam ? `/customer/login?redirect=${encodeURIComponent(redirectParam)}` : "/customer/login";
+        setTimeout(() => router.push(loginUrl), 900);
       } else {
         const response = await accountsService.login({ email: form.email, password: form.password });
         localStorage.setItem("drifully_customer_user", JSON.stringify(response.user || { email: form.email }));
-        router.replace("/customer");
+        router.replace(targetRedirect);
       }
     } catch (requestError: unknown) {
       const response = requestError as { response?: { data?: { message?: string; error?: string } } };
       setError(response.response?.data?.message || response.response?.data?.error || "Something went wrong. Please try again.");
     } finally { setLoading(false); }
   };
+
+  const registerTabHref = redirectParam ? `/customer/register?redirect=${encodeURIComponent(redirectParam)}` : "/customer/register";
+  const loginTabHref = redirectParam ? `/customer/login?redirect=${encodeURIComponent(redirectParam)}` : "/customer/login";
 
   return <main className={styles.page}>
     <Navbar />
@@ -82,10 +90,10 @@ export default function CustomerAuth({ mode }: { mode: AuthMode }) {
         <section className={styles.formSide}>
             <div className={styles.formWrap}>
                 <div className={styles.tabs}>
-                    <Link className={`${styles.tab} ${isRegister ? styles.tabActive : ""}`} href="/customer/register">
+                    <Link className={`${styles.tab} ${isRegister ? styles.tabActive : ""}`} href={registerTabHref}>
                     Create Account
                     </Link>
-                    <Link className={`${styles.tab} ${!isRegister ? styles.tabActive : ""}`} href="/customer/login">
+                    <Link className={`${styles.tab} ${!isRegister ? styles.tabActive : ""}`} href={loginTabHref}>
                     Sign In
                     </Link>
                     </div>

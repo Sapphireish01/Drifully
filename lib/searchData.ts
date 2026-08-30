@@ -215,7 +215,7 @@ export async function hydrateSearchIndex(): Promise<SearchItem[]> {
           id: `api-faq-${f.id}`,
           title: f.question || f.title,
           description: f.answer || f.content || "Frequently Asked Question",
-          url: "/customer/help-support",
+          url: "/contact-us",
           category: "FAQ",
           keywords: ["faq", "help", "support", f.question, f.category],
         });
@@ -240,7 +240,7 @@ export async function hydrateSearchIndex(): Promise<SearchItem[]> {
   return cachedSearchItems;
 }
 
-// Perform search using Fuse.js fuzzy matching
+// Perform search using Fuse.js fuzzy matching (Restricted to Marketing Pages)
 export function performSearch(query: string, items: SearchItem[] = cachedSearchItems): CategorizedSearchResults {
   const normalized = query.trim();
 
@@ -267,7 +267,11 @@ export function performSearch(query: string, items: SearchItem[] = cachedSearchI
     minMatchCharLength: 2,
   });
 
-  const searchResults = fuse.search(normalized).map((res) => res.item);
+  // Filter out any customer or admin routes to restrict search strictly to marketing pages
+  const searchResults = fuse
+    .search(normalized)
+    .map((res) => res.item)
+    .filter((item) => !item.url.startsWith("/customer") && !item.url.startsWith("/admin"));
 
   const fleet = searchResults.filter((i) => i.category === "Our Fleet");
   const blog = searchResults.filter((i) => i.category === "Blog");

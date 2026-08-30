@@ -6,6 +6,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Spinner from "@/components/admin/Spinner";
+import DatePickerModal from "@/components/customer/DatePickerModal";
+import { useRouter } from "next/navigation";
 import { marketingService } from "@/services/marketing-service";
 import { vehiclesService } from "@/services/vehicles-service";
 import { Vehicle } from "@/types/vehicle";
@@ -68,6 +70,7 @@ function FeatureIcon({ name }: { name: string }) {
 }
 
 export default function VehicleDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
   const unwrappedParams = use(params);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [brands, setBrands] = useState<any[]>([]);
@@ -76,6 +79,10 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
   const [currency, setCurrency] = useState<string>("USD");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [pickupDate, setPickupDate] = useState("");
+  const [dropOffDate, setDropOffDate] = useState("");
+  const [activeDateTarget, setActiveDateTarget] = useState<"pickup" | "dropoff" | null>(null);
 
   // Read cached currency (set by fleet page via ipapi.co)
   useEffect(() => {
@@ -115,14 +122,27 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
   const displayCategory = categoryData ? categoryData.name : vehicle?.category;
   const displayName = vehicle ? (brandData ? `${displayBrand} ${vehicle.model}` : vehicle.name) : "";
 
+  const handleSelectDate = (date: string) => {
+    if (activeDateTarget === "pickup") {
+      setPickupDate(date);
+    } else if (activeDateTarget === "dropoff") {
+      setDropOffDate(date);
+    }
+  };
+
   const handleBookNow = () => {
-    if (typeof window !== "undefined") {
-      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-      if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
-        window.open("https://apps.apple.com/app/drifully", "_blank");
-      } else {
-        window.open("https://play.google.com/store/apps/details?id=com.drifully.app", "_blank");
-      }
+    const query = new URLSearchParams();
+    query.set("autoOpenBooking", "true");
+    if (pickupDate) query.set("pickupDate", pickupDate);
+    if (dropOffDate) query.set("dropOffDate", dropOffDate);
+
+    const targetPath = `/customer/vehicles/${unwrappedParams.id}?${query.toString()}`;
+    const isAuthenticated = typeof window !== "undefined" && Boolean(localStorage.getItem("drifully_customer_user"));
+
+    if (isAuthenticated) {
+      router.push(targetPath);
+    } else {
+      router.push(`/customer/login?redirect=${encodeURIComponent(targetPath)}`);
     }
   };
 
@@ -299,6 +319,47 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
                   </span>
                   <span className={styles.priceTaxes}>Before taxes</span>
                 </div>
+
+                <div className={styles.dateFields}>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>Pickup Date</label>
+                    <div className={styles.dateInputWrap} onClick={() => setActiveDateTarget("pickup")}>
+                      <input
+                        type="text"
+                        className={styles.dateInput}
+                        placeholder="Select pickup date"
+                        value={pickupDate}
+                        readOnly
+                      />
+                      <svg className={styles.calIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>Drop Off Date</label>
+                    <div className={styles.dateInputWrap} onClick={() => setActiveDateTarget("dropoff")}>
+                      <input
+                        type="text"
+                        className={styles.dateInput}
+                        placeholder="Select drop-off date"
+                        value={dropOffDate}
+                        readOnly
+                      />
+                      <svg className={styles.calIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
                 <button className={`btn btn-primary ${styles.bookBtn}`} onClick={handleBookNow}>
                   Book Now
                 </button>
@@ -313,6 +374,12 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
             Book Now
           </button>
         </div>
+
+        <DatePickerModal
+          isOpen={activeDateTarget !== null}
+          onClose={() => setActiveDateTarget(null)}
+          onSelectDate={handleSelectDate}
+        />
       </main>
 
       <Footer />
