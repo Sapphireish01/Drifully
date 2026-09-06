@@ -273,7 +273,7 @@ export default function DriveWithDrifullyPage() {
                   <Image src="/images/earning-1.png" alt="Register" fill style={{ objectFit: 'contain', borderRadius: '8px' }} />
                 </div>
               </div>
-              <div className={styles.earnStep} style={{ color: '#3b82f6' }}>01</div>
+              <div className={styles.earnStep} style={{ color: '#3b82f6' }}>Step 01</div>
               <div style={{ color: '#111', fontSize: '0.9rem' }}>Register</div>
               <h3 className={styles.earnCardTitle}>Visit the Driver Registration <Link href="/driver-application" target="_blank" style={{ color: "#868C98" }}> Portal</Link> and complete the registration form.</h3>
             </div>
@@ -284,7 +284,7 @@ export default function DriveWithDrifullyPage() {
                   <Image src="/images/earning-2.png" alt="Upload Your Documents" fill style={{ objectFit: 'cover', borderRadius: '8px' }} />
                 </div>
               </div>
-              <div className={styles.earnStep} style={{ color: '#3b82f6' }}>02</div>
+              <div className={styles.earnStep} style={{ color: '#3b82f6' }}>Step 02</div>
               <div style={{ color: '#111', fontSize: '0.9rem' }}>Upload Your Documents</div>
               <h3 className={styles.earnCardTitle}>Provide all required valid documents and personal information for verification.</h3>
               <ul className={styles.earnList}>
@@ -301,7 +301,7 @@ export default function DriveWithDrifullyPage() {
                   <Image src="/images/earning-3.png" alt="Attend Your Physical Interview" fill style={{ objectFit: 'cover', borderRadius: '10px' }} />
                 </div>
               </div>
-              <div className={styles.earnStep} style={{ color: '#8A2BE2' }}>03</div>
+              <div className={styles.earnStep} style={{ color: '#8A2BE2' }}>Step 03</div>
               <div style={{ color: '#111', fontSize: '0.9rem' }}>Attend Your Physical Interview</div>
               <h3 className={styles.earnCardTitle}>Eligible applicants will receive an invitation for an in-person interview after their documents have been reviewed.</h3>
             </div>
@@ -312,7 +312,7 @@ export default function DriveWithDrifullyPage() {
                   <Image src="/images/earning-4.png" alt="Get Verified & Start Driving" fill style={{ objectFit: 'cover', borderRadius: '10px' }} />
                 </div>
               </div>
-              <div className={styles.earnStep} style={{ color: '#8A2BE2' }}>04</div>
+              <div className={styles.earnStep} style={{ color: '#8A2BE2' }}>Step 04</div>
               <div style={{ color: '#111', fontSize: '0.9rem' }}>Get Verified &amp; Start Driving</div>
               <h3 className={styles.earnCardTitle}>Download or sign in to the Drifully Drivers app, complete your driver profile. Begin applying for available driving bookings.</h3>
             </div>

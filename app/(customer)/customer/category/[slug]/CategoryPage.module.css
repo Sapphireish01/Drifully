@@ -47,18 +47,29 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
+  height: 44px;
+  padding: 0 18px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 9999px;
-  font-size: 13px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 500;
-  color: #475569;
+  color: #525866;
   cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .filterBtn:hover {
   background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.filterBtnActive {
+  border-color: #0f172a;
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 600;
 }
 
 .grid {

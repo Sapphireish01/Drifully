@@ -5,12 +5,17 @@ import { useRouter } from "next/navigation";
 import { TransactionStatus } from "@/data/admin-payments";
 import styles from "./payment-details.module.css";
 import { paymentsService } from "@/services/payments-service";
+import { bookingsService, BookingReceiptData } from "@/services/bookings-service";
 import Spinner from "@/components/admin/Spinner";
+import ReceiptModal from "@/components/admin/ReceiptModal";
 
 export default function PaymentDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [tx, setTx] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [receiptLoading, setReceiptLoading] = useState(false);
+  const [receiptData, setReceiptData] = useState<BookingReceiptData | null>(null);
 
   useEffect(() => {
     const fetchPayment = async () => {
@@ -26,6 +31,40 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
     };
     fetchPayment();
   }, [params.id]);
+
+  const handleOpenReceipt = async () => {
+    const bookingRef = tx?.bookingId || tx?.booking_id || tx?.booking_reference || tx?.booking || params.id;
+    setIsReceiptOpen(true);
+    setReceiptLoading(true);
+    try {
+      const data = await bookingsService.getBookingReceipt(bookingRef);
+      setReceiptData(data);
+    } catch (err) {
+      console.error("Failed to load receipt:", err);
+      // Fallback to synthesizing receipt data from current transaction details
+      if (tx) {
+        setReceiptData({
+          customer_name: tx.customerName || tx.customer_name,
+          customer_email: tx.customerEmail || tx.customer_email,
+          customer_phone: tx.customerPhone || tx.customer_phone,
+          date_created: tx.dateCreated || tx.created_at,
+          booking_type: tx.bookingType || tx.booking_type,
+          transaction_id: tx.id || tx.transaction_id || params.id,
+          booking_id: tx.bookingId || tx.booking_id,
+          amount: parseFloat(String(tx.amount || "0").replace(/[^0-9.]/g, "")),
+          fees: tx.fees ? parseFloat(String(tx.fees).replace(/[^0-9.]/g, "")) : null,
+          taxes: tx.taxes ? parseFloat(String(tx.taxes).replace(/[^0-9.]/g, "")) : 0,
+          payment_method: tx.paymentMethod || tx.payment_method || "Stripe",
+          reference_number: tx.referenceNumber || tx.reference_number,
+          paid_at: tx.paymentReceived || tx.payment_received || tx.created_at,
+          payable_type: "booking",
+          amount_paid: parseFloat(String(tx.amount || "0").replace(/[^0-9.]/g, "")),
+        });
+      }
+    } finally {
+      setReceiptLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -59,7 +98,9 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
           {isPending && (
             <button className={styles.btnOutline}>Mark As Successful</button>
           )}
-          <button className={styles.btnFill}>Download Receipt</button>
+          <button className={styles.btnFill} onClick={handleOpenReceipt}>
+            Download Receipt
+          </button>
         </div>
       </div>
 
@@ -202,6 +243,13 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
           </div>
         </div>
       </div>
+
+      <ReceiptModal
+        isOpen={isReceiptOpen}
+        onClose={() => setIsReceiptOpen(false)}
+        receiptData={receiptData}
+        isLoading={receiptLoading}
+      />
     </div>
   );
 }

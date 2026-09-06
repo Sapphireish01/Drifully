@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { paymentsService } from "@/services/payments-service";
+import { bookingsService } from "@/services/bookings-service";
+import { toastError } from "@/lib/error-handler";
 import Spinner from "@/components/customer/Spinner";
 import styles from "./PaymentMethodModal.module.css";
 
@@ -10,8 +12,11 @@ interface PaymentMethodModalProps {
   isOpen: boolean;
   onClose: () => void;
   onBack?: () => void;
-  onConfirm: () => void;
+  onConfirm: (result?: any) => void;
   bookingRef?: string;
+  isExtension?: boolean;
+  additionalAmount?: string | number;
+  newDropoffDate?: string;
 }
 
 export default function PaymentMethodModal({
@@ -20,6 +25,9 @@ export default function PaymentMethodModal({
   onBack,
   onConfirm,
   bookingRef,
+  isExtension = false,
+  additionalAmount,
+  newDropoffDate,
 }: PaymentMethodModalProps) {
   const [selectedMethod, setSelectedMethod] = useState<string>("paystack");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -54,32 +62,19 @@ export default function PaymentMethodModal({
         />
       ),
     },
-    // {
-    //   id: "card",
-    //   label: "Pay with Card",
-    //   disabled: true,
-    //   icon: (
-    //     <Image
-    //       src="/customer app/icons/card.svg"
-    //       alt="Card"
-    //       width={22}
-    //       height={22}
-    //     />
-    //   ),
-    // },
-    // {
-    //   id: "transfer",
-    //   label: "Pay with Bank Transfer",
-    //   disabled: true,
-    //   icon: (
-    //     <Image
-    //       src="/customer app/icons/bank.svg"
-    //       alt="Bank Transfer"
-    //       width={22}
-    //       height={22}
-    //     />
-    //   ),
-    // },
+    {
+      id: "card",
+      label: "Direct Card Payment",
+      disabled: false,
+      icon: (
+        <Image
+          src="/customer app/icons/card.svg"
+          alt="Card"
+          width={22}
+          height={22}
+        />
+      ),
+    },
   ];
 
   const handlePayClick = async () => {
@@ -92,25 +87,64 @@ export default function PaymentMethodModal({
     setErrorMsg(null);
 
     try {
-      if (selectedMethod === "paystack") {
-        const res = await paymentsService.initiatePaystackPayment(bookingRef);
-        const redirectUrl = res?.data?.authorization_url || res?.authorization_url || res?.data?.url;
-        if (redirectUrl) {
-          window.location.href = redirectUrl;
+      if (isExtension) {
+        // Handling Booking Extension Payment
+        if (selectedMethod === "paystack" && additionalAmount && newDropoffDate) {
+          const res = await paymentsService.initiatePaystackExtension(
+            bookingRef,
+            additionalAmount,
+            newDropoffDate
+          );
+          const redirectUrl = res?.data?.authorization_url || res?.authorization_url || res?.data?.url;
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+            return;
+          }
+        } else if (selectedMethod === "stripe" && additionalAmount && newDropoffDate) {
+          const res = await paymentsService.initiateStripeExtension(
+            bookingRef,
+            additionalAmount,
+            newDropoffDate
+          );
+          const redirectUrl = res?.url || res?.data?.url;
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+            return;
+          }
+        } else {
+          // Direct Confirmation endpoint
+          const res = await bookingsService.confirmBookingExtension(bookingRef, {
+            new_dropoff_date: newDropoffDate || "",
+            payment_method: selectedMethod,
+          });
+          onConfirm(res);
           return;
         }
-      } else if (selectedMethod === "stripe") {
-        const res = await paymentsService.initiateStripePayment(bookingRef);
-        const redirectUrl = res?.url || res?.data?.url;
-        if (redirectUrl) {
-          window.location.href = redirectUrl;
-          return;
+      } else {
+        // Standard Booking Payment
+        if (selectedMethod === "paystack") {
+          const res = await paymentsService.initiatePaystackPayment(bookingRef);
+          const redirectUrl = res?.data?.authorization_url || res?.authorization_url || res?.data?.url;
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+            return;
+          }
+        } else if (selectedMethod === "stripe") {
+          const res = await paymentsService.initiateStripePayment(bookingRef);
+          const redirectUrl = res?.url || res?.data?.url;
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+            return;
+          }
         }
       }
+
       onConfirm();
     } catch (err: any) {
       console.error("Payment initiation failed:", err);
-      setErrorMsg("Failed to initiate payment checkout. Please try again.");
+      const msg = err?.response?.data?.detail || err?.response?.data?.message || err?.message || "Payment initiation failed.";
+      toastError(err, msg);
+      setErrorMsg(msg);
     } finally {
       setIsProcessing(false);
     }
@@ -128,13 +162,12 @@ export default function PaymentMethodModal({
                 </svg>
               </button>
             )}
-            <h2 className={styles.title}>Choose a Payment Method</h2>
+            <h2 className={styles.title}>
+              {isExtension ? "Pay for Extension" : "Choose a Payment Method"}
+            </h2>
           </div>
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close">
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="1" y1="1" x2="11" y2="11" />
-              <line x1="1" y1="11" x2="11" y2="1" />
-            </svg>
+            ✕
           </button>
         </div>
 
@@ -171,7 +204,7 @@ export default function PaymentMethodModal({
           onClick={handlePayClick}
           disabled={isProcessing}
         >
-          {isProcessing ? "Redirecting to Payment..." : "Confirm & Pay"}
+          {isProcessing ? "Processing..." : "Confirm & Pay"}
         </button>
       </div>
     </div>

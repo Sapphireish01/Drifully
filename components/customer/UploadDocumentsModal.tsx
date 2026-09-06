@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { vehiclesService } from "@/services/vehicles-service";
+import { toastError } from "@/lib/error-handler";
 import styles from "./UploadDocumentsModal.module.css";
 
 interface UploadDocumentsModalProps {
@@ -78,13 +79,23 @@ export default function UploadDocumentsModal({
       setIsUploading(true);
       try {
         if (residencyFile?.raw) {
-          await vehiclesService.uploadIdentification(bookingRef, idType, residencyFile.raw);
+          const res = await vehiclesService.uploadIdentification(bookingRef, idType, residencyFile.raw);
+          if (res && res.success === false) {
+            toastError(res.message || "Failed to upload ID document");
+            return;
+          }
         }
         if (licenseFrontFile?.raw) {
-          await vehiclesService.uploadLicense(bookingRef, licenseFrontFile.raw, licenseBackFile?.raw);
+          const res = await vehiclesService.uploadLicense(bookingRef, licenseFrontFile.raw, licenseBackFile?.raw);
+          if (res && res.success === false) {
+            toastError(res.message || "Failed to upload Driver's License");
+            return;
+          }
         }
-      } catch (err) {
-        console.error("Document upload warning:", err);
+      } catch (err: any) {
+        console.error("Document upload error:", err);
+        toastError(err);
+        return;
       } finally {
         setIsUploading(false);
       }

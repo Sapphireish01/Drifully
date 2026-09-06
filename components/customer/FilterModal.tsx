@@ -1,24 +1,87 @@
 import React, { useState } from "react";
 import styles from "./FilterModal.module.css";
 
+const VEHICLE_TYPES = [
+  { label: "Sedan", value: "Sedan" },
+  { label: "SUV", value: "suv" },
+  { label: "Coupe", value: "Coupe" },
+  { label: "Hatchback", value: "Hatchback" },
+  { label: "Convertible", value: "Convertible" },
+  { label: "Truck", value: "Truck" },
+  { label: "Van", value: "Van" },
+  { label: "Luxury", value: "Luxury" },
+  { label: "Electric", value: "Electric" },
+];
+
+const FEATURES_LIST = [
+  { label: "GPS Navigation", value: "GPS" },
+  { label: "Bluetooth", value: "Bluetooth" },
+  { label: "Air Conditioning", value: "Air Conditioning" },
+  { label: "Backup Camera", value: "Backup Camera" },
+  { label: "Heated Seats", value: "Heated Seats" },
+  { label: "Sunroof", value: "Sunroof" },
+  { label: "Leather Seats", value: "Leather Seats" },
+  { label: "Cruise Control", value: "Cruise Control" },
+  { label: "Child Seat", value: "Child Seat" },
+  { label: "USB Port", value: "USB Port" },
+];
+
 interface FilterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onApply?: (filters: any) => void;
+  onApply?: (filters: {
+    min_price?: string;
+    max_price?: string;
+    vehicle_type?: string[];
+    features?: string[];
+  }) => void;
+  initialMinPrice?: string;
+  initialMaxPrice?: string;
+  initialVehicleTypes?: string[];
+  initialFeatures?: string[];
 }
 
-export default function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
-  const [activeTab, setActiveTab] = useState<"date" | "price" | "vehicle" | "features">("price");
-  const [minPrice, setMinPrice] = useState("N40,000");
-  const [maxPrice, setMaxPrice] = useState("N200,000");
+export default function FilterModal({
+  isOpen,
+  onClose,
+  onApply,
+  initialMinPrice = "",
+  initialMaxPrice = "",
+  initialVehicleTypes = [],
+  initialFeatures = [],
+}: FilterModalProps) {
+  const [activeTab, setActiveTab] = useState<"price" | "vehicle" | "features">("price");
+  const [minPrice, setMinPrice] = useState(initialMinPrice ? `₦${initialMinPrice}` : "");
+  const [maxPrice, setMaxPrice] = useState(initialMaxPrice ? `₦${initialMaxPrice}` : "");
+  const [selectedVehicleTypes, setSelectedVehicleTypes] = useState<string[]>(initialVehicleTypes);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>(initialFeatures);
 
   if (!isOpen) return null;
 
-  const presets = ["20,000", "30,000", "50,000", "60,000", "90,000", "1,000,000"];
+  const presets = ["1,000", "2,500", "3,000", "5,000", "10,000", "20,000", "50,000", "100,000"];
+
+  const toggleVehicleType = (typeValue: string) => {
+    setSelectedVehicleTypes((prev) =>
+      prev.includes(typeValue) ? prev.filter((t) => t !== typeValue) : [...prev, typeValue]
+    );
+  };
+
+  const toggleFeature = (feature: string) => {
+    setSelectedFeatures((prev) =>
+      prev.includes(feature) ? prev.filter((f) => f !== feature) : [...prev, feature]
+    );
+  };
 
   const handleApply = () => {
+    const cleanMin = minPrice.replace(/[^0-9.]/g, "");
+    const cleanMax = maxPrice.replace(/[^0-9.]/g, "");
     if (onApply) {
-      onApply({ minPrice, maxPrice });
+      onApply({
+        min_price: cleanMin || undefined,
+        max_price: cleanMax || undefined,
+        vehicle_type: selectedVehicleTypes.length > 0 ? selectedVehicleTypes : undefined,
+        features: selectedFeatures.length > 0 ? selectedFeatures : undefined,
+      });
     }
     onClose();
   };
@@ -26,6 +89,17 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
   const handleClear = () => {
     setMinPrice("");
     setMaxPrice("");
+    setSelectedVehicleTypes([]);
+    setSelectedFeatures([]);
+    if (onApply) {
+      onApply({
+        min_price: undefined,
+        max_price: undefined,
+        vehicle_type: undefined,
+        features: undefined,
+      });
+    }
+    onClose();
   };
 
   return (
@@ -33,18 +107,6 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.body}>
           <div className={styles.sidebar}>
-            <button
-              className={`${styles.tabBtn} ${activeTab === "date" ? styles.activeTab : ""}`}
-              onClick={() => setActiveTab("date")}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              Date
-            </button>
             <button
               className={`${styles.tabBtn} ${activeTab === "price" ? styles.activeTab : ""}`}
               onClick={() => setActiveTab("price")}
@@ -66,6 +128,11 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
                 <path d="M5 17h-2v-6l2-5h9l4 5h1v6h-2" />
               </svg>
               Vehicle Type
+              {selectedVehicleTypes.length > 0 && (
+                <span style={{ fontSize: "11px", fontWeight: 700, marginLeft: "auto", color: "#2563eb" }}>
+                  ({selectedVehicleTypes.length})
+                </span>
+              )}
             </button>
             <button
               className={`${styles.tabBtn} ${activeTab === "features" ? styles.activeTab : ""}`}
@@ -76,6 +143,11 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83a2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2a2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0a2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2a2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83a2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2a2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0a2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2a2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
               Features
+              {selectedFeatures.length > 0 && (
+                <span style={{ fontSize: "11px", fontWeight: 700, marginLeft: "auto", color: "#2563eb" }}>
+                  ({selectedFeatures.length})
+                </span>
+              )}
             </button>
           </div>
 
@@ -98,6 +170,7 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
                       className={styles.input}
                       value={minPrice}
                       onChange={(e) => setMinPrice(e.target.value)}
+                      placeholder="e.g. 1000"
                     />
                     <div className={styles.presetGrid}>
                       {presets.map((val) => (
@@ -120,6 +193,7 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
                       className={styles.input}
                       value={maxPrice}
                       onChange={(e) => setMaxPrice(e.target.value)}
+                      placeholder="e.g. 3000"
                     />
                     <div className={styles.presetGrid}>
                       {presets.map((val) => (
@@ -141,22 +215,84 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
                     Clear
                   </button>
                   <button type="button" className={styles.applyBtn} onClick={handleApply}>
-                    Apply
+                    Apply Filters
                   </button>
                 </div>
               </div>
             )}
 
-            {activeTab !== "price" && (
+            {activeTab === "vehicle" && (
               <div className={styles.placeholderTab}>
-                <h2>Filter by {activeTab}</h2>
-                <p>Select options below to narrow your vehicle search.</p>
-                <div className={styles.actions} style={{ marginTop: "auto" }}>
-                  <button type="button" className={styles.clearBtn} onClick={onClose}>
-                    Close
+                <div className={styles.header}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                    <path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                    <path d="M5 17h-2v-6l2-5h9l4 5h1v6h-2" />
+                  </svg>
+                  <h2>Vehicle Type</h2>
+                </div>
+
+                <div className={styles.typeGrid}>
+                  {VEHICLE_TYPES.map((type) => {
+                    const isSelected = selectedVehicleTypes.includes(type.value);
+                    return (
+                      <button
+                        key={type.value}
+                        type="button"
+                        className={`${styles.typeCard} ${isSelected ? styles.typeCardActive : ""}`}
+                        onClick={() => toggleVehicleType(type.value)}
+                      >
+                        <span>{type.label}</span>
+                        <span className={styles.typeCheck}>{isSelected ? "✓" : ""}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className={styles.actions}>
+                  <button type="button" className={styles.clearBtn} onClick={handleClear}>
+                    Clear
                   </button>
                   <button type="button" className={styles.applyBtn} onClick={handleApply}>
-                    Apply
+                    Apply Filters
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "features" && (
+              <div className={styles.placeholderTab}>
+                <div className={styles.header}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83a2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2a2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0a2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2a2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83a2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2a2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0a2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2a2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                  </svg>
+                  <h2>Vehicle Features</h2>
+                </div>
+
+                <div className={styles.featuresGrid}>
+                  {FEATURES_LIST.map((feat) => {
+                    const isSelected = selectedFeatures.includes(feat.value);
+                    return (
+                      <button
+                        key={feat.value}
+                        type="button"
+                        className={`${styles.featureChip} ${isSelected ? styles.featureChipActive : ""}`}
+                        onClick={() => toggleFeature(feat.value)}
+                      >
+                        <span>{isSelected ? "✓ " : "+ "}</span>
+                        {feat.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className={styles.actions}>
+                  <button type="button" className={styles.clearBtn} onClick={handleClear}>
+                    Clear
+                  </button>
+                  <button type="button" className={styles.applyBtn} onClick={handleApply}>
+                    Apply Filters
                   </button>
                 </div>
               </div>

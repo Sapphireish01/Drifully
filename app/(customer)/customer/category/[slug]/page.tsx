@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import VehicleCard from "@/components/customer/VehicleCard";
 import FilterModal from "@/components/customer/FilterModal";
+import FilterIcon from "@/components/icons/FilterIcon";
 import Spinner from "@/components/customer/Spinner";
 import { vehiclesService } from "@/services/vehicles-service";
 import { Vehicle } from "@/data/vehicles";
@@ -15,12 +16,22 @@ interface VehicleImage {
   image?: string;
 }
 
+interface TagDetail {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  is_active?: boolean;
+}
+
 interface ApiVehicle {
   id: number | string;
   slug?: string;
+  brand?: number | string;
   brand_name?: string;
   model?: string;
   year?: string | number;
+  category?: number | string;
   category_name?: string;
   type?: string;
   transmission?: string;
@@ -29,12 +40,122 @@ interface ApiVehicle {
   location?: string;
   images?: VehicleImage[];
   fuel_type?: string;
-  features?: string[];
+  features?: (string | number)[];
+  tags?: number[];
+  tag_details?: TagDetail[];
+  status?: string;
+  is_featured?: boolean;
 }
 
-interface TagGroup {
+interface NormalizedSection {
+  title: string;
+  slug: string;
   description: string;
   vehicles: ApiVehicle[];
+}
+
+function parseManagedSections(data: any): NormalizedSection[] {
+  if (!data) return [];
+
+  // Case 1: When data is an array (e.g. search / filter result from backend)
+  if (Array.isArray(data)) {
+    if (data.length === 0) return [];
+
+    const tagMap = new Map<string, { title: string; slug: string; description: string; vehicles: ApiVehicle[] }>();
+    const unassigned: ApiVehicle[] = [];
+
+    data.forEach((vehicle: ApiVehicle) => {
+      if (Array.isArray(vehicle.tag_details) && vehicle.tag_details.length > 0) {
+        vehicle.tag_details.forEach((tag) => {
+          if (!tagMap.has(tag.slug)) {
+            tagMap.set(tag.slug, {
+              title: tag.name,
+              slug: tag.slug,
+              description: tag.description || `Explore ${tag.name} vehicles ready for your ride.`,
+              vehicles: [],
+            });
+          }
+          const sec = tagMap.get(tag.slug)!;
+          if (!sec.vehicles.some((v) => v.id === vehicle.id)) {
+            sec.vehicles.push(vehicle);
+          }
+        });
+      } else {
+        unassigned.push(vehicle);
+      }
+    });
+
+    const sections: NormalizedSection[] = Array.from(tagMap.values());
+    if (unassigned.length > 0 || sections.length === 0) {
+      sections.push({
+        title: "Search Results",
+        slug: "search-results",
+        description: "Vehicles matching your search criteria.",
+        vehicles: unassigned.length > 0 ? unassigned : data,
+      });
+    }
+    return sections;
+  }
+
+  // Case 2: When data is an object with { results: [...] }
+  if (data && typeof data === "object" && Array.isArray(data.results)) {
+    return parseManagedSections(data.results);
+  }
+
+  // Case 3: When data is a dictionary of tag slugs { "budget-friendly": [...], "hot-cars": [...] }
+  const sections: NormalizedSection[] = [];
+
+  for (const [key, val] of Object.entries(data)) {
+    if (Array.isArray(val)) {
+      const firstVehicle = val[0];
+      const matchingTag =
+        firstVehicle?.tag_details?.find((t: TagDetail) => t.slug === key) ||
+        firstVehicle?.tag_details?.[0];
+
+      let title = matchingTag?.name;
+      if (!title) {
+        title = key.toLowerCase() === "general"
+          ? "General Fleet"
+          : key
+              .split("-")
+              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(" ");
+      }
+
+      const slug = matchingTag?.slug || key.toLowerCase().replace(/\s+/g, "-");
+      const description =
+        matchingTag?.description ||
+        (key.toLowerCase() === "general"
+          ? "Explore our broad selection of available vehicles ready for your ride."
+          : `Explore ${title} vehicles for your next journey.`);
+
+      sections.push({
+        title,
+        slug,
+        description,
+        vehicles: val,
+      });
+    } else if (val && typeof val === "object" && Array.isArray((val as any).vehicles)) {
+      const title =
+        (val as any).title ||
+        key
+          .split("-")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
+
+      const slug = key.toLowerCase().replace(/\s+/g, "-");
+      const description = (val as any).description || `Explore ${title} vehicles for your next journey.`;
+
+      sections.push({
+        title,
+        slug,
+        description,
+        vehicles: (val as any).vehicles,
+      });
+    }
+  }
+
+  return sections;
 }
 
 function transformApiVehicle(item: ApiVehicle): Vehicle {
@@ -75,47 +196,88 @@ export default function CategoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [categoryTitle, setCategoryTitle] = useState("Vehicles");
   const [categorySubtitle, setCategorySubtitle] = useState("Explore available vehicles for rent.");
+  const [appliedFilters, setAppliedFilters] = useState<{
+    min_price?: string;
+    max_price?: string;
+    vehicle_type?: string[];
+    features?: string[];
+  }>({});
 
-  useEffect(() => {
-    let isMounted = true;
-    vehiclesService.getManagedVehicles()
-      .then((data: Record<string, TagGroup>) => {
-        if (!isMounted || !data || typeof data !== "object") return;
+  const loadCategoryVehicles = (filters?: {
+    search?: string;
+    min_price?: string;
+    max_price?: string;
+    vehicle_type?: string[];
+    features?: string[];
+  }) => {
+    setIsLoading(true);
+    vehiclesService.getManagedVehicles(filters)
+      .then((data: Record<string, any>) => {
+        const sections = parseManagedSections(data);
         
         let foundVehicles: ApiVehicle[] = [];
         let matchingTitle = "";
         let matchingDesc = "";
 
-        for (const [tagTitle, group] of Object.entries(data)) {
-          const tagSlug = tagTitle.toLowerCase().replace(/\s+/g, "-");
-          if (tagSlug === slug || slug === "all") {
-            foundVehicles = [...foundVehicles, ...(group.vehicles || [])];
+        for (const sec of sections) {
+          if (sec.slug === slug || slug === "all") {
+            foundVehicles = [...foundVehicles, ...sec.vehicles];
             if (!matchingTitle) {
-              matchingTitle = tagTitle;
-              matchingDesc = group.description;
+              matchingTitle = sec.title;
+              matchingDesc = sec.description;
             }
           }
         }
 
-        if (foundVehicles.length > 0) {
-          setVehicles(foundVehicles.map(transformApiVehicle));
-          if (matchingTitle) {
-            setCategoryTitle(matchingTitle);
-            setCategorySubtitle(matchingDesc);
-          }
+        let transformed = foundVehicles.map(transformApiVehicle);
+        if (filters?.features && filters.features.length > 0) {
+          transformed = transformed.filter((v) =>
+            filters.features!.every((f) =>
+              v.features?.some((vf) => String(vf).toLowerCase().includes(f.toLowerCase()))
+            )
+          );
+        }
+
+        setVehicles(transformed);
+        if (matchingTitle) {
+          setCategoryTitle(matchingTitle);
+          setCategorySubtitle(matchingDesc);
+        } else if (slug && slug !== "all") {
+          const fallbackTitle = slug
+            .split("-")
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(" ");
+          setCategoryTitle(fallbackTitle);
         }
       })
       .catch((err) => {
         console.error("Failed to load category vehicles:", err);
       })
       .finally(() => {
-        if (isMounted) setIsLoading(false);
+        setIsLoading(false);
       });
+  };
 
-    return () => {
-      isMounted = false;
-    };
+  useEffect(() => {
+    loadCategoryVehicles(appliedFilters);
   }, [slug]);
+
+  const handleApplyFilters = (newFilters: {
+    min_price?: string;
+    max_price?: string;
+    vehicle_type?: string[];
+    features?: string[];
+  }) => {
+    setAppliedFilters(newFilters);
+    loadCategoryVehicles(newFilters);
+  };
+
+  const hasFilterActive = Boolean(
+    appliedFilters.min_price ||
+    appliedFilters.max_price ||
+    (appliedFilters.vehicle_type && appliedFilters.vehicle_type.length > 0) ||
+    (appliedFilters.features && appliedFilters.features.length > 0)
+  );
 
   return (
     <div className={styles.container}>
@@ -130,19 +292,18 @@ export default function CategoryPage() {
           <h1 className={styles.title}>{categoryTitle}</h1>
           <p className={styles.subtitle}>{categorySubtitle}</p>
         </div>
-        <button type="button" className={styles.filterBtn} onClick={() => setIsFilterOpen(true)}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="4" y1="21" x2="4" y2="14" />
-            <line x1="4" y1="10" x2="4" y2="3" />
-            <line x1="12" y1="21" x2="12" y2="12" />
-            <line x1="12" y1="8" x2="12" y2="3" />
-            <line x1="20" y1="21" x2="20" y2="16" />
-            <line x1="20" y1="12" x2="20" y2="3" />
-            <line x1="1" y1="14" x2="7" y2="14" />
-            <line x1="9" y1="8" x2="15" y2="8" />
-            <line x1="17" y1="16" x2="23" y2="16" />
-          </svg>
+        <button
+          type="button"
+          className={`${styles.filterBtn} ${hasFilterActive ? styles.filterBtnActive : ""}`}
+          onClick={() => setIsFilterOpen(true)}
+        >
+          <FilterIcon size={20} color={hasFilterActive ? "#0f172a" : "#868C98"} />
           Filter
+          {hasFilterActive && (
+            <span style={{ fontSize: "11px", marginLeft: "2px", opacity: 0.85 }}>
+              •
+            </span>
+          )}
         </button>
       </div>
 
@@ -156,11 +317,36 @@ export default function CategoryPage() {
         </div>
       ) : (
         <div style={{ padding: "60px 20px", textAlign: "center", color: "#64748b" }}>
-          <p style={{ fontSize: "16px", fontWeight: 500 }}>No vehicles found in this category.</p>
+          <p style={{ fontSize: "16px", fontWeight: 500 }}>No vehicles found matching your criteria.</p>
+          {hasFilterActive && (
+            <button
+              type="button"
+              onClick={() => handleApplyFilters({})}
+              style={{
+                marginTop: "12px",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                border: "1px solid #cbd5e1",
+                background: "#fff",
+                cursor: "pointer",
+                fontSize: "14px"
+              }}
+            >
+              Clear All Filters
+            </button>
+          )}
         </div>
       )}
 
-      <FilterModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
+      <FilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={handleApplyFilters}
+        initialMinPrice={appliedFilters.min_price}
+        initialMaxPrice={appliedFilters.max_price}
+        initialVehicleTypes={appliedFilters.vehicle_type}
+        initialFeatures={appliedFilters.features}
+      />
     </div>
   );
 }

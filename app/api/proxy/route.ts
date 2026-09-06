@@ -89,7 +89,7 @@ async function handleRequest(request: NextRequest, method: string) {
                 newTokens = { access: lastRefreshedTokens.access, refresh: lastRefreshedTokens.refresh };
               } else {
                 activeRefreshPromise = axios.post(
-                  `${BACKEND_URL}/accounts/token/refresh/`,
+                  `${BACKEND_URL}/api/v1/accounts/token/refresh/`,
                   { refresh: refreshToken },
                   {
                     headers: {

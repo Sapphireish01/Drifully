@@ -154,13 +154,14 @@ export const accountsService = {
   },
 
   /**
-   * Logs a user into the admin account at accounts/login/
+   * Logs a user into the account at accounts/login/
    * @param payload - LoginPayload object
    */
   login: async (payload: LoginPayload): Promise<any> => {
     const response = await publicApi.post('', payload, {
-      params: { path: 'api/v1/accounts/login/' }
-    });
+      params: { path: 'api/v1/accounts/login/' },
+      skipToast: true,
+    } as any);
     return response.data;
   },
 
@@ -181,8 +182,9 @@ export const accountsService = {
     }
 
     const response = await publicApi.post('', formData, {
-      params: { path: 'api/v1/accounts/register/' }
-    });
+      params: { path: 'api/v1/accounts/register/' },
+      skipToast: true,
+    } as any);
     return response.data;
   },
 

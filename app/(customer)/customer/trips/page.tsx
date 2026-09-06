@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { bookingsService, ApiTrip } from "@/services/bookings-service";
+import { bookingsService, ApiTrip, TripFilters } from "@/services/bookings-service";
 import Spinner from "@/components/customer/Spinner";
 import TripFilterModal from "@/components/customer/TripFilterModal";
 import ReadyForPickupModal from "@/components/customer/ReadyForPickupModal";
+import FilterIcon from "@/components/icons/FilterIcon";
 import styles from "./TripsPage.module.css";
 
 interface TripItem {
@@ -14,8 +15,9 @@ interface TripItem {
   vehicle: string;
   dates: string;
   pickup: string;
-  status: "Scheduled" | "Ongoing" | "Completed" | "Cancelled";
-  mode: "Drive Yourself" | "Chauffeur Service";
+  status: string;
+  statusColor?: string;
+  mode: string;
   readyForPickup?: boolean;
   code?: string;
 }
@@ -23,65 +25,60 @@ interface TripItem {
 const MOCK_TRIPS: TripItem[] = [
   {
     id: "DRF-2047",
+    reference: "BK-57MRDG04",
     vehicle: "Lamborghini Gallardo LP 570-4",
     dates: "30 Mar 2026 → 25 May 2026",
     pickup: "Pick up: Murtala Muhammed Airport",
     status: "Scheduled",
+    statusColor: "#2563eb",
     mode: "Drive Yourself",
     readyForPickup: true,
     code: "444444",
   },
   {
     id: "DRF-2048",
+    reference: "BK-82NVKL19",
     vehicle: "Lamborghini Gallardo LP 570-4",
     dates: "30 Mar 2026 → 25 May 2026",
     pickup: "Pick up: Murtala Muhammed Airport",
     status: "Scheduled",
+    statusColor: "#2563eb",
     mode: "Drive Yourself",
   },
   {
     id: "DRF-2049",
+    reference: "BK-19PQRS33",
     vehicle: "Cadillac Fleetwood Seventy-Five",
     dates: "30 Mar 2026 → 25 May 2026",
     pickup: "Pick up: Murtala Muhammed Airport",
     status: "Ongoing",
+    statusColor: "#ea580c",
     mode: "Chauffeur Service",
   },
   {
     id: "DRF-2050",
+    reference: "BK-44TUVW78",
     vehicle: "Nissan Titan XD Crew Cab",
     dates: "30 Mar 2026 → 25 May 2026",
     pickup: "Pick up: Murtala Muhammed Airport",
     status: "Completed",
+    statusColor: "#16a34a",
     mode: "Drive Yourself",
-  },
-  {
-    id: "DRF-2051",
-    vehicle: "Lamborghini Gallardo LP 570-4",
-    dates: "30 Mar 2026 → 25 May 2026",
-    pickup: "Pick up: Murtala Muhammed Airport",
-    status: "Scheduled",
-    mode: "Drive Yourself",
-  },
-  {
-    id: "DRF-2052",
-    vehicle: "Nissan Titan XD Crew Cab",
-    dates: "30 Mar 2026 → 25 May 2026",
-    pickup: "Pick up: Murtala Muhammed Airport",
-    status: "Cancelled",
-    mode: "Chauffeur Service",
   },
 ];
 
-function formatTripStatus(statusStr: string): TripItem["status"] {
-  const lower = (statusStr || "").toLowerCase();
-  if (lower.includes("ongoing") || lower.includes("active")) return "Ongoing";
-  if (lower.includes("complete") || lower.includes("done")) return "Completed";
-  if (lower.includes("cancel")) return "Cancelled";
-  return "Scheduled";
+function formatTripStatus(statusStr?: string): string {
+  if (!statusStr) return "Confirmed";
+  const lower = statusStr.toLowerCase();
+  if (lower === "confirmed") return "Confirmed";
+  if (lower === "completed" || lower.includes("complete") || lower.includes("done")) return "Completed";
+  if (lower === "ongoing" || lower.includes("active") || lower.includes("in_progress")) return "Ongoing";
+  if (lower === "cancelled" || lower.includes("cancel")) return "Cancelled";
+  if (lower === "scheduled" || lower.includes("pending")) return "Scheduled";
+  return statusStr.charAt(0).toUpperCase() + statusStr.slice(1);
 }
 
-function formatTripDates(dateStr: string): string {
+function formatTripDates(dateStr?: string): string {
   if (!dateStr || dateStr === "None - None") return "Dates Pending";
   const parts = dateStr.split(" - ");
   if (parts.length === 2) {
@@ -99,61 +96,111 @@ export default function TripsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isPickupModalOpen, setIsPickupModalOpen] = useState(false);
-  const [tripsList, setTripsList] = useState<TripItem[]>(MOCK_TRIPS);
+  const [appliedFilters, setAppliedFilters] = useState<TripFilters>({});
+  const [tripsList, setTripsList] = useState<TripItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    let isMounted = true;
-    bookingsService
-      .getTrips()
-      .then((data) => {
-        if (!isMounted) return;
-        const apiTrips = Array.isArray(data) ? data : (data as any)?.results || [];
-        if (apiTrips.length > 0) {
-          const transformed: TripItem[] = apiTrips.map((item: ApiTrip) => ({
-            id: item.reference || item.id,
-            reference: item.reference,
-            vehicle: item.vehicle || "Vehicle",
-            dates: formatTripDates(item.booking_date),
-            pickup: item.location ? `Pick up: ${item.location}` : "Pick up: Murtala Muhammed Airport",
-            status: formatTripStatus(item.status),
-            mode: item.drive_type?.toLowerCase().includes("chauffeur") ? "Chauffeur Service" : "Drive Yourself",
-            readyForPickup: Boolean(item.ready_for_pickup),
-            code: item.pickup_code || "444444"
-          }));
-          setTripsList(transformed);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to fetch trips from API, falling back to mocks:", err);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
+  const fetchTrips = useCallback(async (filters: TripFilters) => {
+    setIsLoading(true);
+    try {
+      const data = await bookingsService.getTrips(filters);
+      const apiTrips = Array.isArray(data) ? data : (data as any)?.results || [];
+      if (apiTrips.length > 0) {
+        const transformed: TripItem[] = apiTrips.map((item: ApiTrip) => ({
+          id: item.id || item.reference,
+          reference: item.reference,
+          vehicle: item.vehicle || "Vehicle",
+          dates: formatTripDates(item.booking_date),
+          pickup: item.location ? `Pick up: ${item.location}` : "Pick up: Murtala Muhammed Airport",
+          status: formatTripStatus(item.status),
+          statusColor: item.status_color,
+          mode: item.drive_type?.toLowerCase().includes("chauffeur") ? "Chauffeur Service" : "Drive Yourself",
+          readyForPickup: Boolean(item.ready_for_pickup),
+          code: item.pickup_code || "444444"
+        }));
+        setTripsList(transformed);
+      } else {
+        // If filters are active and no backend results, show empty list.
+        // If no filters are active, show empty list as well (or mock if fresh dev setup)
+        const hasFilters = Boolean(filters.start_date || filters.end_date || filters.status || filters.drive_type);
+        setTripsList(hasFilters ? [] : MOCK_TRIPS);
+      }
+    } catch (err) {
+      console.error("Failed to fetch trips from API, falling back to mocks:", err);
+      setTripsList(MOCK_TRIPS);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const filteredTrips = tripsList.filter((t) =>
-    t.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (t.reference && t.reference.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  useEffect(() => {
+    fetchTrips(appliedFilters);
+  }, [appliedFilters, fetchTrips]);
 
-  const getStatusClass = (status: TripItem["status"]) => {
-    switch (status) {
-      case "Scheduled":
-        return styles.scheduled;
-      case "Ongoing":
-        return styles.ongoing;
-      case "Completed":
-        return styles.completed;
-      case "Cancelled":
-        return styles.cancelled;
-      default:
-        return "";
-    }
+  const activeFiltersCount = [
+    Boolean(appliedFilters.start_date || appliedFilters.end_date),
+    Boolean(appliedFilters.status),
+    Boolean(appliedFilters.vehicle_type),
+    Boolean(appliedFilters.drive_type),
+  ].filter(Boolean).length;
+
+  const handleRemoveDateFilter = () => {
+    setAppliedFilters((prev) => {
+      const next = { ...prev };
+      delete next.start_date;
+      delete next.end_date;
+      return next;
+    });
+  };
+
+  const handleRemoveVehicleTypeFilter = () => {
+    setAppliedFilters((prev) => {
+      const next = { ...prev };
+      delete next.vehicle_type;
+      return next;
+    });
+  };
+
+  const handleRemoveStatusFilter = () => {
+    setAppliedFilters((prev) => {
+      const next = { ...prev };
+      delete next.status;
+      return next;
+    });
+  };
+
+  const handleRemoveTypeFilter = () => {
+    setAppliedFilters((prev) => {
+      const next = { ...prev };
+      delete next.drive_type;
+      return next;
+    });
+  };
+
+  const handleClearAllFilters = () => {
+    setAppliedFilters({});
+    setSearchTerm("");
+  };
+
+  const filteredTrips = tripsList.filter((t) => {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return true;
+    return (
+      t.vehicle.toLowerCase().includes(term) ||
+      (t.reference && t.reference.toLowerCase().includes(term)) ||
+      t.status.toLowerCase().includes(term) ||
+      t.mode.toLowerCase().includes(term)
+    );
+  });
+
+  const getStatusClass = (status: string) => {
+    const s = status.toLowerCase();
+    if (s === "confirmed") return styles.confirmed;
+    if (s === "scheduled") return styles.scheduled;
+    if (s === "ongoing") return styles.ongoing;
+    if (s === "completed") return styles.completed;
+    if (s === "cancelled") return styles.cancelled;
+    return styles.confirmed;
   };
 
   return (
@@ -161,17 +208,17 @@ export default function TripsPage() {
       {/* Search & Filter Top Control Row */}
       <div className={styles.searchFilterRow}>
         <div className={styles.searchWrap}>
-          <svg className={styles.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Search Trips"
+            placeholder="Search trips by vehicle, reference, or status"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+          <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
         </div>
 
         <button
@@ -179,17 +226,111 @@ export default function TripsPage() {
           className={styles.filterBtn}
           onClick={() => setIsFilterOpen(true)}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-          </svg>
+          <FilterIcon size={20} color={activeFiltersCount > 0 ? "#0f172a" : "#868C98"} />
           Filter
+          {activeFiltersCount > 0 && (
+            <span className={styles.activeFilterBadge}>{activeFiltersCount}</span>
+          )}
         </button>
       </div>
 
+      {/* Active Filter Chips */}
+      {activeFiltersCount > 0 && (
+        <div className={styles.activeFilterChips}>
+          {(appliedFilters.start_date || appliedFilters.end_date) && (
+            <span className={styles.filterChip}>
+              📅 {appliedFilters.start_date || "Start"} → {appliedFilters.end_date || "End"}
+              <button
+                type="button"
+                className={styles.removeChipBtn}
+                onClick={handleRemoveDateFilter}
+                aria-label="Remove date filter"
+              >
+                ✕
+              </button>
+            </span>
+          )}
+
+          {appliedFilters.vehicle_type && (
+            <span className={styles.filterChip}>
+              Vehicle: {appliedFilters.vehicle_type}
+              <button
+                type="button"
+                className={styles.removeChipBtn}
+                onClick={handleRemoveVehicleTypeFilter}
+                aria-label="Remove vehicle type filter"
+              >
+                ✕
+              </button>
+            </span>
+          )}
+
+          {appliedFilters.status && (
+            <span className={styles.filterChip}>
+              Status: {appliedFilters.status}
+              <button
+                type="button"
+                className={styles.removeChipBtn}
+                onClick={handleRemoveStatusFilter}
+                aria-label="Remove status filter"
+              >
+                ✕
+              </button>
+            </span>
+          )}
+
+          {appliedFilters.drive_type && (
+            <span className={styles.filterChip}>
+              Type: {appliedFilters.drive_type.replace("_", " ")}
+              <button
+                type="button"
+                className={styles.removeChipBtn}
+                onClick={handleRemoveTypeFilter}
+                aria-label="Remove type filter"
+              >
+                ✕
+              </button>
+            </span>
+          )}
+
+          <button
+            type="button"
+            className={styles.clearAllFiltersBtn}
+            onClick={handleClearAllFilters}
+          >
+            Clear all
+          </button>
+        </div>
+      )}
+
       {/* Trips Cards List */}
       {isLoading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}>
+        <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
           <Spinner />
+        </div>
+      ) : filteredTrips.length === 0 ? (
+        <div className={styles.emptyState}>
+          <svg className={styles.emptyIcon} width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <h3 className={styles.emptyTitle}>No trips found</h3>
+          <p className={styles.emptyDesc}>
+            {searchTerm || activeFiltersCount > 0
+              ? "We couldn't find any trips matching your filters or search query."
+              : "You haven't made any bookings yet."}
+          </p>
+          {(activeFiltersCount > 0 || searchTerm) && (
+            <button
+              type="button"
+              className={styles.resetFiltersBtn}
+              onClick={handleClearAllFilters}
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
       ) : (
         <div className={styles.tripsList}>
@@ -224,8 +365,19 @@ export default function TripsPage() {
                     </div>
                   ) : (
                     <>
-                      <span className={`${styles.statusBadge} ${getStatusClass(trip.status)}`}>
-                        {trip.status}
+                      <span
+                        className={`${styles.statusBadge} ${getStatusClass(trip.status)}`}
+                        style={
+                          trip.statusColor
+                            ? {
+                              color: trip.statusColor,
+                              borderColor: `${trip.statusColor}50`,
+                              backgroundColor: `${trip.statusColor}18`,
+                            }
+                            : undefined
+                        }
+                      >
+                        {trip.status?.replace(/_/g, " ")}
                       </span>
                       <span className={styles.modeText}>{trip.mode}</span>
                     </>
@@ -254,8 +406,9 @@ export default function TripsPage() {
 
       <TripFilterModal
         isOpen={isFilterOpen}
+        initialFilters={appliedFilters}
         onClose={() => setIsFilterOpen(false)}
-        onApply={() => setIsFilterOpen(false)}
+        onApply={(filters) => setAppliedFilters(filters)}
       />
 
       <ReadyForPickupModal

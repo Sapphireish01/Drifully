@@ -17,6 +17,7 @@ import { vehiclesService } from "@/services/vehicles-service";
 import { bookingsService } from "@/services/bookings-service";
 import { paymentsService } from "@/services/payments-service";
 import { Vehicle } from "@/data/vehicles";
+import { toastError } from "@/lib/error-handler";
 import styles from "./VehicleDetailPage.module.css";
 
 interface FeatureItem {
@@ -272,19 +273,64 @@ export default function VehicleDetailPage() {
     setSelectedRentalMode(mode);
     if (!vehicle) return;
 
-    setIsInitiatingBooking(true);
-    const result = await vehiclesService.initiateBooking(vehicle.id, mode);
-    setIsInitiatingBooking(false);
-
-    if (result.success && result.data) {
-      if (result.data.booking_id) setBookingId(result.data.booking_id);
-      if (result.data.reference) setBookingReference(result.data.reference);
+    if (!pickupDate || !dropOffDate) {
+      toastError("Please select pickup and dropoff dates before proceeding.");
+      return;
     }
 
-    if (mode === "chauffeur") {
-      setBookingStep(3); // Skip UploadDocumentsModal and proceed to Enhance Your Trip
-    } else {
-      setBookingStep(2);
+    setIsInitiatingBooking(true);
+    try {
+      const result = await vehiclesService.initiateBooking(vehicle.id, mode);
+      if (!result.success) {
+        toastError(result.message || "Failed to initiate booking");
+        return;
+      }
+
+      let activeRef = bookingReference;
+      if (result.data) {
+        const ref = result.data.reference || result.data.booking_reference || result.data.data?.reference;
+        const bId = result.data.booking_id || result.data.id || result.data.data?.id;
+        if (bId) setBookingId(bId);
+        if (ref) {
+          activeRef = ref;
+          setBookingReference(ref);
+        }
+      }
+
+      if (!activeRef) {
+        toastError("Unable to retrieve booking reference. Please try again.");
+        return;
+      }
+
+      // Send pickup and dropoff dates to the bookings endpoint before proceeding to step 2/3
+      const isoPickup = formatDateToISO(pickupDate);
+      const isoDropoff = formatDateToISO(dropOffDate);
+      const datesResult = await bookingsService.setBookingDates(activeRef, isoPickup, isoDropoff);
+
+      if (!datesResult.success) {
+        toastError(datesResult.message || "Failed to update booking dates");
+        return;
+      }
+
+      if (datesResult.data) {
+        if (datesResult.data.reference) {
+          setBookingReference(datesResult.data.reference);
+        }
+        if (datesResult.data.id) {
+          setBookingId(datesResult.data.id);
+        }
+      }
+
+      if (mode === "chauffeur") {
+        setBookingStep(3); // Skip UploadDocumentsModal and proceed to Enhance Your Trip
+      } else {
+        setBookingStep(2);
+      }
+    } catch (err: any) {
+      console.error("Error initiating booking or setting dates:", err);
+      toastError(err);
+    } finally {
+      setIsInitiatingBooking(false);
     }
   };
 
@@ -299,8 +345,10 @@ export default function VehicleDetailPage() {
       try {
         setIsSavingExtras(true);
         await bookingsService.addExtras(bookingReference, extrasToSave);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to save extras to booking:", err);
+        toastError(err);
+        return;
       } finally {
         setIsSavingExtras(false);
       }
@@ -345,6 +393,7 @@ export default function VehicleDetailPage() {
   const handleCheckAvailability = async () => {
     if (!pickupDate || !dropOffDate) {
       setShowWarning(true);
+      toastError("Please select both pickup and dropoff dates.");
       return;
     }
     if (!vehicle) return;
@@ -378,17 +427,20 @@ export default function VehicleDetailPage() {
       setAvailabilityResult({ success: true, message: msg });
       setIsAvailableChecked(true);
     } else {
+      const errMsg = typeof result.message === "string" ? result.message : "Vehicle is not available for selected dates.";
       setAvailabilityResult({
         success: false,
-        message: typeof result.message === "string" ? result.message : "Vehicle is not available for selected dates."
+        message: errMsg
       });
       setIsAvailableChecked(false);
+      toastError(errMsg);
     }
   };
 
   const handleBookNow = () => {
     if (!pickupDate || !dropOffDate) {
       setShowWarning(true);
+      toastError("Please select pickup and dropoff dates before booking.");
     } else {
       setBookingStep(1);
     }

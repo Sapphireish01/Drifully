@@ -18,13 +18,14 @@
   display: flex;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-height: 90vh;
 }
 
 .sidebar {
-  width: 240px;
-  background: #ffffff;
-  border-right: 1px solid #f1f5f9;
-  padding: 20px 16px;
+  width: 220px;
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  padding: 20px 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -34,26 +35,29 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 12px 14px;
   border-radius: 12px;
   border: none;
   background: transparent;
   color: #64748b;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   width: 100%;
   text-align: left;
+  transition: all 0.15s ease;
 }
 
 .tabBtn:hover {
-  background: #f8fafc;
+  background: #edf2f7;
+  color: #0f172a;
 }
 
 .activeTab {
-  background: #f8fafc;
+  background: #ffffff;
   color: #0f172a;
   font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .chevron {
@@ -67,13 +71,16 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
+  overflow-y: auto;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 14px;
 }
 
 .titleGroup {
@@ -87,36 +94,97 @@
   font-size: 16px;
   font-weight: 700;
   margin: 0;
+  color: #0f172a;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.closeBtn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.tabPane {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.subtext {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.presetRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.presetBtn {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.presetBtn:hover {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
 }
 
 .datePickerGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  border-top: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
-  padding: 20px 0;
+  gap: 20px;
+  padding: 10px 0;
 }
 
 .pickerCol {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #f1f5f9;
 }
 
 .colLabel {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  color: #0f172a;
+  color: #334155;
 }
 
-.inputBox {
-  padding: 12px 16px;
+.dateInputField {
+  padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   background: #ffffff;
   font-size: 13px;
   color: #0f172a;
+  outline: none;
+}
+
+.dateInputField:focus {
+  border-color: #0f172a;
 }
 
 .yearNav {
@@ -124,33 +192,50 @@
   align-items: center;
   justify-content: space-between;
   font-size: 13px;
-  color: #64748b;
-  padding: 4px 12px;
+  color: #334155;
+  padding: 4px 8px;
 }
 
-.yearNav span {
+.navArrow {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  font-size: 14px;
+  color: #475569;
+}
+
+.navArrow:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .monthsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .monthCell {
-  padding: 10px 0;
+  padding: 8px 0;
   border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: #64748b;
-  font-size: 12px;
+  border: 1px solid transparent;
+  background: #ffffff;
+  color: #475569;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .monthCell:hover {
-  background: #f1f5f9;
+  background: #e2e8f0;
+  color: #0f172a;
 }
 
 .selectedMonth {
@@ -159,26 +244,72 @@
   font-weight: 600;
 }
 
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.optionItem:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.optionSelected {
+  border-color: #0f172a;
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.checkMark {
+  color: #0f172a;
+  font-weight: 700;
+}
+
 .footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+  margin-top: auto;
 }
 
 .clearBtn {
-  padding: 12px 28px;
+  padding: 10px 22px;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
-  color: #334155;
+  color: #475569;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
 
+.clearBtn:hover {
+  background: #f8fafc;
+}
+
 .applyBtn {
-  padding: 12px 36px;
+  padding: 10px 28px;
   border-radius: 10px;
   border: none;
   background: #0f172a;
@@ -186,4 +317,9 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.applyBtn:hover {
+  opacity: 0.9;
 }

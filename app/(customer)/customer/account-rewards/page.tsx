@@ -643,9 +643,9 @@ export default function AccountRewardsPage() {
             <p className={styles.explainerSub}>A simple three-step explainer:</p>
 
             <ol className={styles.stepsList}>
-              <li>Share your referral code.</li>
-              <li>Your friend signs up and books.</li>
-              <li>You both earn rewards.</li>
+              <li>1. Share your referral code.</li>
+              <li>2. Your friend signs up and books.</li>
+              <li>3. You both earn rewards.</li>
             </ol>
 
             <div className={styles.termsNote}>

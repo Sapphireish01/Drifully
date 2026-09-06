@@ -99,6 +99,94 @@ export const paymentsService = {
   },
 
   /**
+   * Initiates Stripe extension payment session
+   */
+  initiateStripeExtension: async (
+    bookingRef: string,
+    additionalAmount: string | number,
+    newDropoffDate: string
+  ) => {
+    const params = {
+      path: 'api/v1/payments/stripe/extension/initiate/',
+      booking_ref: bookingRef,
+      additional_amount: String(additionalAmount),
+      new_dropoff_date: newDropoffDate,
+    };
+    try {
+      const response = await publicApi.post('', {}, { params });
+      return response.data;
+    } catch (error) {
+      const fallbackParams = {
+        path: 'payments/stripe/extension/initiate/',
+        booking_ref: bookingRef,
+        additional_amount: String(additionalAmount),
+        new_dropoff_date: newDropoffDate,
+      };
+      const fallbackRes = await publicApi.post('', {}, { params: fallbackParams });
+      return fallbackRes.data;
+    }
+  },
+
+  /**
+   * Initiates Paystack extension payment session
+   */
+  initiatePaystackExtension: async (
+    bookingRef: string,
+    additionalAmount: string | number,
+    newDropoffDate: string
+  ) => {
+    const params = {
+      path: 'api/v1/payments/paystack/extension/initiate/',
+      booking_ref: bookingRef,
+      additional_amount: String(additionalAmount),
+      new_dropoff_date: newDropoffDate,
+    };
+    try {
+      const response = await publicApi.post('', {}, { params });
+      return response.data;
+    } catch (error) {
+      const fallbackParams = {
+        path: 'payments/paystack/extension/initiate/',
+        booking_ref: bookingRef,
+        additional_amount: String(additionalAmount),
+        new_dropoff_date: newDropoffDate,
+      };
+      const fallbackRes = await publicApi.post('', {}, { params: fallbackParams });
+      return fallbackRes.data;
+    }
+  },
+
+  /**
+   * Verifies Paystack extension payment
+   * GET payments/paystack/extension/verify/?booking_ref=...&transaction_ref=...&new_dropoff_date=...
+   */
+  verifyPaystackExtension: async (
+    bookingRef: string,
+    transactionRef: string,
+    newDropoffDate: string
+  ) => {
+    const params = {
+      path: 'api/v1/payments/paystack/extension/verify/',
+      booking_ref: bookingRef,
+      transaction_ref: transactionRef,
+      new_dropoff_date: newDropoffDate,
+    };
+    try {
+      const response = await publicApi.get('', { params });
+      return response.data;
+    } catch (error) {
+      const fallbackParams = {
+        path: 'payments/paystack/extension/verify/',
+        booking_ref: bookingRef,
+        transaction_ref: transactionRef,
+        new_dropoff_date: newDropoffDate,
+      };
+      const fallbackRes = await publicApi.get('', { params: fallbackParams });
+      return fallbackRes.data;
+    }
+  },
+
+  /**
    * Fetches payment details
    */
   getPaymentDetails: async (paymentId: string): Promise<any> => {

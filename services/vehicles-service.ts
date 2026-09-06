@@ -1,4 +1,5 @@
 import { publicApi } from '@/lib/api-client';
+import { getUserFriendlyMessage } from '@/lib/error-handler';
 
 export const vehiclesService = {
   /**
@@ -47,33 +48,28 @@ export const vehiclesService = {
    * Uploads identification document linked to booking reference
    */
   uploadIdentification: async (bookingRef: string, identificationType: string, file: File) => {
-    try {
-      const formData = new FormData();
-      formData.append("identification_type", identificationType);
-      formData.append("identification_file", file);
+    const formData = new FormData();
+    formData.append("identification_type", identificationType);
+    formData.append("identification_file", file);
 
+    try {
       const response = await publicApi.post("", formData, {
         params: { path: "api/v1/bookings/upload/id/", booking_ref: bookingRef },
         headers: { "Content-Type": "multipart/form-data" }
       });
       return { success: true, data: response.data };
-    } catch {
+    } catch (error: any) {
       try {
-        const formData = new FormData();
-        formData.append("identification_type", identificationType);
-        formData.append("identification_file", file);
-
         const fallbackRes = await publicApi.post("", formData, {
           params: { path: "bookings/upload/id/", booking_ref: bookingRef },
           headers: { "Content-Type": "multipart/form-data" }
         });
         return { success: true, data: fallbackRes.data };
-      } catch (fallbackErr: unknown) {
-        const err = fallbackErr as any;
+      } catch (fallbackErr: any) {
         console.error("Failed to upload identification:", fallbackErr);
         return {
           success: false,
-          message: err?.response?.data?.message || err?.response?.data || "Failed to upload identification."
+          message: getUserFriendlyMessage(fallbackErr || error)
         };
       }
     }
@@ -83,37 +79,30 @@ export const vehiclesService = {
    * Uploads driver's license images linked to booking reference
    */
   uploadLicense: async (bookingRef: string, frontImage: File, backImage?: File) => {
-    try {
-      const formData = new FormData();
-      formData.append("front_image", frontImage);
-      if (backImage) {
-        formData.append("back_image", backImage);
-      }
+    const formData = new FormData();
+    formData.append("front_image", frontImage);
+    if (backImage) {
+      formData.append("back_image", backImage);
+    }
 
+    try {
       const response = await publicApi.post("", formData, {
         params: { path: "api/v1/bookings/upload/license/", booking_ref: bookingRef },
         headers: { "Content-Type": "multipart/form-data" }
       });
       return { success: true, data: response.data };
-    } catch (error) {
+    } catch (error: any) {
       try {
-        const formData = new FormData();
-        formData.append("front_image", frontImage);
-        if (backImage) {
-          formData.append("back_image", backImage);
-        }
-
         const fallbackRes = await publicApi.post("", formData, {
           params: { path: "bookings/upload/license/", booking_ref: bookingRef },
           headers: { "Content-Type": "multipart/form-data" }
         });
         return { success: true, data: fallbackRes.data };
-      } catch (fallbackErr: unknown) {
-        const err = fallbackErr as any;
+      } catch (fallbackErr: any) {
         console.error("Failed to upload driver license:", fallbackErr);
         return {
           success: false,
-          message: err?.response?.data?.message || err?.response?.data || "Failed to upload driver license."
+          message: getUserFriendlyMessage(fallbackErr || error)
         };
       }
     }
@@ -123,33 +112,32 @@ export const vehiclesService = {
    * Initiates a booking for a vehicle
    */
   initiateBooking: async (vehicleId: number | string, driveType: string) => {
-    try {
-      const formData = new FormData();
-      const driveTypeValue = driveType === "self" || driveType === "self_drive" ? "self_drive" : "chauffeur";
-      formData.append("drive_type", driveTypeValue);
+    const formData = new FormData();
+    const driveTypeValue = driveType === "self" || driveType === "self_drive" ? "self_drive" : "chauffeur";
+    formData.append("drive_type", driveTypeValue);
 
+    try {
       const response = await publicApi.post("", formData, {
         params: { path: "api/v1/bookings/initiate/", vehicle_id: vehicleId },
         headers: { "Content-Type": "multipart/form-data" }
       });
       return { success: true, data: response.data };
-    } catch (error) {
+    } catch (error: any) {
       try {
-        const formData = new FormData();
-        const driveTypeValue = driveType === "self" || driveType === "self_drive" ? "Self_drive" : "Chauffeur_drive";
-        formData.append("drive_type", driveTypeValue);
+        const driveTypeValueUpper = driveType === "self" || driveType === "self_drive" ? "Self_drive" : "Chauffeur_drive";
+        const fallbackFormData = new FormData();
+        fallbackFormData.append("drive_type", driveTypeValueUpper);
 
-        const fallbackRes = await publicApi.post("", formData, {
+        const fallbackRes = await publicApi.post("", fallbackFormData, {
           params: { path: "bookings/initiate/", vehicle_id: vehicleId },
           headers: { "Content-Type": "multipart/form-data" }
         });
         return { success: true, data: fallbackRes.data };
-      } catch (fallbackErr: unknown) {
-        const err = fallbackErr as any;
+      } catch (fallbackErr: any) {
         console.error("Failed to initiate booking:", fallbackErr);
         return {
           success: false,
-          message: err?.response?.data?.message || err?.response?.data || "Failed to initiate booking."
+          message: getUserFriendlyMessage(fallbackErr || error)
         };
       }
     }
@@ -169,7 +157,7 @@ export const vehiclesService = {
         }
       });
       return { success: true, data: response.data };
-    } catch (error) {
+    } catch (error: any) {
       try {
         const fallbackRes = await publicApi.get("", {
           params: {
@@ -180,12 +168,11 @@ export const vehiclesService = {
           }
         });
         return { success: true, data: fallbackRes.data };
-      } catch (fallbackErr: unknown) {
-        const err = fallbackErr as any;
+      } catch (fallbackErr: any) {
         console.error("Failed to check vehicle availability:", fallbackErr);
         return {
           success: false,
-          message: err?.response?.data?.message || err?.response?.data || "Vehicle is not available for selected dates."
+          message: getUserFriendlyMessage(fallbackErr || error)
         };
       }
     }
@@ -193,13 +180,45 @@ export const vehiclesService = {
 
   /**
    * Fetches home page vehicles grouped by tags at vehicles/manage/
+   * Optionally filtered by search, min_price, max_price, vehicle_type, and features
    */
-  getManagedVehicles: async (): Promise<Record<string, { description: string; vehicles: any[] }>> => {
+  getManagedVehicles: async (filters?: {
+    search?: string;
+    min_price?: string | number;
+    max_price?: string | number;
+    vehicle_type?: string[] | string;
+    features?: string[] | string;
+  }): Promise<Record<string, any>> => {
     try {
-      const response = await publicApi.get("", {
-        params: { path: "api/v1/vehicles/manage/" }
-      });
-      return response.data;
+      const searchParams = new URLSearchParams();
+      searchParams.append("path", "api/v1/vehicles/manage/");
+      if (filters?.search !== undefined && filters?.search.trim() !== "") {
+        searchParams.append("search", filters.search.trim());
+      }
+      if (filters?.min_price !== undefined && filters?.min_price !== "") {
+        searchParams.append("min_price", String(filters.min_price));
+      }
+      if (filters?.max_price !== undefined && filters?.max_price !== "") {
+        searchParams.append("max_price", String(filters.max_price));
+      }
+      if (filters?.vehicle_type) {
+        const types = Array.isArray(filters.vehicle_type) ? filters.vehicle_type : [filters.vehicle_type];
+        types.forEach((t) => {
+          if (t && t.trim()) {
+            searchParams.append("vehicle_type", t.trim());
+          }
+        });
+      }
+      if (filters?.features) {
+        const feats = Array.isArray(filters.features) ? filters.features : [filters.features];
+        feats.forEach((f) => {
+          if (f && f.trim()) {
+            searchParams.append("features", f.trim());
+          }
+        });
+      }
+      const response = await publicApi.get(`?${searchParams.toString()}`);
+      return response.data || {};
     } catch (error) {
       console.error("Failed to fetch managed vehicles:", error);
       return {};

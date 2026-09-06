@@ -42,3 +42,9 @@ next-env.d.ts
 
 # files
 MARKETING_SEARCH_PLAN.md
+ENDPOINT_AUDIT_REPORT.md
+*.mjs
+schema.json
+routes_catalog.json
+audit_results.json
+webapp_proxy_audit.json

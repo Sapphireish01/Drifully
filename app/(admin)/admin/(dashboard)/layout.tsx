@@ -20,18 +20,15 @@ export const metadata: Metadata = {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ToastProvider>
-      <div className={styles.dashboard}>
-        <AdminSidebar />
-        <div className={styles.main}>
-          <AdminTopbar />
-          <main className={styles.content} id="admin-content">
-            <AdminGuard>{children}</AdminGuard>
-          </main>
-        </div>
+    <div className={styles.dashboard}>
+      <AdminSidebar />
+      <div className={styles.main}>
+        <AdminTopbar />
+        <main className={styles.content} id="admin-content">
+          <AdminGuard>{children}</AdminGuard>
+        </main>
       </div>
-      <ToastContainer />
-    </ToastProvider>
+    </div>
   );
 }
 

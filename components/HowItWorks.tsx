@@ -160,11 +160,11 @@ function DatePickerMockup() {
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div style={{ width: "47%", backgroundColor: "var(--color-surface)", padding: "var(--space-2)", borderRadius: "var(--radius-md)" }}>
             <p className="date-picker-mock__label">Daily Rate</p>
-            <p className="date-picker-mock__total">$120</p>
+            <p className="date-picker-mock__total">₦120</p>
           </div>
           <div style={{ width: "47%", backgroundColor: "var(--color-surface)", padding: "var(--space-2)", borderRadius: "var(--radius-md)" }}>
             <p className="date-picker-mock__label">Estimated Total</p>
-            <p className="date-picker-mock__total">$240</p>
+            <p className="date-picker-mock__total">₦240</p>
           </div>
         </div>
         <div className="date-picker-mock__avail">

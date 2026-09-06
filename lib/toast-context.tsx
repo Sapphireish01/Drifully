@@ -60,11 +60,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [dismissToast]
   );
 
-  // Bridge for Axios interceptor (outside React tree)
+  // Bridge for Axios interceptor and external callers (outside React tree)
   useEffect(() => {
     (window as any).__showAdminToast = showToast;
+    (window as any).__showToast = showToast;
     return () => {
       delete (window as any).__showAdminToast;
+      delete (window as any).__showToast;
     };
   }, [showToast]);
 
