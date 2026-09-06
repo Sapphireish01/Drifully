@@ -65,10 +65,12 @@ export default function HelpSupportPage() {
 
   // Tab 2: Report a Problem State
   const [subject, setSubject] = useState("");
-  const [category, setCategory] = useState("e.g Payment Issue");
+  const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [uploadedFile, setUploadedFile] = useState<{ name: string; size: string } | null>(null);
   const [isReportSubmitted, setIsReportSubmitted] = useState(false);
+
+  const isFormValid = Boolean(subject.trim() && category.trim() && description.trim());
 
   const [history] = useState<ReportHistoryItem[]>([
     {
@@ -256,8 +258,8 @@ export default function HelpSupportPage() {
     const target = (
       typeof contact === "object" && contact !== null
         ? (contact as Record<string, unknown>).contact ||
-          (contact as Record<string, unknown>).attributes ||
-          contact
+        (contact as Record<string, unknown>).attributes ||
+        contact
         : contact
     ) as Record<string, unknown>;
 
@@ -590,11 +592,11 @@ export default function HelpSupportPage() {
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Category<span>*</span></label>
             <select
-              className={styles.selectInput}
+              className={`${styles.selectInput} ${!category ? styles.selectPlaceholder : ""}`}
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="e.g Payment Issue">e.g Payment Issue</option>
+              <option value="" disabled>e.g Payment Issue</option>
               <option value="Payment Issue">Payment Issue</option>
               <option value="Vehicle Condition">Vehicle Condition</option>
               <option value="Driver Behavior">Driver Behavior</option>
@@ -661,8 +663,13 @@ export default function HelpSupportPage() {
 
           <button
             type="button"
-            className={`${styles.submitBtn} ${isReportSubmitted ? styles.submittedBtn : ""}`}
-            onClick={() => setIsReportSubmitted(true)}
+            className={`${styles.submitBtn} ${isFormValid && !isReportSubmitted ? styles.submitBtnActive : ""} ${isReportSubmitted ? styles.submittedBtn : ""}`}
+            disabled={!isFormValid || isReportSubmitted}
+            onClick={() => {
+              if (isFormValid) {
+                setIsReportSubmitted(true);
+              }
+            }}
           >
             {isReportSubmitted ? (
               <>
@@ -675,8 +682,8 @@ export default function HelpSupportPage() {
           </button>
 
           {/* History Section */}
-          <div className={styles.historySection}>
-            <h3 className={styles.historyTitle}>History</h3>
+          {/*<div className={styles.historySection}>
+             <h3 className={styles.historyTitle}>History</h3>
             <div className={styles.tableWrap}>
               <table className={styles.historyTable}>
                 <thead>
@@ -707,7 +714,7 @@ export default function HelpSupportPage() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
 

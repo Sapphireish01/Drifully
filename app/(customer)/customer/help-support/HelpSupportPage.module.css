@@ -83,7 +83,7 @@
   flex: 1;
   min-width: 0;
   height: 48px;
-  padding: 0 16px;
+  padding: 16px;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
@@ -220,6 +220,18 @@
   background-size: 16px;
 }
 
+.selectPlaceholder {
+  color: #94a3b8;
+}
+
+.selectInput option {
+  color: #0f172a;
+}
+
+.selectInput option:disabled {
+  color: #94a3b8;
+}
+
 .textareaWrap {
   position: relative;
 }
@@ -350,11 +362,23 @@
   border-radius: 12px;
   border: none;
   background: #f1f5f9;
-  color: #cbd5e1;
+  color: #94a3b8;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   cursor: not-allowed;
   margin-top: 8px;
+  transition: all 0.2s ease;
+}
+
+.submitBtnActive {
+  background: #0f172a;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.submitBtnActive:hover {
+  background: #1e293b;
 }
 
 .submittedBtn {

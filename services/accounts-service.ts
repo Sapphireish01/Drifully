@@ -53,6 +53,18 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface ChangePasswordPayload {
+  old_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
+  access?: string;
+  refresh?: string;
+}
+
 export interface DeactivateAccountPayload {
   password: string;
   mfa_code?: string;
@@ -529,5 +541,32 @@ export const accountsService = {
       params: { path: 'api/v1/accounts/deactivate/' }
     });
     return response.data;
+  },
+
+  /**
+   * Changes user password
+   * POST accounts/change-password/
+   */
+  changePassword: async (payload: ChangePasswordPayload): Promise<ChangePasswordResponse> => {
+    const formData = new FormData();
+    formData.append('old_password', payload.old_password);
+    formData.append('new_password', payload.new_password);
+    formData.append('confirm_password', payload.confirm_password);
+
+    try {
+      const response = await publicApi.post('', formData, {
+        params: { path: 'api/v1/accounts/change-password/' },
+        headers: { 'Content-Type': 'multipart/form-data' },
+        successMessage: 'Password changed successfully',
+      } as any);
+      return response.data;
+    } catch (error) {
+      const fallbackRes = await publicApi.post('', formData, {
+        params: { path: 'accounts/change-password/' },
+        headers: { 'Content-Type': 'multipart/form-data' },
+        successMessage: 'Password changed successfully',
+      } as any);
+      return fallbackRes.data;
+    }
   }
 };

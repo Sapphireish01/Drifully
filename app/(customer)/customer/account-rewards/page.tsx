@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import OtpVerificationModal from "@/components/customer/OtpVerificationModal";
+import ChangePasswordModal from "@/components/customer/ChangePasswordModal";
 import CustomSelect from "@/components/admin/CustomSelect";
 import { accountsService } from "@/services/accounts-service";
 import styles from "./AccountRewards.module.css";
@@ -15,7 +15,7 @@ export default function AccountRewardsPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [address, setAddress] = useState("");
 
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
@@ -28,7 +28,6 @@ export default function AccountRewardsPage() {
   const [phonePrefixOptions, setPhonePrefixOptions] = useState<{ value: string; label: string; icon: string | null }[]>([]);
 
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [isOtpOpen, setIsOtpOpen] = useState(false);
 
   // Notification Preferences State
   const [inAppNotif, setInAppNotif] = useState(true);
@@ -259,7 +258,6 @@ export default function AccountRewardsPage() {
       setProfileSaveStatus("saved");
       setFocusedField(null);
       setSelectedFile(null);
-      setIsOtpOpen(true);
       setTimeout(() => {
         setProfileSaveStatus("idle");
       }, 2500);
@@ -461,15 +459,18 @@ export default function AccountRewardsPage() {
                 <input
                   type="password"
                   className={styles.input}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setFocusedField("password")}
+                  value="••••••••••••"
+                  readOnly
+                  style={{ letterSpacing: "2px", color: "#64748b", background: "#f8fafc" }}
                 />
-                {focusedField === "password" && (
-                  <button type="button" className={styles.saveBtn} onClick={handleSave} disabled={isSavingProfile}>
-                    {isSavingProfile ? "Saving..." : "Save"}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  className={styles.saveBtn}
+                  onClick={() => setIsChangePasswordOpen(true)}
+                  style={{ display: "inline-flex" }}
+                >
+                  Change Password
+                </button>
               </div>
             </div>
 
@@ -655,13 +656,13 @@ export default function AccountRewardsPage() {
         </>
       )}
 
-      {/* OTP Verification Modal */}
-      <OtpVerificationModal
-        isOpen={isOtpOpen}
-        onClose={() => setIsOtpOpen(false)}
-        onVerified={() => {
-          setIsOtpOpen(false);
-          setFocusedField(null);
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        onSuccess={() => {
+          setIsChangePasswordOpen(false);
         }}
       />
     </div>
