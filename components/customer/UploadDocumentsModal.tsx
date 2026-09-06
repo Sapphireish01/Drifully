@@ -260,7 +260,7 @@ export default function UploadDocumentsModal({
               </div>
               <div className={styles.dropText}>
                 <span className={styles.dropTitle}>Choose a file or drag & drop it here.</span>
-                <span className={styles.dropHint}>JPEG, PNG, PDF formats, up to 50 MB.</span>
+                <span className={styles.dropHint}>JPEG, PNG, PDF formats, up to 5 mb.</span>
               </div>
               <span className={styles.browseBtn}>Browse File</span>
               <input type="file" accept="image/*,.pdf" onChange={handleResidencyChange} className={styles.hiddenInput} />

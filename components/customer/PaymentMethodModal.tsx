@@ -62,19 +62,19 @@ export default function PaymentMethodModal({
         />
       ),
     },
-    {
-      id: "card",
-      label: "Direct Card Payment",
-      disabled: false,
-      icon: (
-        <Image
-          src="/customer app/icons/card.svg"
-          alt="Card"
-          width={22}
-          height={22}
-        />
-      ),
-    },
+    // {
+    //   id: "card",
+    //   label: "Direct Card Payment",
+    //   disabled: false,
+    //   icon: (
+    //     <Image
+    //       src="/customer app/icons/card.svg"
+    //       alt="Card"
+    //       width={22}
+    //       height={22}
+    //     />
+    //   ),
+    // },
   ];
 
   const handlePayClick = async () => {

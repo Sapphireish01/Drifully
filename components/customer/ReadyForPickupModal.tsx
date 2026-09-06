@@ -81,7 +81,7 @@ export default function ReadyForPickupModal({
               </div>
               <div className={styles.dropText}>
                 <span className={styles.dropTitle}>Choose a file or drag & drop it here.</span>
-                <span className={styles.dropHint}>JPEG, PNG, PDF, and MP4 formats, up to 50 MB.</span>
+                <span className={styles.dropHint}>JPEG, PNG, PDF, and MP4 formats, up to 5 mb.</span>
               </div>
               <label className={styles.browseBtn}>
                 Browse File

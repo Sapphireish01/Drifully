@@ -343,7 +343,7 @@ export default function AccountRewardsPage() {
                 </div>
                 <div>
                   <span className={styles.dropTitle}>Choose a file or drag & drop it here.</span>
-                  <div className={styles.dropHint}>JPEG, PNG, PDF, and MP4 formats, up to 50 MB.</div>
+                  <div className={styles.dropHint}>JPEG, PNG, PDF, and MP4 formats, up to 5 mb.</div>
                 </div>
                 <label className={styles.browseBtn}>
                   Browse File

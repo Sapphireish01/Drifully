@@ -623,7 +623,7 @@ export default function HelpSupportPage() {
               <Image src="/customer app/icons/upload.svg" alt="Upload" width={28} height={28} />
             </div>
             <span className={styles.dropTitle}>Upload Supporting Evidence</span>
-            <span className={styles.dropHint}>JPEG, PNG, PDF, and MP4 formats, up to 50 MB.</span>
+            <span className={styles.dropHint}>JPEG, PNG, PDF, and MP4 formats, up to 5 mb.</span>
             <label className={styles.browseBtn}>
               Browse File
               <input
