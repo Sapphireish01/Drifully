@@ -7,24 +7,32 @@ interface CancelReservationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirmCancel: () => void;
+  isLoading?: boolean;
 }
 
 export default function CancelReservationModal({
   isOpen,
   onClose,
   onConfirmCancel,
+  isLoading = false,
 }: CancelReservationModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className={styles.backdrop} onClick={onClose} role="presentation">
+    <div className={styles.backdrop} onClick={isLoading ? undefined : onClose} role="presentation">
       <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog">
         <div className={styles.header}>
           <h2 className={styles.title}>Cancel Reservation</h2>
-          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close">
+          <button
+            type="button"
+            className={styles.closeBtn}
+            onClick={onClose}
+            disabled={isLoading}
+            aria-label="Close"
+          >
             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="1" y1="1" x2="11" y2="11" />
-              <line x1="1" y1="11" x2="11" y2="1" />
+              <line x1="1" y1="1" x2="11" y2="1" />
             </svg>
           </button>
         </div>
@@ -43,11 +51,21 @@ export default function CancelReservationModal({
         </div>
 
         <div className={styles.actionsRow}>
-          <button type="button" className={styles.confirmCancelBtn} onClick={onConfirmCancel}>
-            Cancel Reservation
+          <button
+            type="button"
+            className={styles.confirmCancelBtn}
+            onClick={onConfirmCancel}
+            disabled={isLoading}
+          >
+            {isLoading ? "Cancelling..." : "Cancel Reservation"}
           </button>
-          <button type="button" className={styles.keepBtn} onClick={onClose}>
-            Cancel
+          <button
+            type="button"
+            className={styles.keepBtn}
+            onClick={onClose}
+            disabled={isLoading}
+          >
+            Keep Reservation
           </button>
         </div>
       </div>

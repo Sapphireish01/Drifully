@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { bookingsService, ExpandedTripData, BookingExtensionQuote, BookingExtensionConfirmation } from "@/services/bookings-service";
 import { paymentsService } from "@/services/payments-service";
+import { toastError } from "@/lib/error-handler";
 import Spinner from "@/components/customer/Spinner";
 import RateTripModal from "@/components/customer/RateTripModal";
 import GetHelpModal from "@/components/customer/GetHelpModal";
@@ -28,6 +29,7 @@ export default function TripDetailsPage() {
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [isRebookModalOpen, setIsRebookModalOpen] = useState(false);
 
   // Extend Rental Flow Steps: 0 (Closed), 1 (Date), 2 (Price Breakdown), 3 (Payment), 4 (Confirmed)
@@ -272,9 +274,21 @@ export default function TripDetailsPage() {
       <CancelReservationModal
         isOpen={isCancelModalOpen}
         onClose={() => setIsCancelModalOpen(false)}
-        onConfirmCancel={() => {
-          setIsCancelModalOpen(false);
-          alert("Reservation cancelled.");
+        isLoading={isCancelling}
+        onConfirmCancel={async () => {
+          if (!bookingRef) return;
+          setIsCancelling(true);
+          try {
+            await bookingsService.cancelBooking(bookingRef, { reason: "Cancelled by customer" });
+            setIsCancelModalOpen(false);
+            const updated = await bookingsService.getExpandedTripDetail(bookingRef);
+            setTripData(updated);
+          } catch (err: any) {
+            console.error("Failed to cancel reservation:", err);
+            toastError(err, "Failed to cancel reservation.");
+          } finally {
+            setIsCancelling(false);
+          }
         }}
       />
 

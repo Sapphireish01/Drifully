@@ -90,14 +90,21 @@
   gap: 10px;
 }
 
+.sectionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
 .sectionHeading {
   font-size: 13px;
   font-weight: 700;
   color: #0f172a;
-  margin: 10px 0 2px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 12px 0 2px 0;
 }
-
-
 
 .extraItem {
   display: flex;
@@ -106,7 +113,7 @@
   padding: 14px 18px;
   border-radius: 12px;
   background: #f8fafc;
-  border: 1px solid #f1f5f9;
+  border: 1.5px solid #f1f5f9;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -116,8 +123,9 @@
 }
 
 .extraItemSelected {
-  background: #f8fafc;
+  background: #ffffff;
   border-color: #0f172a;
+  box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.08);
 }
 
 .centerContainer {
@@ -163,10 +171,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .extraTitle {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #0f172a;
 }
@@ -175,6 +184,7 @@
   font-size: 13px;
   font-weight: 700;
   color: #0f172a;
+  white-space: nowrap;
 }
 
 .extraPrice small {
@@ -184,9 +194,88 @@
 }
 
 .extraSub {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #64748b;
   margin: 0;
+  line-height: 1.4;
+}
+
+.quantifiedControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.qtyLabel {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.stepBtn {
+  width: 32px;
+  height: 30px;
+  background: #f8fafc;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.stepBtn:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.stepBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qtyValue {
+  min-width: 32px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.summaryFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  margin-top: 4px;
+}
+
+.summaryLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.summaryValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .continueBtn {
@@ -199,5 +288,10 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 8px;
+  margin-top: 4px;
+  transition: background 0.15s ease;
+}
+
+.continueBtn:hover {
+  background: #1e293b;
 }

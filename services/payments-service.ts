@@ -71,9 +71,20 @@ export const paymentsService = {
   /**
    * Initiates Paystack payment session
    */
-  initiatePaystackPayment: async (bookingRef: string) => {
+  initiatePaystackPayment: async (bookingRef: string, customCallbackUrl?: string) => {
+    const callbackUrl =
+      customCallbackUrl ||
+      (typeof window !== "undefined"
+        ? `${window.location.origin}/customer/booking-confirmed?booking_ref=${encodeURIComponent(bookingRef)}`
+        : "");
+
     const response = await publicApi.get('', {
-      params: { path: 'api/v1/payments/paystack/pay/', booking_ref: bookingRef }
+      params: {
+        path: 'api/v1/payments/paystack/pay/',
+        booking_ref: bookingRef,
+        callback_url: callbackUrl,
+        redirect_url: callbackUrl,
+      }
     });
     return response.data;
   },
@@ -112,19 +123,8 @@ export const paymentsService = {
       additional_amount: String(additionalAmount),
       new_dropoff_date: newDropoffDate,
     };
-    try {
-      const response = await publicApi.post('', {}, { params });
-      return response.data;
-    } catch (error) {
-      const fallbackParams = {
-        path: 'payments/stripe/extension/initiate/',
-        booking_ref: bookingRef,
-        additional_amount: String(additionalAmount),
-        new_dropoff_date: newDropoffDate,
-      };
-      const fallbackRes = await publicApi.post('', {}, { params: fallbackParams });
-      return fallbackRes.data;
-    }
+    const response = await publicApi.post('', {}, { params });
+    return response.data;
   },
 
   /**
@@ -141,19 +141,8 @@ export const paymentsService = {
       additional_amount: String(additionalAmount),
       new_dropoff_date: newDropoffDate,
     };
-    try {
-      const response = await publicApi.post('', {}, { params });
-      return response.data;
-    } catch (error) {
-      const fallbackParams = {
-        path: 'payments/paystack/extension/initiate/',
-        booking_ref: bookingRef,
-        additional_amount: String(additionalAmount),
-        new_dropoff_date: newDropoffDate,
-      };
-      const fallbackRes = await publicApi.post('', {}, { params: fallbackParams });
-      return fallbackRes.data;
-    }
+    const response = await publicApi.post('', {}, { params });
+    return response.data;
   },
 
   /**
@@ -171,19 +160,8 @@ export const paymentsService = {
       transaction_ref: transactionRef,
       new_dropoff_date: newDropoffDate,
     };
-    try {
-      const response = await publicApi.get('', { params });
-      return response.data;
-    } catch (error) {
-      const fallbackParams = {
-        path: 'payments/paystack/extension/verify/',
-        booking_ref: bookingRef,
-        transaction_ref: transactionRef,
-        new_dropoff_date: newDropoffDate,
-      };
-      const fallbackRes = await publicApi.get('', { params: fallbackParams });
-      return fallbackRes.data;
-    }
+    const response = await publicApi.get('', { params });
+    return response.data;
   },
 
   /**

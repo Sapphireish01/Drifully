@@ -12,6 +12,16 @@ import styles from "./CustomerAuth.module.css";
 
 type AuthMode = "login" | "register";
 
+const LOGIN_IMAGES = [
+  "/customer app/loginImages/Property 1=Component 9.png",
+  "/customer app/loginImages/Property 1=Component 10.png",
+  "/customer app/loginImages/Property 1=Component 11.png",
+  "/customer app/loginImages/Property 1=Component 12.png",
+  "/customer app/loginImages/Property 1=Component 13.png",
+  "/customer app/loginImages/Property 1=Component 14.png",
+  "/customer app/loginImages/Property 1=Component 15.png",
+];
+
 export default function CustomerAuth({ mode }: { mode: AuthMode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -23,10 +33,22 @@ export default function CustomerAuth({ mode }: { mode: AuthMode }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-    const [phonePrefix, setPhonePrefix] = useState("");
-    const [phonePrefixOptions, setPhonePrefixOptions] = useState<{ value: string; label: string; icon: string | null }[]>([]);
+  const [phonePrefix, setPhonePrefix] = useState("");
+  const [phonePrefixOptions, setPhonePrefixOptions] = useState<{ value: string; label: string; icon: string | null }[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [prevImageIndex, setPrevImageIndex] = useState<number | null>(null);
   const isRegister = mode === "register";
   const update = (key: keyof typeof form, value: string) => setForm((current) => ({ ...current, [key]: value }));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImageIndex((curr) => {
+        setPrevImageIndex(curr);
+        return (curr + 1) % LOGIN_IMAGES.length;
+      });
+    }, 7000);
+    return () => clearInterval(timer);
+  }, []);
 
     useEffect(() => {
         if (!isRegister) return;
@@ -86,7 +108,57 @@ export default function CustomerAuth({ mode }: { mode: AuthMode }) {
   return <main className={styles.page}>
     <Navbar />
     <div className={styles.body}>
-        <section className={styles.visual} aria-label="Drifully car rental introduction"><Image className={styles.visualBackground} src="/customer app/257a09680b948a4012ee2fbad1c71c6c0d941bd7.jpg" alt="Customer using the Drifully app" fill priority sizes="(max-width: 900px) 100vw, 56vw" /><Image className={`${styles.vehicleCard} ${styles.cardOne}`} src="/customer app/frame-1.png" alt="Toyota Corolla rental" width={240} height={174} /><Image className={`${styles.vehicleCard} ${styles.cardTwo}`} src="/customer app/Frame-2-b.png" alt="Luxury car rental" width={240} height={174} /><div className={styles.visualCopy}><h2 className={styles.visualTitle}>Find the Car That Fits Your Journey.</h2><p className={styles.visualText}>Sign in or create an account to explore our vehicles, book your next ride, and enjoy a seamless journey with Drifully.</p><div className={styles.visualActions}><Link className={styles.fleetButton} href="/our-fleet">Browse Our Fleet</Link><a className={styles.appLink} href="https://play.google.com/store/apps/details?id=com.drifully.app">Download The App</a></div></div></section>
+        <section className={styles.visual} aria-label="Drifully car rental introduction">
+          <div className={styles.slideshowContainer}>
+            {LOGIN_IMAGES.map((src, index) => {
+              const isCurrent = index === currentImageIndex;
+              const isPrev = index === prevImageIndex;
+              const slideClass = isPrev
+                ? styles.slideFadingOut
+                : isCurrent
+                ? styles.slideBehind
+                : styles.slideIdle;
+
+              return (
+                <Image
+                  key={src}
+                  className={`${styles.slideImage} ${slideClass}`}
+                  src={src}
+                  alt="Drifully car rental showcase"
+                  fill
+                  priority={index === 0}
+                  sizes="(max-width: 900px) 100vw, 56vw"
+                />
+              );
+            })}
+          </div>
+
+          <Image
+            className={`${styles.vehicleCard} ${styles.cardOne}`}
+            src="/customer app/frame-1.png"
+            alt="Toyota Corolla rental"
+            width={240}
+            height={174}
+          />
+          <Image
+            className={`${styles.vehicleCard} ${styles.cardTwo}`}
+            src="/customer app/Frame-2-b.png"
+            alt="Luxury car rental"
+            width={240}
+            height={174}
+          />
+
+          <div className={styles.visualCopy}>
+            <h2 className={styles.visualTitle}>Find the Car That Fits Your Journey.</h2>
+            <p className={styles.visualText}>
+              Sign in or create an account to explore our vehicles, book your next ride, and enjoy a seamless journey with Drifully.
+            </p>
+            <div className={styles.visualActions}>
+              <Link className={styles.fleetButton} href="/our-fleet">Browse Our Fleet</Link>
+              <a className={styles.appLink} href="https://play.google.com/store/apps/details?id=com.drifully.app" target="_blank" rel="noopener noreferrer">Download The App</a>
+            </div>
+          </div>
+        </section>
         <section className={styles.formSide}>
             <div className={styles.formWrap}>
                 <div className={styles.tabs}>

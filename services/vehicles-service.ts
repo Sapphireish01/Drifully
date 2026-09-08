@@ -59,19 +59,11 @@ export const vehiclesService = {
       });
       return { success: true, data: response.data };
     } catch (error: any) {
-      try {
-        const fallbackRes = await publicApi.post("", formData, {
-          params: { path: "bookings/upload/id/", booking_ref: bookingRef },
-          headers: { "Content-Type": "multipart/form-data" }
-        });
-        return { success: true, data: fallbackRes.data };
-      } catch (fallbackErr: any) {
-        console.error("Failed to upload identification:", fallbackErr);
-        return {
-          success: false,
-          message: getUserFriendlyMessage(fallbackErr || error)
-        };
-      }
+      console.error("Failed to upload identification:", error);
+      return {
+        success: false,
+        message: getUserFriendlyMessage(error)
+      };
     }
   },
 
@@ -92,19 +84,11 @@ export const vehiclesService = {
       });
       return { success: true, data: response.data };
     } catch (error: any) {
-      try {
-        const fallbackRes = await publicApi.post("", formData, {
-          params: { path: "bookings/upload/license/", booking_ref: bookingRef },
-          headers: { "Content-Type": "multipart/form-data" }
-        });
-        return { success: true, data: fallbackRes.data };
-      } catch (fallbackErr: any) {
-        console.error("Failed to upload driver license:", fallbackErr);
-        return {
-          success: false,
-          message: getUserFriendlyMessage(fallbackErr || error)
-        };
-      }
+      console.error("Failed to upload driver license:", error);
+      return {
+        success: false,
+        message: getUserFriendlyMessage(error)
+      };
     }
   },
 
@@ -123,23 +107,11 @@ export const vehiclesService = {
       });
       return { success: true, data: response.data };
     } catch (error: any) {
-      try {
-        const driveTypeValueUpper = driveType === "self" || driveType === "self_drive" ? "Self_drive" : "Chauffeur_drive";
-        const fallbackFormData = new FormData();
-        fallbackFormData.append("drive_type", driveTypeValueUpper);
-
-        const fallbackRes = await publicApi.post("", fallbackFormData, {
-          params: { path: "bookings/initiate/", vehicle_id: vehicleId },
-          headers: { "Content-Type": "multipart/form-data" }
-        });
-        return { success: true, data: fallbackRes.data };
-      } catch (fallbackErr: any) {
-        console.error("Failed to initiate booking:", fallbackErr);
-        return {
-          success: false,
-          message: getUserFriendlyMessage(fallbackErr || error)
-        };
-      }
+      console.error("Failed to initiate booking:", error);
+      return {
+        success: false,
+        message: getUserFriendlyMessage(error)
+      };
     }
   },
 
@@ -158,23 +130,11 @@ export const vehiclesService = {
       });
       return { success: true, data: response.data };
     } catch (error: any) {
-      try {
-        const fallbackRes = await publicApi.get("", {
-          params: {
-            path: "bookings/check-availability/",
-            vehicle_id: vehicleId,
-            pickup_date: pickupDate,
-            dropoff_date: dropoffDate,
-          }
-        });
-        return { success: true, data: fallbackRes.data };
-      } catch (fallbackErr: any) {
-        console.error("Failed to check vehicle availability:", fallbackErr);
-        return {
-          success: false,
-          message: getUserFriendlyMessage(fallbackErr || error)
-        };
-      }
+      console.error("Failed to check vehicle availability:", error);
+      return {
+        success: false,
+        message: getUserFriendlyMessage(error)
+      };
     }
   },
 
@@ -303,16 +263,8 @@ export const vehiclesService = {
       });
       return response.data;
     } catch (error) {
-      // Fallback in case api/v1 is not needed
-      try {
-        const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/vehicles/dashboard/', page, ...filters }
-        });
-        return fallbackResponse.data;
-      } catch (fallbackError) {
-        console.error('Failed to fetch dashboard vehicles:', fallbackError);
-        throw fallbackError;
-      }
+      console.error('Failed to fetch dashboard vehicles:', error);
+      throw error;
     }
   },
 

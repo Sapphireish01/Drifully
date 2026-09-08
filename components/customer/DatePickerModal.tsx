@@ -1,30 +1,61 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./DatePickerModal.module.css";
 
 interface DatePickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectDate?: (date: string) => void;
+  minDate?: string | Date;
+  selectedDate?: string;
 }
 
-export default function DatePickerModal({ isOpen, onClose, onSelectDate }: DatePickerModalProps) {
+export default function DatePickerModal({
+  isOpen,
+  onClose,
+  onSelectDate,
+  minDate,
+  selectedDate,
+}: DatePickerModalProps) {
   const now = new Date();
   const [currentYear, setCurrentYear] = useState<number>(now.getFullYear());
   const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(now.getMonth());
-  const [selectedDay, setSelectedDay] = useState<number | null>(now.getDate());
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+
+  const minDateObj = useMemo(() => {
+    if (!minDate) return null;
+    const d = new Date(minDate);
+    if (isNaN(d.getTime())) return null;
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [minDate]);
 
   useEffect(() => {
     if (isOpen) {
-      const today = new Date();
-      setCurrentYear(today.getFullYear());
-      setCurrentMonthIndex(today.getMonth());
-      setSelectedDay(today.getDate());
-    }
-  }, [isOpen]);
+      if (selectedDate) {
+        const parts = selectedDate.split("-");
+        if (parts.length === 3) {
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const day = parseInt(parts[2], 10);
+          if (!isNaN(y) && !isNaN(m) && !isNaN(day)) {
+            setCurrentYear(y);
+            setCurrentMonthIndex(m);
+            setSelectedDay(day);
+            return;
+          }
+        }
+      }
 
-  if (!isOpen) return null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const baseDate = minDateObj && minDateObj.getTime() > today.getTime() ? minDateObj : today;
+      setCurrentYear(baseDate.getFullYear());
+      setCurrentMonthIndex(baseDate.getMonth());
+      setSelectedDay(null);
+    }
+  }, [isOpen, selectedDate, minDateObj]);
 
   const monthNamesShort = [
     "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
@@ -47,16 +78,26 @@ export default function DatePickerModal({ isOpen, onClose, onSelectDate }: DateP
   const prevMonthTotalDays = new Date(currentYear, currentMonthIndex, 0).getDate();
   const prevMonthDays = Array.from({ length: startingOffset }, (_, i) => prevMonthTotalDays - startingOffset + i + 1);
 
+  const isDayDisabled = (day: number) => {
+    if (!minDateObj) return false;
+    const targetDate = new Date(currentYear, currentMonthIndex, day, 0, 0, 0, 0);
+    return targetDate.getTime() < minDateObj.getTime();
+  };
+
+  const isPrevMonthDisabled = useMemo(() => {
+    if (!minDateObj) return false;
+    const prevMonthLastDay = new Date(currentYear, currentMonthIndex, 0, 23, 59, 59, 999);
+    return prevMonthLastDay.getTime() < minDateObj.getTime();
+  }, [currentYear, currentMonthIndex, minDateObj]);
+
   const handleContinue = () => {
-    if (selectedDay && onSelectDate) {
-      const monthStr = monthNamesLong[currentMonthIndex];
-      // Format as "YYYY-MM-DD" or standard date string
+    if (selectedDay && onSelectDate && !isDayDisabled(selectedDay)) {
       const formattedMonth = String(currentMonthIndex + 1).padStart(2, "0");
       const formattedDay = String(selectedDay).padStart(2, "0");
       const isoDateStr = `${currentYear}-${formattedMonth}-${formattedDay}`;
       onSelectDate(isoDateStr);
+      onClose();
     }
-    onClose();
   };
 
   const handleNextMonth = () => {
@@ -70,6 +111,7 @@ export default function DatePickerModal({ isOpen, onClose, onSelectDate }: DateP
   };
 
   const handlePrevMonth = () => {
+    if (isPrevMonthDisabled) return;
     if (currentMonthIndex === 0) {
       setCurrentMonthIndex(11);
       setCurrentYear((prev) => prev - 1);
@@ -79,12 +121,20 @@ export default function DatePickerModal({ isOpen, onClose, onSelectDate }: DateP
     setSelectedDay(null);
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className={styles.backdrop} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <div className={styles.dropdowns}>
-            <button type="button" className={styles.selectBtn} onClick={handlePrevMonth} title="Previous Month">
+            <button
+              type="button"
+              className={`${styles.selectBtn} ${isPrevMonthDisabled ? styles.disabledNavBtn : ""}`}
+              onClick={handlePrevMonth}
+              disabled={isPrevMonthDisabled}
+              title={isPrevMonthDisabled ? "Previous dates are unavailable" : "Previous Month"}
+            >
               ‹
             </button>
             <button type="button" className={styles.selectBtn}>
@@ -116,16 +166,25 @@ export default function DatePickerModal({ isOpen, onClose, onSelectDate }: DateP
                 {day}
               </span>
             ))}
-            {daysInMonth.map((day) => (
-              <button
-                key={day}
-                type="button"
-                className={`${styles.dayBtn} ${selectedDay === day ? styles.selected : ""}`}
-                onClick={() => setSelectedDay(day)}
-              >
-                {day}
-              </button>
-            ))}
+            {daysInMonth.map((day) => {
+              const disabled = isDayDisabled(day);
+              const isSelected = selectedDay === day && !disabled;
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  className={`${styles.dayBtn} ${isSelected ? styles.selected : ""} ${disabled ? styles.disabledDay : ""}`}
+                  onClick={() => {
+                    if (!disabled) {
+                      setSelectedDay(day);
+                    }
+                  }}
+                  disabled={disabled}
+                >
+                  {day}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -135,8 +194,9 @@ export default function DatePickerModal({ isOpen, onClose, onSelectDate }: DateP
           </button>
           <button
             type="button"
-            className={`${styles.continueBtn} ${selectedDay ? styles.activeContinue : ""}`}
+            className={`${styles.continueBtn} ${selectedDay && !isDayDisabled(selectedDay) ? styles.activeContinue : ""}`}
             onClick={handleContinue}
+            disabled={!selectedDay || isDayDisabled(selectedDay)}
           >
             Continue
           </button>

@@ -8,10 +8,10 @@ import { Vehicle } from "@/data/vehicles";
 interface BookingConfirmedModalProps {
   isOpen: boolean;
   onClose: () => void;
-  vehicle: Vehicle;
-  pickupDate: string;
-  dropOffDate: string;
-  selectedMode: "self" | "chauffeur";
+  vehicle?: Vehicle | null;
+  pickupDate?: string;
+  dropOffDate?: string;
+  selectedMode?: "self" | "chauffeur";
   bookingReference?: string;
 }
 
@@ -21,10 +21,12 @@ export default function BookingConfirmedModal({
   vehicle,
   pickupDate,
   dropOffDate,
-  selectedMode,
+  selectedMode = "self",
   bookingReference,
 }: BookingConfirmedModalProps) {
   if (!isOpen) return null;
+
+  const tripHref = bookingReference ? `/customer/trips/${bookingReference}` : "/customer/trips";
 
   return (
     <div className={styles.backdrop} onClick={onClose} role="presentation">
@@ -32,7 +34,7 @@ export default function BookingConfirmedModal({
         <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close">
           <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="1" y1="1" x2="11" y2="11" />
-            <line x1="1" y1="11" x2="11" y2="1" />
+            <line x1="1" y1="1" x2="11" y2="1" />
           </svg>
         </button>
 
@@ -57,12 +59,12 @@ export default function BookingConfirmedModal({
               <span className={styles.modeBadge}>
                 {selectedMode === "self" ? "Drive Yourself" : "Chauffeur Service"}
               </span>
-              <strong className={styles.vehicleTitle}>{vehicle.name}</strong>
+              <strong className={styles.vehicleTitle}>{vehicle?.name || "Drifully Luxury Vehicle"}</strong>
             </div>
 
             <div className={styles.summaryRow}>
               <span className={styles.label}>Reserved For</span>
-              <span className={styles.val}>{pickupDate || "30 Mar 2025"} – {dropOffDate || "11 May 2025"}</span>
+              <span className={styles.val}>{pickupDate || "Scheduled Date"} {dropOffDate ? `– ${dropOffDate}` : ""}</span>
             </div>
 
             <div className={styles.summaryRow}>
@@ -75,7 +77,7 @@ export default function BookingConfirmedModal({
             <button type="button" className={styles.homeBtn} onClick={onClose}>
               Home
             </button>
-            <Link href="/customer" className={styles.viewBookingBtn} onClick={onClose}>
+            <Link href={tripHref} className={styles.viewBookingBtn} onClick={onClose}>
               View Booking
             </Link>
           </div>

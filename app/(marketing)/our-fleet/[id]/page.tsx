@@ -125,6 +125,21 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
   const handleSelectDate = (date: string) => {
     if (activeDateTarget === "pickup") {
       setPickupDate(date);
+      // Ensure drop-off date is strictly after the newly selected pickup date
+      if (dropOffDate) {
+        const pickupD = new Date(date);
+        const dropoffD = new Date(dropOffDate);
+        if (!isNaN(pickupD.getTime()) && !isNaN(dropoffD.getTime())) {
+          if (dropoffD.getTime() <= pickupD.getTime()) {
+            const nextDay = new Date(pickupD);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const y = nextDay.getFullYear();
+            const m = String(nextDay.getMonth() + 1).padStart(2, "0");
+            const d = String(nextDay.getDate()).padStart(2, "0");
+            setDropOffDate(`${y}-${m}-${d}`);
+          }
+        }
+      }
     } else if (activeDateTarget === "dropoff") {
       setDropOffDate(date);
     }
@@ -379,6 +394,22 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
           isOpen={activeDateTarget !== null}
           onClose={() => setActiveDateTarget(null)}
           onSelectDate={handleSelectDate}
+          minDate={
+            activeDateTarget === "dropoff"
+              ? (pickupDate
+                ? (() => {
+                  const d = new Date(pickupDate);
+                  d.setDate(d.getDate() + 1);
+                  return d;
+                })()
+                : (() => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + 1);
+                  return d;
+                })())
+              : new Date()
+          }
+          selectedDate={activeDateTarget === "pickup" ? pickupDate : dropOffDate}
         />
       </main>
 

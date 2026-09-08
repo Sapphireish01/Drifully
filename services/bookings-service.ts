@@ -1,12 +1,24 @@
 import { publicApi } from '@/lib/api-client';
 import { getUserFriendlyMessage } from '@/lib/error-handler';
 
-export interface BookingExtra {
+export interface BookingExtraItem {
   id: string;
   name: string;
   description: string;
   price_per_booking: string;
-  icon: string;
+  icon?: string;
+}
+
+export type BookingExtra = BookingExtraItem;
+
+export interface BookingExtrasResponse {
+  quantified_extras: BookingExtraItem[];
+  unquantified_extras: BookingExtraItem[];
+}
+
+export interface AddExtraPayloadItem {
+  extra_id: string;
+  quantity: number;
 }
 
 export interface BookingSummaryExtraItem {
@@ -227,19 +239,8 @@ export const bookingsService = {
       });
       return response.data;
     } catch (error: any) {
-      try {
-        const fallbackRes = await publicApi.get('', {
-          params: {
-            path: 'bookings/initiate/extension/',
-            booking_ref: bookingRef,
-            new_dropoff_date: newDropoffDate,
-          }
-        });
-        return fallbackRes.data;
-      } catch (fallbackError) {
-        console.error(`Failed to initiate booking extension for ${bookingRef}:`, fallbackError);
-        throw fallbackError;
-      }
+      console.error(`Failed to initiate booking extension for ${bookingRef}:`, error);
+      throw error;
     }
   },
 
@@ -258,16 +259,8 @@ export const bookingsService = {
       });
       return response.data;
     } catch (error: any) {
-      try {
-        const fallbackRes = await publicApi.post('', formData, {
-          params: { path: 'bookings/confirm/extension/', booking_ref: bookingRef },
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        return fallbackRes.data;
-      } catch (fallbackError) {
-        console.error(`Failed to confirm booking extension for ${bookingRef}:`, fallbackError);
-        throw fallbackError;
-      }
+      console.error(`Failed to confirm booking extension for ${bookingRef}:`, error);
+      throw error;
     }
   },
 
@@ -286,16 +279,8 @@ export const bookingsService = {
       });
       return response.data;
     } catch (error: any) {
-      try {
-        const fallbackRes = await publicApi.post('', formData, {
-          params: { path: 'bookings/rebook/check-dates/', booking_ref: bookingRef },
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        return fallbackRes.data;
-      } catch (fallbackError) {
-        console.error(`Failed to check rebook dates for ${bookingRef}:`, fallbackError);
-        throw fallbackError;
-      }
+      console.error(`Failed to check rebook dates for ${bookingRef}:`, error);
+      throw error;
     }
   },
 
@@ -316,16 +301,8 @@ export const bookingsService = {
       });
       return response.data;
     } catch (error: any) {
-      try {
-        const fallbackRes = await publicApi.post('', formData, {
-          params: { path: 'bookings/rebook/confirm/', booking_ref: bookingRef },
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        return fallbackRes.data;
-      } catch (fallbackError) {
-        console.error(`Failed to confirm rebook for ${bookingRef}:`, fallbackError);
-        throw fallbackError;
-      }
+      console.error(`Failed to confirm rebook for ${bookingRef}:`, error);
+      throw error;
     }
   },
 
@@ -343,22 +320,8 @@ export const bookingsService = {
       });
       return response.data;
     } catch (error) {
-      try {
-        const fallbackParams: Record<string, string> = { path: 'bookings/trips/' };
-        if (filters?.start_date) fallbackParams.start_date = filters.start_date;
-        if (filters?.end_date) fallbackParams.end_date = filters.end_date;
-        if (filters?.status) fallbackParams.status = filters.status;
-        if (filters?.vehicle_type) fallbackParams.vehicle_type = filters.vehicle_type;
-        if (filters?.drive_type) fallbackParams.drive_type = filters.drive_type;
-
-        const fallbackRes = await publicApi.get('', {
-          params: fallbackParams
-        });
-        return fallbackRes.data;
-      } catch (fallbackError) {
-        console.error('Failed to fetch trips:', fallbackError);
-        throw fallbackError;
-      }
+      console.error('Failed to fetch trips:', error);
+      throw error;
     }
   },
 
@@ -374,23 +337,48 @@ export const bookingsService = {
     }
   },
 
-  getBookingExtras: async (): Promise<BookingExtra[]> => {
+  getBookingExtras: async (): Promise<BookingExtrasResponse> => {
     try {
       const response = await publicApi.get('', {
         params: { path: 'api/v1/bookings/extras/' }
       });
-      return response.data;
+      const data = response.data;
+      if (data && (Array.isArray(data.quantified_extras) || Array.isArray(data.unquantified_extras))) {
+        return {
+          quantified_extras: data.quantified_extras || [],
+          unquantified_extras: data.unquantified_extras || [],
+        };
+      }
+      if (Array.isArray(data)) {
+        return {
+          quantified_extras: [],
+          unquantified_extras: data,
+        };
+      }
+      return {
+        quantified_extras: [],
+        unquantified_extras: [],
+      };
     } catch (error) {
       console.error('Failed to fetch booking extras:', error);
       throw error;
     }
   },
 
-  addExtras: async (bookingRef: string, extraIds: string[]) => {
+  addExtras: async (
+    bookingRef: string,
+    extras: (string | AddExtraPayloadItem)[]
+  ) => {
+    const formattedExtras: AddExtraPayloadItem[] = extras.map((item) => {
+      if (typeof item === 'string') {
+        return { extra_id: item, quantity: 1 };
+      }
+      return item;
+    });
+
+    const payload = { extras: formattedExtras };
+
     try {
-      const payload = {
-        extras: extraIds.map((id) => ({ extra_id: id }))
-      };
       const response = await publicApi.put('', payload, {
         params: { path: 'api/v1/bookings/add-extras/', booking_ref: bookingRef }
       });
@@ -403,7 +391,7 @@ export const bookingsService = {
 
   /**
    * Sets or updates pickup and dropoff dates on a booking
-   * POST api/v1/bookings/?booking_ref=BK-XXXXXX (with fallback to bookings/)
+   * POST api/v1/bookings/?booking_ref=BK-XXXXXX
    */
   setBookingDates: async (bookingRef: string, pickupDate: string, dropoffDate: string) => {
     const formData = new FormData();
@@ -417,19 +405,11 @@ export const bookingsService = {
       });
       return { success: true, data: response.data };
     } catch (error: any) {
-      try {
-        const fallbackRes = await publicApi.post('', formData, {
-          params: { path: 'bookings/', booking_ref: bookingRef },
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        return { success: true, data: fallbackRes.data };
-      } catch (fallbackErr: any) {
-        console.error(`Failed to set booking dates for ${bookingRef}:`, fallbackErr);
-        return {
-          success: false,
-          message: getUserFriendlyMessage(fallbackErr || error)
-        };
-      }
+      console.error(`Failed to set booking dates for ${bookingRef}:`, error);
+      return {
+        success: false,
+        message: getUserFriendlyMessage(error)
+      };
     }
   },
 
@@ -457,10 +437,11 @@ export const bookingsService = {
     }
   },
 
-  cancelBooking: async (bookingRef: string, data: { reason: string }) => {
+  cancelBooking: async (bookingRef: string, data?: { reason?: string }) => {
+    const body = data || { reason: 'Customer requested cancellation' };
     try {
-      const response = await publicApi.post('', data, {
-        params: { path: `api/v1/admin/bookings/cancel/`, booking_ref: bookingRef },
+      const response = await publicApi.put('', body, {
+        params: { path: 'api/v1/bookings/cancel/', booking_ref: bookingRef },
       });
       return response.data;
     } catch (error) {
@@ -568,17 +549,8 @@ export const bookingsService = {
       });
       return response.data;
     } catch (error) {
-      try {
-        const fallbackRes = await publicApi.get('', {
-          params: { path: 'admin/bookings/receipt/', booking_ref: bookingRef }
-        });
-        return fallbackRes.data;
-      } catch (fallbackError) {
-        const altRes = await publicApi.get('', {
-          params: { path: 'bookings/receipt/', booking_ref: bookingRef }
-        });
-        return altRes.data;
-      }
+      console.error(`Failed to fetch booking receipt for ${bookingRef}:`, error);
+      throw error;
     }
   },
 };

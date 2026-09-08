@@ -553,20 +553,11 @@ export const accountsService = {
     formData.append('new_password', payload.new_password);
     formData.append('confirm_password', payload.confirm_password);
 
-    try {
-      const response = await publicApi.post('', formData, {
-        params: { path: 'api/v1/accounts/change-password/' },
-        headers: { 'Content-Type': 'multipart/form-data' },
-        successMessage: 'Password changed successfully',
-      } as any);
-      return response.data;
-    } catch (error) {
-      const fallbackRes = await publicApi.post('', formData, {
-        params: { path: 'accounts/change-password/' },
-        headers: { 'Content-Type': 'multipart/form-data' },
-        successMessage: 'Password changed successfully',
-      } as any);
-      return fallbackRes.data;
-    }
+    const response = await publicApi.post<ChangePasswordResponse>('', formData, {
+      params: { path: 'api/v1/accounts/change-password/' },
+      headers: { 'Content-Type': 'multipart/form-data' },
+      successMessage: 'Password changed successfully',
+    } as any);
+    return response.data;
   }
 };

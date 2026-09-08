@@ -22,15 +22,8 @@ export const auditLogsService = {
       });
       return response.data;
     } catch (error) {
-      try {
-        const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/audit-logs/info/', audit_id: auditId }
-        });
-        return fallbackResponse.data;
-      } catch (fallbackError) {
-        console.error(`Failed to fetch audit log detail for ${auditId}:`, fallbackError);
-        throw fallbackError;
-      }
+      console.error(`Failed to fetch audit log detail for ${auditId}:`, error);
+      throw error;
     }
   },
 
@@ -42,16 +35,8 @@ export const auditLogsService = {
       });
       return response;
     } catch (error) {
-      try {
-        const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/audit-logs/', export: format },
-          responseType: 'arraybuffer',
-        });
-        return fallbackResponse;
-      } catch (fallbackError) {
-        console.error('Failed to export audit logs:', fallbackError);
-        throw fallbackError;
-      }
+      console.error('Failed to export audit logs:', error);
+      throw error;
     }
   }
 };

@@ -8,7 +8,7 @@ import { performSearch, hydrateSearchIndex } from "@/lib/searchData";
 import SearchDropdown from "@/components/search/SearchDropdown";
 
 const NAV_LINKS = [
-  { label: "Home", href: "/" },
+  { label: "Home", href: "/home" },
   { label: "About Us", href: "/about-us" },
   { label: "Our Fleet", href: "/our-fleet" },
   { label: "Blog", href: "/blog" },
@@ -123,7 +123,7 @@ export default function Navbar() {
       <div className="navbar__inner">
         {/* Logo */}
         <Link
-          href="/"
+          href="/home"
           className={`navbar__logo-link ${isOpen ? "navbar__logo-link--hidden" : ""}`}
           aria-label="Drifully home"
         >
@@ -136,7 +136,7 @@ export default function Navbar() {
             DRIFULLY
           </div>
           <div className="navbar__mobile-header">
-            <Link href="/" onClick={() => setIsOpen(false)}>
+            <Link href="/home" onClick={() => setIsOpen(false)}>
               <Image src="/images/logo.svg" alt="Drifully" width={120} height={36} />
             </Link>
           </div>

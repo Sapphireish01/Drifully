@@ -169,7 +169,20 @@ export default function RebookVehicleModal({
                     type="date"
                     className={styles.dateInput}
                     value={pickupDate}
-                    onChange={(e) => setPickupDate(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]}
+                    onChange={(e) => {
+                      const newPickup = e.target.value;
+                      setPickupDate(newPickup);
+                      if (dropoffDate && newPickup) {
+                        const p = new Date(newPickup);
+                        const d = new Date(dropoffDate);
+                        if (d <= p) {
+                          const nextDay = new Date(p);
+                          nextDay.setDate(nextDay.getDate() + 1);
+                          setDropoffDate(nextDay.toISOString().split("T")[0]);
+                        }
+                      }
+                    }}
                   />
                 </div>
 
@@ -179,6 +192,15 @@ export default function RebookVehicleModal({
                     type="date"
                     className={styles.dateInput}
                     value={dropoffDate}
+                    min={
+                      pickupDate
+                        ? (() => {
+                            const d = new Date(pickupDate);
+                            d.setDate(d.getDate() + 1);
+                            return d.toISOString().split("T")[0];
+                          })()
+                        : new Date().toISOString().split("T")[0]
+                    }
                     onChange={(e) => setDropoffDate(e.target.value)}
                   />
                 </div>

@@ -62,19 +62,6 @@ export default function PaymentMethodModal({
         />
       ),
     },
-    // {
-    //   id: "card",
-    //   label: "Direct Card Payment",
-    //   disabled: false,
-    //   icon: (
-    //     <Image
-    //       src="/customer app/icons/card.svg"
-    //       alt="Card"
-    //       width={22}
-    //       height={22}
-    //     />
-    //   ),
-    // },
   ];
 
   const handlePayClick = async () => {
@@ -125,6 +112,7 @@ export default function PaymentMethodModal({
         if (selectedMethod === "paystack") {
           const res = await paymentsService.initiatePaystackPayment(bookingRef);
           const redirectUrl = res?.data?.authorization_url || res?.authorization_url || res?.data?.url;
+
           if (redirectUrl) {
             window.location.href = redirectUrl;
             return;
@@ -145,7 +133,6 @@ export default function PaymentMethodModal({
       const msg = err?.response?.data?.detail || err?.response?.data?.message || err?.message || "Payment initiation failed.";
       toastError(err, msg);
       setErrorMsg(msg);
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -204,7 +191,7 @@ export default function PaymentMethodModal({
           onClick={handlePayClick}
           disabled={isProcessing}
         >
-          {isProcessing ? "Processing..." : "Confirm & Pay"}
+          {isProcessing ? "Redirecting to Paystack..." : "Confirm & Pay"}
         </button>
       </div>
     </div>

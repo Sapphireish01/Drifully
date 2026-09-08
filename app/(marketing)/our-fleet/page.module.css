@@ -7,7 +7,7 @@
 }
 
 .fleet-hero {
-  padding-block: var(--space-16);
+  padding-top: var(--space-16);
   text-align: center;
 }
 
@@ -113,7 +113,7 @@
 
 /* Fleet Grid & Filters */
 .fleet-section {
-  padding-block: var(--space-20);
+  padding-bottom: var(--space-20);
   background: #fff;
 }
 

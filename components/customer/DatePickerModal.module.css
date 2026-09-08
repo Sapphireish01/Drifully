@@ -89,8 +89,22 @@
   justify-content: center;
 }
 
-.dayBtn:hover {
+.dayBtn:hover:not(:disabled) {
   background: #f1f5f9;
+}
+
+.disabledDay {
+  opacity: 0.28 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+.disabledNavBtn {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 
 .selected {

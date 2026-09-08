@@ -312,7 +312,7 @@ export default function DriveWithDrifullyPage() {
                   <Image src="/images/earning-4.png" alt="Get Verified & Start Driving" fill style={{ objectFit: 'cover', borderRadius: '10px' }} />
                 </div>
               </div>
-              <div className={styles.earnStep} style={{ color: '#8A2BE2' }}>Step 04</div>
+              <div className={styles.earnStep} style={{ color: '#8A2BE2' }}>Step 4</div>
               <div style={{ color: '#111', fontSize: '0.9rem' }}>Get Verified &amp; Start Driving</div>
               <h3 className={styles.earnCardTitle}>Download or sign in to the Drifully Drivers app, complete your driver profile. Begin applying for available driving bookings.</h3>
             </div>

@@ -243,14 +243,17 @@ export default function VehicleDetailPage() {
     }
   }, [isLoading, vehicle, searchParams]);
 
-  // Payment Verification on Redirect Return
+  // Payment Verification / Confirmation on Redirect Return
   useEffect(() => {
     if (typeof window === "undefined") return;
     const urlParams = new URLSearchParams(window.location.search);
     const trxref = urlParams.get("trxref") || urlParams.get("reference");
-    const bookingRefFromUrl = urlParams.get("booking_ref");
+    const bookingRefFromUrl = urlParams.get("booking_ref") || urlParams.get("booking_reference");
 
-    if (trxref) {
+    if (bookingRefFromUrl) {
+      setBookingReference(bookingRefFromUrl);
+      setBookingStep(6); // Open Booking Confirmed modal directly
+    } else if (trxref) {
       const refToVerify = bookingRefFromUrl || bookingReference;
       if (refToVerify) {
         paymentsService
@@ -263,7 +266,7 @@ export default function VehicleDetailPage() {
             setBookingStep(6); // Open Booking Confirmed modal
           })
           .catch((err: any) => {
-            console.error("Payment verification failed:", err);
+            console.error("Payment verification fallback failed:", err);
           });
       }
     }
@@ -335,16 +338,19 @@ export default function VehicleDetailPage() {
   };
 
   const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([]);
+  const [selectedExtrasPayload, setSelectedExtrasPayload] = useState<any[]>([]);
   const [isSavingExtras, setIsSavingExtras] = useState<boolean>(false);
 
-  const handleContinueEnhanceTrip = async (ids?: string[]) => {
-    const extrasToSave = ids || selectedExtraIds;
-    setSelectedExtraIds(extrasToSave);
+  const handleContinueEnhanceTrip = async (extrasPayload?: any[], ids?: string[]) => {
+    const payloadToSave = extrasPayload || selectedExtrasPayload;
+    const idsToSave = ids || selectedExtraIds;
+    setSelectedExtrasPayload(payloadToSave);
+    setSelectedExtraIds(idsToSave);
 
-    if (bookingReference && extrasToSave.length > 0) {
+    if (bookingReference && payloadToSave.length > 0) {
       try {
         setIsSavingExtras(true);
-        await bookingsService.addExtras(bookingReference, extrasToSave);
+        await bookingsService.addExtras(bookingReference, payloadToSave);
       } catch (err: any) {
         console.error("Failed to save extras to booking:", err);
         toastError(err);
@@ -369,6 +375,21 @@ export default function VehicleDetailPage() {
   const handleSelectDate = (date: string) => {
     if (activeDateTarget === "pickup") {
       setPickupDate(date);
+      // Ensure drop-off date is strictly after the newly selected pickup date
+      if (dropOffDate) {
+        const pickupD = new Date(date);
+        const dropoffD = new Date(dropOffDate);
+        if (!isNaN(pickupD.getTime()) && !isNaN(dropoffD.getTime())) {
+          if (dropoffD.getTime() <= pickupD.getTime()) {
+            const nextDay = new Date(pickupD);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const y = nextDay.getFullYear();
+            const m = String(nextDay.getMonth() + 1).padStart(2, "0");
+            const d = String(nextDay.getDate()).padStart(2, "0");
+            setDropOffDate(`${y}-${m}-${d}`);
+          }
+        }
+      }
     } else if (activeDateTarget === "dropoff") {
       setDropOffDate(date);
     }
@@ -701,6 +722,22 @@ export default function VehicleDetailPage() {
         isOpen={activeDateTarget !== null}
         onClose={() => setActiveDateTarget(null)}
         onSelectDate={handleSelectDate}
+        minDate={
+          activeDateTarget === "dropoff"
+            ? (pickupDate
+                ? (() => {
+                    const d = new Date(pickupDate);
+                    d.setDate(d.getDate() + 1);
+                    return d;
+                  })()
+                : (() => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + 1);
+                    return d;
+                  })())
+            : new Date()
+        }
+        selectedDate={activeDateTarget === "pickup" ? pickupDate : dropOffDate}
       />
 
       {/* Step 1: Start Your Journey (Rental Mode Modal) */}
@@ -727,11 +764,6 @@ export default function VehicleDetailPage() {
         onBack={() => setBookingStep(selectedRentalMode === "chauffeur" ? 1 : 2)}
         onContinue={handleContinueEnhanceTrip}
         selectedExtras={selectedExtraIds}
-        onToggleExtra={(id) =>
-          setSelectedExtraIds((prev) =>
-            prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-          )
-        }
       />
 
       {/* Step 4: Review Your Booking */}
