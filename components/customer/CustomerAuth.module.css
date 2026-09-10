@@ -1,5 +1,7 @@
 .page {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background: #fff;
   color: #171a22;
 }
@@ -83,17 +85,18 @@
 }
 
 .body {
-  min-height: calc(100vh - 68px);
+  height: calc(100vh - 68px);
+  height: calc(100dvh - 68px);
   margin-top: 68px;
   display: grid;
   grid-template-columns: 56.3% 43.7%;
   align-items: stretch;
+  overflow: hidden;
 }
 
 .visual {
   position: relative;
   height: 100%;
-  min-height: calc(100vh - 68px);
   overflow: hidden;
   background: #11151a;
 }
@@ -214,12 +217,18 @@
 .formSide {
   display: flex;
   justify-content: center;
-  padding: 98px 7.5% 50px;
+  align-items: flex-start;
+  height: 100%;
+  padding: 30px 7.5% 20px 0;
   background: #fff;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .formWrap {
   width: 100%;
+  max-width: 440px;
+  margin: 0;
 }
 
 .tabs {
@@ -252,37 +261,37 @@
 }
 
 .formHeading {
-  margin-top: 29px;
-  font-size: 28px;
+  margin-top: 18px;
+  font-size: 26px;
   letter-spacing: 0;
 }
 
 .formSubtitle {
-  margin-top: 8px;
+  margin-top: 5px;
   color: #9aa2ad;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .form {
   display: grid;
-  gap: 13px;
-  margin-top: 23px;
+  gap: 10px;
+  margin-top: 18px;
 }
 
 .field {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .field label {
   color: #303640;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .field input,
 .phoneInput {
   width: 100%;
-  height: 44px;
+  height: 40px;
   padding: 0 11px;
   border: 1px solid #e0e4e9;
   border-radius: 7px;
@@ -290,7 +299,7 @@
   background: #fff;
   outline: none;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .field input:focus,
@@ -400,6 +409,13 @@
 }
 
 @media (max-width: 900px) {
+  .page {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-y: auto;
+  }
+
   .header {
     padding: 0 24px;
   }
@@ -410,15 +426,21 @@
   }
 
   .body {
+    height: auto;
+    min-height: calc(100vh - 68px);
+    overflow: visible;
     grid-template-columns: 1fr;
   }
 
   .visual {
+    height: auto;
     min-height: 520px;
   }
 
   .formSide {
+    height: auto;
     padding: 55px 24px;
+    overflow-y: visible;
   }
 }
 

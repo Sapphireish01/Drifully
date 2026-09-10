@@ -150,10 +150,7 @@ export default function EnhanceTripModal({
             <h2 className={styles.title}>Enhance Your Trip</h2>
           </div>
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close">
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="1" y1="1" x2="11" y2="11" />
-              <line x1="1" y1="1" x2="11" y2="1" />
-            </svg>
+            x
           </button>
         </div>
 
