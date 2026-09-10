@@ -136,7 +136,8 @@ export const paymentsService = {
     newDropoffDate: string
   ) => {
     const params = {
-      path: 'api/v1/payments/paystack/extension/initiate/',
+      // {{base_url}}payments/frontend/paystack/pay/?booking_ref=BK-9MEAFRTO
+      path: 'api/v1/payments/frontend/paystack/pay/',
       booking_ref: bookingRef,
       additional_amount: String(additionalAmount),
       new_dropoff_date: newDropoffDate,
