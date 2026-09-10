@@ -80,7 +80,7 @@ export const paymentsService = {
 
     const response = await publicApi.get('', {
       params: {
-        path: 'api/v1/payments/paystack/pay/',
+        path: 'api/v1/payments/frontend/paystack/pay/',
         booking_ref: bookingRef,
         callback_url: callbackUrl,
         redirect_url: callbackUrl,
