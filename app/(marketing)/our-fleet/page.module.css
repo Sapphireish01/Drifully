@@ -3,6 +3,7 @@
 .main {
   padding-top: 100px;
   min-height: 100vh;
+  overflow-x: clip;
   background: #fcfcfc;
 }
 
@@ -80,6 +81,21 @@
   justify-content: center;
 }
 
+.hero-carousel__link {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  line-height: 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+.hero-carousel__link:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
 .hero-carousel__img {
   width: 100%;
   border-radius: var(--radius-lg);
@@ -105,6 +121,28 @@
 
 .hero-carousel:hover .hero-carousel__track {
   animation-play-state: paused;
+}
+
+@keyframes hero-skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.hero-carousel__skeleton {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: hero-skeleton-shimmer 1.8s infinite linear;
+}
+
+.hero-carousel__track--loading {
+  animation: none;
 }
 
 .body-md {

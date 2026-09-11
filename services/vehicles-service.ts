@@ -300,5 +300,17 @@ export const vehiclesService = {
       console.error("Failed to bulk upload vehicles:", error);
       throw error;
     }
+  },
+
+  getMiniFleet: async () => {
+    try {
+      const response = await publicApi.get("", {
+        params: { path: "api/v1/vehicles/mini-fleet/" }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch mini-fleet:", error);
+      throw error;
+    }
   }
 };

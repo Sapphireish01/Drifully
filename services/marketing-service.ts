@@ -2,6 +2,17 @@ import { publicApi } from '@/lib/api-client';
 import { Vehicle } from '@/types/vehicle';
 import { Faq } from '@/types/faq';
 
+export interface MiniFleetItem {
+  id: number;
+  primary_image: string;
+}
+
+export interface MiniFleetResponse {
+  results: {
+    [key: string]: MiniFleetItem[];
+  };
+}
+
 // Brand ID to name mapping
 const BRAND_MAP: { [key: number]: string } = {
   1: 'Toyota',
@@ -119,10 +130,11 @@ export const marketingService = {
     }
     return null;
   },
-  // getFleetVehicles: async (): Promise<any[]> => {
-  //   const res = await publicApi.get('', {
-  //     params: { path: 'api/v1/vehicles/fleet/' }
-  //   });
-  //   return res.data;
-  // }
+
+  getMiniFleet: async (): Promise<MiniFleetResponse> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/vehicles/mini-fleet/' }
+    });
+    return response.data;
+  },
 };

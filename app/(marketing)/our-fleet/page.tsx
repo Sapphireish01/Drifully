@@ -24,6 +24,92 @@ export default function OurFleetPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currency, setCurrency] = useState<string>("USD");
+  const [heroImages, setHeroImages] = useState<{ id?: number; src: string; alt: string }[]>([]);
+  const [heroLoading, setHeroLoading] = useState<boolean>(true);
+
+  // Fetch mini fleet for the hero carousel
+  useEffect(() => {
+    let isMounted = true;
+    const fetchHeroFleet = async () => {
+      setHeroLoading(true);
+      try {
+        const miniFleetData = await marketingService.getMiniFleet();
+        if (!isMounted) return;
+
+        const results = miniFleetData?.results || {};
+        const categoryKeys = Object.keys(results);
+        const extracted: { id?: number; src: string; alt: string }[] = [];
+        const seenIds = new Set<number>();
+        const seenImages = new Set<string>();
+
+        // Find max list length across returned categories
+        const maxLen = Math.max(
+          0,
+          ...categoryKeys.map((cat) => (Array.isArray(results[cat]) ? results[cat].length : 0))
+        );
+
+        // Interleave categories to create a diverse carousel
+        for (let i = 0; i < maxLen; i++) {
+          for (const cat of categoryKeys) {
+            const list = results[cat];
+            if (Array.isArray(list) && list[i]) {
+              const item = list[i];
+              if (item?.primary_image && !seenIds.has(item.id) && !seenImages.has(item.primary_image)) {
+                seenIds.add(item.id);
+                seenImages.add(item.primary_image);
+                extracted.push({
+                  id: item.id,
+                  src: item.primary_image,
+                  alt: `Fleet Vehicle ${item.id}`,
+                });
+              }
+            }
+          }
+        }
+
+        if (extracted.length > 0) {
+          setHeroImages(extracted);
+        } else {
+          // Fallback to getVehicles if mini-fleet returns empty
+          const allFleet = await marketingService.getVehicles();
+          if (!isMounted) return;
+          const fallback: { id?: number; src: string; alt: string }[] = [];
+          (allFleet || []).forEach((v) => {
+            const name = v.name || "Drifully Fleet Vehicle";
+            if (v.image && !v.image.includes("placeholder-car.png")) {
+              fallback.push({ id: Number(v.id), src: v.image, alt: name });
+            }
+          });
+          setHeroImages(fallback);
+        }
+      } catch (e) {
+        console.error("Failed to load hero mini-fleet:", e);
+        if (isMounted) {
+          try {
+            const allFleet = await marketingService.getVehicles();
+            if (!isMounted) return;
+            const fallback: { id?: number; src: string; alt: string }[] = [];
+            (allFleet || []).forEach((v) => {
+              const name = v.name || "Drifully Fleet Vehicle";
+              if (v.image && !v.image.includes("placeholder-car.png")) {
+                fallback.push({ id: Number(v.id), src: v.image, alt: name });
+              }
+            });
+            setHeroImages(fallback);
+          } catch {
+            setHeroImages([]);
+          }
+        }
+      } finally {
+        if (isMounted) setHeroLoading(false);
+      }
+    };
+
+    fetchHeroFleet();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Reset page when category or brand filter changes
   useEffect(() => {
@@ -102,6 +188,104 @@ export default function OurFleetPage() {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const renderHeroSkeletonSet = () => (
+    <>
+      <div className={styles['hero-carousel__col']}>
+        <div className={`${styles['hero-carousel__skeleton']} ${styles['hero-carousel__img--taller']}`} />
+        <div className={`${styles['hero-carousel__skeleton']} ${styles['hero-carousel__img--shorter']}`} />
+      </div>
+      <div className={styles['hero-carousel__col']}>
+        <div className={`${styles['hero-carousel__skeleton']} ${styles['hero-carousel__img--small']}`} />
+        <div className={`${styles['hero-carousel__skeleton']} ${styles['hero-carousel__img--small']}`} />
+      </div>
+      <div className={`${styles['hero-carousel__col']} ${styles['hero-carousel__col--single']}`}>
+        <div className={`${styles['hero-carousel__skeleton']} ${styles['hero-carousel__img--large']}`} />
+      </div>
+      <div className={styles['hero-carousel__col']}>
+        <div className={`${styles['hero-carousel__skeleton']} ${styles['hero-carousel__img--small']}`} />
+        <div className={`${styles['hero-carousel__skeleton']} ${styles['hero-carousel__img--small']}`} />
+      </div>
+      <div className={styles['hero-carousel__col']}>
+        <div className={`${styles['hero-carousel__skeleton']} ${styles['hero-carousel__img--shorter']}`} />
+        <div className={`${styles['hero-carousel__skeleton']} ${styles['hero-carousel__img--taller']}`} />
+      </div>
+    </>
+  );
+
+  const renderHeroItem = (
+    img: { id?: number; src: string; alt: string },
+    sizeClass: string,
+    width: number,
+    height: number
+  ) => {
+    const imgElement = (
+      <Image
+        src={img.src}
+        alt={img.alt}
+        width={width}
+        height={height}
+        unoptimized
+        className={`${styles['hero-carousel__img']} ${sizeClass}`}
+      />
+    );
+
+    if (img.id) {
+      return (
+        <Link
+          href={`/our-fleet/${img.id}`}
+          className={styles['hero-carousel__link']}
+        >
+          {imgElement}
+        </Link>
+      );
+    }
+
+    return (
+      <div className={styles['hero-carousel__link']}>
+        {imgElement}
+      </div>
+    );
+  };
+
+  const renderHeroColumnSet = (keyPrefix: string) => {
+    if (heroImages.length === 0) return null;
+    const getImg = (idx: number) => heroImages[idx % heroImages.length];
+
+    const img0 = getImg(0);
+    const img1 = getImg(1);
+    const img2 = getImg(2);
+    const img3 = getImg(3);
+    const img4 = getImg(4);
+    const img5 = getImg(5);
+    const img6 = getImg(6);
+    const img7 = getImg(7);
+    const img8 = getImg(8);
+
+    return (
+      <>
+        <div className={styles['hero-carousel__col']}>
+          {renderHeroItem(img0, styles['hero-carousel__img--taller'], 250, 180)}
+          {renderHeroItem(img1, styles['hero-carousel__img--shorter'], 250, 100)}
+        </div>
+        <div className={styles['hero-carousel__col']}>
+          {renderHeroItem(img2, styles['hero-carousel__img--small'], 250, 140)}
+          {renderHeroItem(img3, styles['hero-carousel__img--small'], 250, 140)}
+        </div>
+        <div className={`${styles['hero-carousel__col']} ${styles['hero-carousel__col--single']}`}>
+          {renderHeroItem(img4, styles['hero-carousel__img--large'], 250, 300)}
+        </div>
+        <div className={styles['hero-carousel__col']}>
+          {renderHeroItem(img5, styles['hero-carousel__img--small'], 250, 140)}
+          {renderHeroItem(img6, styles['hero-carousel__img--small'], 250, 140)}
+        </div>
+        <div className={styles['hero-carousel__col']}>
+          {renderHeroItem(img7, styles['hero-carousel__img--shorter'], 250, 140)}
+          {renderHeroItem(img8, styles['hero-carousel__img--taller'], 250, 140)}
+        </div>
+      </>
+    );
+  };
+
   return (
     <>
       <Navbar />
@@ -121,51 +305,21 @@ export default function OurFleetPage() {
             <DownloadButtons variant="default" />
 
             {/* Continuous Carousel */}
-            <div className={styles['hero-carousel']}>
-              <div className={styles['hero-carousel__track']}>
-                {/* Set 1 */}
-                <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/1st-img.png" alt="VW Bus" width={250} height={180} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--taller']}`} />
-                  <Image src="/images/2nd-img.jpg" alt="Interior" width={250} height={100} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--shorter']}`} />
-                </div>
-                <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/3rd-img.png" alt="Tesla" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                  <Image src="/images/4th-img.png" alt="Mini Cooper" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                </div>
-                <div className={`${styles['hero-carousel__col']} ${styles['hero-carousel__col--single']}`}>
-                  <Image src="/images/5th-img.png" alt="Red GTR" width={250} height={300} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--large']}`} />
-                </div>
-                <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/6th-img.png" alt="Polestar" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                  <Image src="/images/7th-img.png" alt="Charging" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                </div>
-                <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/8th-img.png" alt="BMW X6" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--shorter']}`} />
-                  <Image src="/images/9th-img.png" alt="Red Honda" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--taller']}`} />
-                </div>
-
-                {/* Set 2 (Duplicate for seamless loop) */}
-                <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/1st-img.png" alt="VW Bus" width={250} height={180} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--taller']}`} />
-                  <Image src="/images/2nd-img.jpg" alt="Interior" width={250} height={100} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--shorter']}`} />
-                </div>
-                <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/3rd-img.png" alt="Tesla" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                  <Image src="/images/4th-img.png" alt="Mini Cooper" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                </div>
-                <div className={`${styles['hero-carousel__col']} ${styles['hero-carousel__col--single']}`}>
-                  <Image src="/images/5th-img.png" alt="Red GTR" width={250} height={300} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--large']}`} />
-                </div>
-                <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/6th-img.png" alt="Polestar" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                  <Image src="/images/7th-img.png" alt="Charging" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                </div>
-                <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/8th-img.png" alt="BMW X6" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--shorter']}`} />
-                  <Image src="/images/9th-img.png" alt="Red Honda" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--taller']}`} />
+            {heroLoading ? (
+              <div className={styles['hero-carousel']}>
+                <div className={`${styles['hero-carousel__track']} ${styles['hero-carousel__track--loading']}`}>
+                  {renderHeroSkeletonSet()}
+                  {renderHeroSkeletonSet()}
                 </div>
               </div>
-            </div>
+            ) : heroImages.length > 0 ? (
+              <div className={styles['hero-carousel']}>
+                <div className={styles['hero-carousel__track']}>
+                  {renderHeroColumnSet("set-1")}
+                  {renderHeroColumnSet("set-2")}
+                </div>
+              </div>
+            ) : null}
           </div>
         </section>
 
