@@ -90,7 +90,7 @@ export default function BlogList() {
       )}
 
       {nonFeaturedBlogs.length > 0 && (
-        <section className={styles.section} style={{ paddingTop: '240px' }}>
+        <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Insights for every journey</h2>
             <p className={styles.sectionDesc}>Explore travel tips, driving guides, and smarter ways to move — designed to make every trip easier and more enjoyable</p>
