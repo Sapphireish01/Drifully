@@ -223,6 +223,18 @@ export const accountsService = {
   },
 
   /**
+   * Subscribes an email to the newsletter at accounts/newsletter/subscribe/
+   * @param email - User's email address
+   */
+  subscribeNewsletter: async (email: string): Promise<{ message?: string; [key: string]: any }> => {
+    const response = await publicApi.post('', { email }, {
+      params: { path: 'api/v1/accounts/newsletter/subscribe/' },
+      skipToast: true,
+    } as any);
+    return response.data;
+  },
+
+  /**
    * Creates a new role in the admin account at admin/roles/
    * @param payload - RolePayload object
    */

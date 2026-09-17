@@ -128,7 +128,7 @@ export default function Navbar() {
       <div className="navbar__inner">
         {/* Logo */}
         <Link
-          href="/"
+          href="/home"
           className={`navbar__logo-link ${isOpen ? "navbar__logo-link--hidden" : ""}`}
           aria-label="Drifully home"
         >

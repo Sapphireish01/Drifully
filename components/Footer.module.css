@@ -173,8 +173,29 @@
   transition: opacity var(--transition-fast);
 }
 
-.footer__newsletter-btn:hover {
+.footer__newsletter-btn:hover:not(:disabled) {
   opacity: 0.9;
+}
+
+.footer__newsletter-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.footer__newsletter-success {
+  margin-top: var(--space-2);
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.footer__newsletter-error {
+  margin-top: var(--space-2);
+  font-size: 13px;
+  color: #dc2626;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .footer__bottom {

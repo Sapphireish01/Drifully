@@ -13,19 +13,25 @@ export interface MiniFleetResponse {
   };
 }
 
-// Brand ID to name mapping
-const BRAND_MAP: { [key: number]: string } = {
+// Baseline Brand ID to name mapping from api/v1/vehicles/brands/
+const INITIAL_BRAND_MAP: { [key: number]: string } = {
   1: 'Toyota',
-  2: 'Honda',
-  3: 'BMW',
-  4: 'Mercedes-Benz',
-  5: 'Audi',
-  6: 'Porsche',
-  7: 'Tesla',
-  8: 'Volkswagen',
-  9: 'Ford',
-  10: 'Chevrolet',
+  2: 'BMW',
+  3: 'Mercedes',
+  4: 'Honda',
+  5: 'Ford',
+  6: 'Audi',
+  7: 'Chevrolet',
+  8: 'Nissan',
+  9: 'Volkswagen',
+  10: 'Lexus',
+  12: 'Hyundai',
+  13: 'Mercedes-Benz',
+  14: 'Kia',
 };
+
+// Dynamic in-memory Brand ID to name mapping, synchronized with brand API
+export const BRAND_MAP: { [key: number]: string } = { ...INITIAL_BRAND_MAP };
 
 // Category ID to name mapping
 const CATEGORY_MAP: { [key: number]: string } = {
@@ -39,22 +45,37 @@ const CATEGORY_MAP: { [key: number]: string } = {
 
 // Helper function to transform API vehicle to Vehicle interface
 const transformVehicle = (apiVehicle: any): Vehicle => {
-  const brandName = BRAND_MAP[apiVehicle.brand] || `Brand ${apiVehicle.brand}`;
-  const categoryName = CATEGORY_MAP[apiVehicle.category] || `Category ${apiVehicle.category}`;
+  const brandId = Number(apiVehicle.brand);
+  const brandName =
+    apiVehicle.brand_name ||
+    (typeof apiVehicle.brand === 'object' && apiVehicle.brand?.name) ||
+    BRAND_MAP[brandId] ||
+    (apiVehicle.brand && isNaN(Number(apiVehicle.brand)) ? String(apiVehicle.brand) : '');
+
+  const categoryName =
+    apiVehicle.category_name ||
+    (typeof apiVehicle.category === 'object' && apiVehicle.category?.name) ||
+    CATEGORY_MAP[apiVehicle.category] ||
+    (apiVehicle.category && isNaN(Number(apiVehicle.category)) ? String(apiVehicle.category) : '');
+
   const primaryImage = apiVehicle.images?.find((img: any) => img.is_primary)?.image ||
     apiVehicle.images?.[0]?.image ||
     '/images/placeholder-car.png';
 
+  const fullName = brandName
+    ? `${brandName} ${apiVehicle.model || ''}`.trim()
+    : apiVehicle.model || 'Rental Vehicle';
+
   return {
     id: apiVehicle.id,
-    name: `${brandName} ${apiVehicle.model}`,
-    type: categoryName,
+    name: fullName,
+    type: categoryName || 'Sedan',
     transmission: apiVehicle.transmission || 'Automatic',
     capacity: apiVehicle.seats || 5,
     price: apiVehicle.price_per_day || '0',
     location: 'Available', // Default location since API doesn't provide it
     image: primaryImage,
-    category: categoryName,
+    category: categoryName || 'Sedan',
     rating: apiVehicle.rating || '4.5',
     reviews: apiVehicle.reviews || 0,
     fuel: apiVehicle.fuel_type || 'Petrol',
@@ -69,7 +90,28 @@ const transformVehicle = (apiVehicle: any): Vehicle => {
 
 export const marketingService = {
   /**
-   * Fetches vehicles with optional filters
+   * Fetches vehicle brands from api/v1/vehicles/brands/ and synchronizes BRAND_MAP
+   */
+  getBrands: async (): Promise<any[]> => {
+    try {
+      const response = await publicApi.get('', {
+        params: { path: 'api/v1/vehicles/brands/' }
+      });
+      const brands = Array.isArray(response.data) ? response.data : response.data?.results || [];
+      brands.forEach((b: any) => {
+        if (b && b.id && b.name) {
+          BRAND_MAP[Number(b.id)] = b.name;
+        }
+      });
+      return brands;
+    } catch (e) {
+      console.warn('Failed to fetch dynamic vehicle brands from API:', e);
+      return Object.entries(BRAND_MAP).map(([id, name]) => ({ id: Number(id), name }));
+    }
+  },
+
+  /**
+   * Fetches vehicles with optional filters, ensuring brand definitions are up to date
    * @param vehicleTypes - Array of vehicle types (e.g., ['suv', 'sedan'])
    */
   getVehicles: async (vehicleTypes?: string[]): Promise<Vehicle[]> => {
@@ -81,18 +123,29 @@ export const marketingService = {
       params.vehicle_type = vehicleTypes.map(t => t.toLowerCase());
     }
 
-    const response = await publicApi.get('', { params });
-    const vehicles = response.data;
+    const [fleetRes] = await Promise.allSettled([
+      publicApi.get('', { params }),
+      marketingService.getBrands(),
+    ]);
+
+    const vehicles = fleetRes.status === 'fulfilled' ? fleetRes.value.data : [];
 
     // Transform API response to Vehicle interface
     return Array.isArray(vehicles) ? vehicles.map(transformVehicle) : [];
   },
 
   getVehicleById: async (id: string | number): Promise<Vehicle> => {
-    const response = await publicApi.get('', {
-      params: { path: `api/v1/vehicles/fleet/?vehicle_id=${id}` }
-    });
-    return transformVehicle(response.data);
+    const [fleetRes] = await Promise.allSettled([
+      publicApi.get('', {
+        params: { path: `api/v1/vehicles/fleet/?vehicle_id=${id}` }
+      }),
+      marketingService.getBrands(),
+    ]);
+
+    if (fleetRes.status === 'fulfilled') {
+      return transformVehicle(fleetRes.value.data);
+    }
+    throw new Error(`Failed to fetch vehicle ${id}`);
   },
 
   getFaqs: async (): Promise<Faq[]> => {

@@ -7,6 +7,7 @@ import FilterModal from "@/components/customer/FilterModal";
 import FilterIcon from "@/components/icons/FilterIcon";
 import Spinner from "@/components/customer/Spinner";
 import { vehiclesService } from "@/services/vehicles-service";
+import { BRAND_MAP } from "@/services/marketing-service";
 import { Vehicle } from "@/data/vehicles";
 import styles from "./CustomerHome.module.css";
 
@@ -166,10 +167,16 @@ function transformApiVehicle(item: ApiVehicle): Vehicle {
     ? rawPrice.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
     : "15,000";
 
+  const brandId = item.brand !== undefined ? Number(item.brand) : undefined;
+  const brandName = item.brand_name || (brandId && BRAND_MAP[brandId]) || "";
+  const vehicleName = brandName
+    ? `${brandName} ${item.model || ""} ${item.year || ""}`.trim()
+    : `${item.model || ""} ${item.year || ""}`.trim() || `Vehicle #${item.id}`;
+
   return {
     id: typeof item.id === "string" ? parseInt(item.id, 10) || 0 : item.id,
     slug: item.slug || `${(item.model || 'car').toLowerCase().replace(/\s+/g, '-')}-${item.id}`,
-    name: `${item.brand_name || ''} ${item.model || ''} ${item.year || ''}`.trim() || `Vehicle #${item.id}`,
+    name: vehicleName,
     type: item.category_name || item.type || "Sedan",
     transmission: item.transmission ? (item.transmission.charAt(0).toUpperCase() + item.transmission.slice(1)) : "Automatic",
     capacity: item.seats || 4,

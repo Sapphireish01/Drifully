@@ -1,5 +1,5 @@
 import Fuse, { IFuseOptions } from "fuse.js";
-import { marketingService } from "@/services/marketing-service";
+import { marketingService, BRAND_MAP } from "@/services/marketing-service";
 
 export interface SearchItem {
   id: string;
@@ -695,35 +695,75 @@ export async function hydrateSearchIndex(): Promise<SearchItem[]> {
 
   isHydrating = true;
   try {
-    const [apiVehicles, apiBlogs, apiFaqs] = await Promise.allSettled([
+    const [apiVehicles, apiBlogs, apiFaqs, apiBrands] = await Promise.allSettled([
       marketingService.getVehicles(),
       marketingService.getBlogs(),
       marketingService.getFaqs(),
+      marketingService.getBrands(),
     ]);
 
     const dynamicItems: SearchItem[] = [];
 
+    // Ensure brand lookup map is ready with live and baseline brands
+    const brandLookup: Record<string, string> = {
+      "1": "Toyota",
+      "2": "BMW",
+      "3": "Mercedes",
+      "4": "Honda",
+      "5": "Ford",
+      "6": "Audi",
+      "7": "Chevrolet",
+      "8": "Nissan",
+      "9": "Volkswagen",
+      "10": "Lexus",
+      "12": "Hyundai",
+      "13": "Mercedes-Benz",
+      "14": "Kia",
+      ...Object.fromEntries(Object.entries(BRAND_MAP).map(([k, v]) => [String(k), v])),
+    };
+
+    if (apiBrands.status === "fulfilled" && Array.isArray(apiBrands.value)) {
+      apiBrands.value.forEach((b: any) => {
+        if (b && b.id && b.name) {
+          brandLookup[String(b.id)] = b.name;
+        }
+      });
+    }
+
     // Process API Vehicles if available
     if (apiVehicles.status === "fulfilled" && Array.isArray(apiVehicles.value)) {
       apiVehicles.value.forEach((v: any) => {
-        const title = v.name || `${v.brand_id || ""} ${v.model || ""}`.trim();
+        const brandId = String(v.brand_id || v.brand || "");
+        const resolvedBrand = v.brand_name || brandLookup[brandId] || "";
+
+        let title = v.name || "";
+        // Clean up any residual "Brand <id>" prefix
+        if (!title || /^Brand\s+\d+/i.test(title)) {
+          title = resolvedBrand ? `${resolvedBrand} ${v.model || ""}`.trim() : (v.model || "Rental Vehicle");
+        }
+
+        const keywords = [
+          title.toLowerCase(),
+          resolvedBrand.toLowerCase(),
+          (v.model || "").toLowerCase(),
+          (v.type || "").toLowerCase(),
+          (v.category || "").toLowerCase(),
+          (v.fuel || "").toLowerCase(),
+          (v.transmission || "").toLowerCase(),
+          ...title.toLowerCase().split(/\s+/),
+          ...(v.features || []).map((f: string) => String(f).toLowerCase()),
+        ].filter(Boolean);
+
         dynamicItems.push({
           id: `fleet-${v.id}`,
           title: title || "Rental Vehicle",
           description: `${v.type || v.category || "Vehicle"} • ${v.fuel || "Petrol"} • ${v.transmission || "Automatic"} • ${v.capacity || 5} Seats`,
           url: `/our-fleet/${v.id}`,
           category: "Our Fleet",
-          tag: v.type || v.category || "Vehicle",
+          tag: resolvedBrand || v.type || v.category || "Vehicle",
           rating: String(v.rating || "4.8"),
           reviewsCount: Number(v.reviews || 0),
-          keywords: [
-            title.toLowerCase(),
-            (v.type || "").toLowerCase(),
-            (v.category || "").toLowerCase(),
-            (v.fuel || "").toLowerCase(),
-            (v.transmission || "").toLowerCase(),
-            ...(v.features || []).map((f: string) => String(f).toLowerCase()),
-          ].filter(Boolean),
+          keywords: Array.from(new Set(keywords)),
         });
       });
     }
