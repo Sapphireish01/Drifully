@@ -37,6 +37,7 @@ const TOAST_DURATION = 4500; // ms
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const timersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const recentToastsRef = useRef<Map<string, number>>(new Map());
 
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -46,10 +47,34 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const showToast = useCallback(
     (type: ToastType, message: string) => {
-      const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      const item: ToastItem = { id, type, message, createdAt: Date.now() };
+      const trimmed = message?.trim();
+      if (!trimmed) return;
+
+      const dedupeKey = `${type}:${trimmed}`;
+      const now = Date.now();
+      const lastShown = recentToastsRef.current.get(dedupeKey);
+
+      // Debounce: ignore identical toast triggered within last 1800ms
+      if (lastShown && now - lastShown < 1800) {
+        return;
+      }
+      recentToastsRef.current.set(dedupeKey, now);
+
+      // Clean up old entries from dedupe cache
+      if (recentToastsRef.current.size > 50) {
+        recentToastsRef.current.forEach((time, key) => {
+          if (now - time > 5000) recentToastsRef.current.delete(key);
+        });
+      }
+
+      const id = `toast-${now}-${Math.random().toString(36).slice(2, 7)}`;
+      const item: ToastItem = { id, type, message: trimmed, createdAt: now };
 
       setToasts((prev) => {
+        // Prevent duplicate active toast with identical message
+        if (prev.some((t) => t.type === type && t.message === trimmed)) {
+          return prev;
+        }
         // Cap at 5 visible toasts — remove oldest if over limit
         const next = [...prev, item];
         return next.length > 5 ? next.slice(next.length - 5) : next;

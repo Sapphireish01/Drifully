@@ -82,22 +82,42 @@ export default function PaymentMethodModal({
             additionalAmount,
             newDropoffDate
           );
-          const redirectUrl = res?.data?.authorization_url || res?.authorization_url || res?.data?.url;
+          const redirectUrl =
+            (typeof res === "string" && res.startsWith("http") ? res : null) ||
+            res?.data?.authorization_url ||
+            res?.authorization_url ||
+            res?.data?.url ||
+            res?.url;
+
           if (redirectUrl) {
             window.location.href = redirectUrl;
             return;
           }
+          const failMsg = res?.message || "Failed to obtain payment authorization URL for extension.";
+          setErrorMsg(failMsg);
+          toastError(failMsg);
+          setIsProcessing(false);
+          return;
         } else if (selectedMethod === "stripe" && additionalAmount && newDropoffDate) {
           const res = await paymentsService.initiateStripeExtension(
             bookingRef,
             additionalAmount,
             newDropoffDate
           );
-          const redirectUrl = res?.url || res?.data?.url;
+          const redirectUrl =
+            (typeof res === "string" && res.startsWith("http") ? res : null) ||
+            res?.url ||
+            res?.data?.url;
+
           if (redirectUrl) {
             window.location.href = redirectUrl;
             return;
           }
+          const failMsg = res?.message || "Failed to obtain Stripe extension checkout URL.";
+          setErrorMsg(failMsg);
+          toastError(failMsg);
+          setIsProcessing(false);
+          return;
         } else {
           // Direct Confirmation endpoint
           const res = await bookingsService.confirmBookingExtension(bookingRef, {
@@ -111,19 +131,38 @@ export default function PaymentMethodModal({
         // Standard Booking Payment
         if (selectedMethod === "paystack") {
           const res = await paymentsService.initiatePaystackPayment(bookingRef);
-          const redirectUrl = res?.data?.authorization_url || res?.authorization_url || res?.data?.url;
+          const redirectUrl =
+            (typeof res === "string" && res.startsWith("http") ? res : null) ||
+            res?.data?.authorization_url ||
+            res?.authorization_url ||
+            res?.data?.url ||
+            res?.url;
 
           if (redirectUrl) {
             window.location.href = redirectUrl;
             return;
           }
+          const failMsg = res?.message || "Failed to obtain payment authorization URL.";
+          setErrorMsg(failMsg);
+          toastError(failMsg);
+          setIsProcessing(false);
+          return;
         } else if (selectedMethod === "stripe") {
           const res = await paymentsService.initiateStripePayment(bookingRef);
-          const redirectUrl = res?.url || res?.data?.url;
+          const redirectUrl =
+            (typeof res === "string" && res.startsWith("http") ? res : null) ||
+            res?.url ||
+            res?.data?.url;
+
           if (redirectUrl) {
             window.location.href = redirectUrl;
             return;
           }
+          const failMsg = res?.message || "Failed to obtain Stripe payment checkout URL.";
+          setErrorMsg(failMsg);
+          toastError(failMsg);
+          setIsProcessing(false);
+          return;
         }
       }
 

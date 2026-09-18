@@ -71,21 +71,21 @@ export const paymentsService = {
   /**
    * Initiates Paystack payment session
    */
+  /**
+   * Initiates Paystack payment session
+   */
   initiatePaystackPayment: async (bookingRef: string, customCallbackUrl?: string) => {
-    const callbackUrl =
-      customCallbackUrl ||
-      (typeof window !== "undefined"
-        ? `${window.location.origin}/customer/booking-confirmed?booking_ref=${encodeURIComponent(bookingRef)}`
-        : "");
+    const params: Record<string, string> = {
+      path: 'api/v1/payments/frontend/paystack/pay/',
+      booking_ref: bookingRef,
+    };
 
-    const response = await publicApi.get('', {
-      params: {
-        path: 'api/v1/payments/frontend/paystack/pay/',
-        booking_ref: bookingRef,
-        callback_url: callbackUrl,
-        redirect_url: callbackUrl,
-      }
-    });
+    if (customCallbackUrl) {
+      params.callback_url = customCallbackUrl;
+      params.redirect_url = customCallbackUrl;
+    }
+
+    const response = await publicApi.get('', { params });
     return response.data;
   },
 

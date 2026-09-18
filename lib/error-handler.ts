@@ -154,6 +154,11 @@ export function getUserFriendlyMessage(error: any): string {
  * Programmatically triggers a global toast error notification.
  */
 export function toastError(errorOrMessage: any, fallbackMessage: string = "An error occurred"): void {
+  // If this error was already toasted by the API interceptor, avoid duplicate toast
+  if (errorOrMessage && typeof errorOrMessage === "object" && (errorOrMessage as any).__handledToast) {
+    return;
+  }
+
   const message = typeof errorOrMessage === "string"
     ? errorOrMessage
     : getUserFriendlyMessage(errorOrMessage) || fallbackMessage;

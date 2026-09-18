@@ -54,6 +54,7 @@ export const vehiclesService = {
 
     try {
       const response = await publicApi.post("", formData, {
+        skipToast: true,
         params: { path: "api/v1/bookings/upload/id/", booking_ref: bookingRef },
         headers: { "Content-Type": "multipart/form-data" }
       });
@@ -79,6 +80,7 @@ export const vehiclesService = {
 
     try {
       const response = await publicApi.post("", formData, {
+        skipToast: true,
         params: { path: "api/v1/bookings/upload/license/", booking_ref: bookingRef },
         headers: { "Content-Type": "multipart/form-data" }
       });
@@ -102,6 +104,7 @@ export const vehiclesService = {
 
     try {
       const response = await publicApi.post("", formData, {
+        skipToast: true,
         params: { path: "api/v1/bookings/initiate/", vehicle_id: vehicleId },
         headers: { "Content-Type": "multipart/form-data" }
       });
@@ -190,7 +193,7 @@ export const vehiclesService = {
    */
   getReviews: async (bookingRef?: string) => {
     try {
-      const params: Record<string, string> = { path: "bookings/review/" };
+      const params: Record<string, string> = { path: "api/v1/bookings/review/" };
       if (bookingRef) params.booking_ref = bookingRef;
       const response = await publicApi.get("", { params });
       return response.data;

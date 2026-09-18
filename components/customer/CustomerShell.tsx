@@ -39,7 +39,15 @@ export default function CustomerShell({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     if (!authenticated) {
-      router.replace("/customer/login");
+      const fullPath =
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : pathname;
+      const targetUrl =
+        fullPath && fullPath !== "/customer"
+          ? `/customer/login?redirect=${encodeURIComponent(fullPath)}`
+          : "/customer/login";
+      router.replace(targetUrl);
       return;
     }
 

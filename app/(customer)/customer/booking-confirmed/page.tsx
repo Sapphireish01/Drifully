@@ -5,59 +5,82 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { bookingsService, ExpandedTripData, BookingSummaryData } from "@/services/bookings-service";
+import { paymentsService } from "@/services/payments-service";
 import Spinner from "@/components/customer/Spinner";
 import styles from "./BookingConfirmed.module.css";
 
 function BookingConfirmedContent() {
   const searchParams = useSearchParams();
-  const bookingRef =
+  const rawBookingRef =
     searchParams.get("booking_ref") ||
     searchParams.get("booking_reference") ||
-    searchParams.get("reference") ||
+    searchParams.get("ref") ||
     searchParams.get("id") ||
     "";
 
+  const trxref = searchParams.get("trxref") || searchParams.get("reference") || "";
+  // If booking_ref wasn't explicit, but reference starts with BK-, use it
+  const resolvedBookingRef = rawBookingRef || (trxref.startsWith("BK-") ? trxref : "");
+
   const [tripData, setTripData] = useState<ExpandedTripData | null>(null);
   const [summaryData, setSummaryData] = useState<BookingSummaryData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(Boolean(bookingRef));
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(resolvedBookingRef || trxref));
+  const [isVerifying, setIsVerifying] = useState<boolean>(Boolean(trxref));
   const [copied, setCopied] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!bookingRef) return;
+    const activeRef = resolvedBookingRef || trxref;
+    if (!activeRef) return;
 
     let isMounted = true;
     setIsLoading(true);
 
-    // Attempt to fetch detailed trip information first
-    bookingsService
-      .getExpandedTripDetail(bookingRef)
-      .then((data) => {
+    const loadConfirmation = async () => {
+      // 1. Verify Paystack transaction if reference is present
+      if (trxref) {
+        setIsVerifying(true);
+        try {
+          await paymentsService.verifyPaystackPayment(trxref, activeRef);
+        } catch (vErr) {
+          console.warn("Payment verification response note:", vErr);
+        } finally {
+          if (isMounted) setIsVerifying(false);
+        }
+      }
+
+      // 2. Fetch detailed trip information
+      try {
+        const data = await bookingsService.getExpandedTripDetail(activeRef);
         if (isMounted && data) {
           setTripData(data);
+          setIsLoading(false);
+          return;
         }
-      })
-      .catch((err) => {
-        console.warn("Could not fetch expanded trip, trying booking summary:", err);
-        // Fallback to summary
-        return bookingsService
-          .getBookingSummary(bookingRef)
-          .then((summary) => {
-            if (isMounted && summary) {
-              setSummaryData(summary);
-            }
-          })
-          .catch((summaryErr) => {
-            console.error("Failed to fetch booking details:", summaryErr);
-          });
-      })
-      .finally(() => {
+      } catch (err) {
+        console.warn("Could not fetch expanded trip, falling back to booking summary:", err);
+      }
+
+      // 3. Fallback to booking summary
+      try {
+        const summary = await bookingsService.getBookingSummary(activeRef);
+        if (isMounted && summary) {
+          setSummaryData(summary);
+        }
+      } catch (summaryErr) {
+        console.error("Failed to fetch booking details:", summaryErr);
+      } finally {
         if (isMounted) setIsLoading(false);
-      });
+      }
+    };
+
+    loadConfirmation();
 
     return () => {
       isMounted = false;
     };
-  }, [bookingRef]);
+  }, [resolvedBookingRef, trxref]);
+
+  const bookingRef = resolvedBookingRef || trxref;
 
   const handleCopyRef = () => {
     if (!bookingRef) return;
@@ -104,7 +127,7 @@ function BookingConfirmedContent() {
     return (
       <div className={styles.loadingWrapper}>
         <Spinner size={36} />
-        <p>Loading your booking confirmation...</p>
+        <p>{isVerifying ? "Verifying payment with Paystack..." : "Loading your booking confirmation..."}</p>
       </div>
     );
   }

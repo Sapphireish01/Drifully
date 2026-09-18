@@ -3,6 +3,12 @@ import { getUserFriendlyMessage } from '@/lib/error-handler';
 
 // Extend AxiosRequestConfig to support custom toast metadata
 declare module 'axios' {
+  interface AxiosRequestConfig {
+    /** Custom success message shown in the toast after a successful mutation. */
+    successMessage?: string;
+    /** Set to true to suppress all toasts for this request. */
+    skipToast?: boolean;
+  }
   interface InternalAxiosRequestConfig {
     /** Custom success message shown in the toast after a successful mutation. */
     successMessage?: string;
@@ -77,6 +83,9 @@ publicApi.interceptors.response.use(
         (window as any).__showToast('error', message);
       } else if (typeof (window as any).__showAdminToast === 'function') {
         (window as any).__showAdminToast('error', message);
+      }
+      if (error && typeof error === 'object') {
+        (error as any).__handledToast = true;
       }
     }
 

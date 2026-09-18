@@ -380,6 +380,7 @@ export const bookingsService = {
 
     try {
       const response = await publicApi.put('', payload, {
+        skipToast: true,
         params: { path: 'api/v1/bookings/add-extras/', booking_ref: bookingRef }
       });
       return response.data;
@@ -400,6 +401,7 @@ export const bookingsService = {
 
     try {
       const response = await publicApi.post('', formData, {
+        skipToast: true,
         params: { path: 'api/v1/bookings/', booking_ref: bookingRef },
         headers: { 'Content-Type': 'multipart/form-data' }
       });

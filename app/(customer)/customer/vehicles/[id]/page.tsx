@@ -250,25 +250,30 @@ export default function VehicleDetailPage() {
     const trxref = urlParams.get("trxref") || urlParams.get("reference");
     const bookingRefFromUrl = urlParams.get("booking_ref") || urlParams.get("booking_reference");
 
-    if (bookingRefFromUrl) {
+    const activeRef = bookingRefFromUrl || (trxref?.startsWith("BK-") ? trxref : "") || bookingReference;
+
+    if (trxref && activeRef) {
+      paymentsService
+        .verifyPaystackPayment(trxref, activeRef)
+        .then((res: any) => {
+          console.log("Payment verified successfully:", res);
+          if (res?.booking_reference) {
+            setBookingReference(res.booking_reference);
+          } else if (activeRef) {
+            setBookingReference(activeRef);
+          }
+          setBookingStep(6); // Open Booking Confirmed modal
+        })
+        .catch((err: any) => {
+          console.error("Payment verification fallback failed:", err);
+          if (activeRef) {
+            setBookingReference(activeRef);
+            setBookingStep(6);
+          }
+        });
+    } else if (bookingRefFromUrl) {
       setBookingReference(bookingRefFromUrl);
       setBookingStep(6); // Open Booking Confirmed modal directly
-    } else if (trxref) {
-      const refToVerify = bookingRefFromUrl || bookingReference;
-      if (refToVerify) {
-        paymentsService
-          .verifyPaystackPayment(trxref, refToVerify)
-          .then((res: any) => {
-            console.log("Payment verified successfully:", res);
-            if (res?.booking_reference) {
-              setBookingReference(res.booking_reference);
-            }
-            setBookingStep(6); // Open Booking Confirmed modal
-          })
-          .catch((err: any) => {
-            console.error("Payment verification fallback failed:", err);
-          });
-      }
     }
   }, [bookingReference]);
 
