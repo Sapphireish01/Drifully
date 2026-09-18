@@ -1,25 +1,43 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(6px);
   z-index: 120;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  transition: opacity 0.25s ease, background 0.25s ease;
+}
+
+/* When Paystack modal opens, avoid double-darkening and visual collision */
+.backdropPaystackActive {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  pointer-events: none !important;
 }
 
 .modal {
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 22px;
   width: 100%;
-  max-width: 680px;
-  padding: 28px 32px;
+  max-width: 520px;
+  padding: 28px 30px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   gap: 20px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  position: relative;
+  pointer-events: auto;
+}
+
+/* Visually hide Drifully modal while Paystack checkout is in foreground */
+.modalHidden {
+  opacity: 0 !important;
+  transform: scale(0.96) translateY(10px) !important;
+  pointer-events: none !important;
 }
 
 .header {
@@ -38,6 +56,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.backBtn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -45,26 +91,14 @@
   background: #ffffff;
   color: #64748b;
   cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 14px;
 }
 
-.title {
-  font-size: 22px;
-  font-weight: 700;
+.closeBtn:hover {
+  background: #f8fafc;
   color: #0f172a;
-  margin: 0;
-}
-
-.closeBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #64748b;
-  cursor: pointer;
+  border-color: #cbd5e1;
 }
 
 .methodsList {
@@ -77,21 +111,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-radius: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
   background: #f8fafc;
-  border: 1.5px solid transparent;
+  border: 1.5px solid #e2e8f0;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.methodCard:hover {
-  background: #f1f5f9;
+.methodCard:hover:not(.disabledCard) {
+  background: #ffffff;
+  border-color: #94a3b8;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
 .selectedCard {
-  border-color: #0f172a;
-  background: #ffffff;
+  border-color: #0f172a !important;
+  background: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07) !important;
 }
 
 .methodLeft {
@@ -104,8 +141,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.selectedCard .iconBox {
+  border-color: #cbd5e1;
+}
+
+.methodMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .methodLabel {
@@ -114,18 +165,38 @@
   color: #0f172a;
 }
 
-.arrowIcon {
-  font-size: 20px;
-  color: #94a3b8;
+.methodSubtitle {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.radioIndicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.selectedRadio {
+  border-color: #0f172a;
+}
+
+.radioInnerDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0f172a;
 }
 
 .disabledCard {
   opacity: 0.5;
   cursor: not-allowed;
-  background: #f1f5f9;
-}
-
-.disabledCard:hover {
   background: #f1f5f9;
 }
 
@@ -138,86 +209,157 @@
 
 .errorText {
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fef2f2;
+  border: 1px solid #fee2e2;
   color: #ef4444;
-  font-size: 12px;
+  font-size: 13px;
   text-align: center;
 }
 
 .confirmBtn {
   width: 100%;
-  padding: 14px;
-  border-radius: 12px;
+  height: 50px;
+  min-height: 50px;
+  border-radius: 14px;
   border: none;
   background: #0f172a;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 8px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.15s ease;
 }
 
-.waitingContainer {
+.confirmBtn:hover:not(:disabled) {
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.confirmBtn:disabled {
+  opacity: 0.85;
+  cursor: not-allowed;
+}
+
+.btnSpinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: btnSpin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes btnSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.securityNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+  margin: -6px 0 0 0;
+}
+
+/* Dedicated Payment Verification Screen */
+.verifyingContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 24px 16px;
+  padding: 24px 12px 16px;
   gap: 16px;
 }
 
-.waitingTitle {
-  font-size: 18px;
+.verifyingIconBox {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verifyingPulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid #bbf7d0;
+  animation: pulseRing 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+.verifyingTitle {
+  font-size: 20px;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
 }
 
-.waitingText {
-  font-size: 13px;
+.verifyingText {
+  font-size: 14px;
   color: #64748b;
   margin: 0;
   line-height: 1.5;
-  max-width: 440px;
+  max-width: 380px;
 }
 
-.waitingActions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.verifyingProgressBar {
   width: 100%;
-  max-width: 360px;
-  margin-top: 8px;
+  max-width: 260px;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  margin-top: 4px;
 }
 
-.checkStatusBtn {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #0f172a;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
+.verifyingProgressFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 45%;
+  background: #16a34a;
+  border-radius: 999px;
+  animation: progressMove 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
-.checkStatusBtn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+@keyframes progressMove {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 100%;
+  }
 }
-
-.reopenBtn {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  background: transparent;
-  color: #2563eb;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
