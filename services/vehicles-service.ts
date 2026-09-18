@@ -189,17 +189,23 @@ export const vehiclesService = {
   },
 
   /**
-   * Fetches reviews for a booking reference
+   * Fetches reviews for a vehicle (requires vehicle_id)
    */
-  getReviews: async (bookingRef?: string) => {
+  getReviews: async (vehicleId?: number | string, bookingRef?: string) => {
     try {
+      if (!vehicleId && !bookingRef) return [];
       const params: Record<string, string> = { path: "api/v1/bookings/review/" };
-      if (bookingRef) params.booking_ref = bookingRef;
-      const response = await publicApi.get("", { params });
+      if (vehicleId) params.vehicle_id = String(vehicleId);
+      if (bookingRef) params.booking_ref = String(bookingRef);
+
+      const response = await publicApi.get("", { 
+        params,
+        skipToast: true 
+      } as any);
       return response.data;
     } catch (error) {
       console.error("Failed to fetch reviews:", error);
-      return null;
+      return [];
     }
   },
 

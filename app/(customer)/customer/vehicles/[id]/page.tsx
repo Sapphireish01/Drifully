@@ -133,14 +133,31 @@ function transformApiDetailToVehicle(item: ApiVehicleDetail, allFeatures: Featur
     : ["Air Conditioning", "Bluetooth", "USB Charging Ports"];
 
   const mappedReviews = Array.isArray(item.reviews)
-    ? item.reviews.map((r) => ({
-        id: String(r.id),
-        author: r.user_display || r.author || "Anonymous Customer",
-        date: r.created_at ? new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Recent",
-        rating: Number(r.rating) || 5,
-        title: r.rating >= 4 ? "Great Experience" : "Customer Review",
-        comment: r.comment || ""
-      }))
+    ? item.reviews.map((r: any) => {
+        const authorName =
+          r.user_display ||
+          r.author ||
+          r.customer_name ||
+          r.user_name ||
+          (r.user && typeof r.user === "object" ? `${r.user.first_name || ""} ${r.user.last_name || ""}`.trim() : null) ||
+          "Customer";
+        const rawDate = r.created_at || r.date;
+        const formattedDate = rawDate
+          ? new Date(rawDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+          : "Recent";
+        const ratingNum = Math.min(5, Math.max(1, Number(r.rating) || 5));
+        const commentText = r.comment || r.review || r.feedback || r.message || "";
+        const titleText = r.title || (ratingNum >= 4 ? "Wonderful Experience" : "Customer Review");
+
+        return {
+          id: String(r.id || Math.random()),
+          author: authorName,
+          date: formattedDate,
+          rating: ratingNum,
+          title: titleText,
+          comment: commentText,
+        };
+      })
     : [];
 
   return {
@@ -182,13 +199,27 @@ export default function VehicleDetailPage() {
     Promise.all([
       vehiclesService.getVehicleDetail(idStr),
       vehiclesService.getFeatures(),
-      vehiclesService.getReviews()
+      vehiclesService.getReviews(idStr)
     ])
       .then(([detailData, featuresData, reviewsData]) => {
         if (isMounted && detailData && typeof detailData === "object") {
-          const rawReviews = Array.isArray(reviewsData) ? reviewsData : reviewsData?.results || [];
-          const detailWithReviews = { ...detailData, reviews: detailData.reviews || rawReviews };
-          const transformed = transformApiDetailToVehicle(detailWithReviews, Array.isArray(featuresData) ? featuresData : []);
+          const rawReviews = Array.isArray(reviewsData)
+            ? reviewsData
+            : Array.isArray(reviewsData?.results)
+              ? reviewsData.results
+              : Array.isArray(reviewsData?.data)
+                ? reviewsData.data
+                : [];
+          const detailWithReviews = {
+            ...detailData,
+            reviews: Array.isArray(detailData.reviews) && detailData.reviews.length > 0
+              ? detailData.reviews
+              : rawReviews
+          };
+          const transformed = transformApiDetailToVehicle(
+            detailWithReviews,
+            Array.isArray(featuresData) ? featuresData : []
+          );
           setVehicle(transformed);
         }
       })
