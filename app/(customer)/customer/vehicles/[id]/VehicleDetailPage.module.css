@@ -148,6 +148,13 @@
   gap: 16px;
 }
 
+.noReviews {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+  padding: 12px 0;
+}
+
 .reviewCard {
   padding: 16px;
   border-radius: 16px;

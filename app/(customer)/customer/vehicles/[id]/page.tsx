@@ -24,6 +24,8 @@ interface FeatureItem {
   id?: number | string;
   name?: string;
   title?: string;
+  icon?: string | null;
+  category?: string;
 }
 
 interface ApiReview {
@@ -52,6 +54,8 @@ interface ApiVehicleDetail {
   status?: string;
   features?: (number | string | FeatureItem)[];
   reviews?: ApiReview[];
+  rating?: string | number;
+  reviews_count?: number;
   is_featured?: boolean;
   uploaded_by?: number;
   images?: {
@@ -64,52 +68,92 @@ interface ApiVehicleDetail {
   updated_at?: string;
 }
 
-function getFeatureIconPath(name: string): string {
+function FeatureIcon({ name, iconUrl }: { name: string; iconUrl?: string | null }) {
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [iconUrl]);
+
+  if (iconUrl && !imgError) {
+    return (
+      <Image
+        src={iconUrl}
+        alt={`${name} icon`}
+        width={18}
+        height={18}
+        aria-hidden="true"
+        unoptimized
+        onError={() => setImgError(true)}
+        style={{ width: "18px", height: "18px", objectFit: "contain", flexShrink: 0 }}
+      />
+    );
+  }
+
   const lower = name.toLowerCase();
+  let iconFile = "gas-station.svg"; // default fallback
 
-  if (lower.includes("air condition") || lower.includes("ac")) {
-    return "/images/our-fleet/air-conditioner.svg";
-  }
-  if (lower.includes("bag")) {
-    return "/images/our-fleet/air-bag.svg";
-  }
-  if (lower.includes("anti") || lower.includes("abs") || lower.includes("brak")) {
-    return "/images/our-fleet/anti-lock.svg";
-  }
-  if (lower.includes("bluetooth") || lower.includes("audio") || lower.includes("sound")) {
-    return "/images/our-fleet/bluetooth.svg";
-  }
-  if (lower.includes("climate")) {
-    return "/images/our-fleet/climate.svg";
-  }
-  if (lower.includes("heat") || lower.includes("seat")) {
-    return "/images/our-fleet/heated-seats.svg";
-  }
-  if (lower.includes("navig") || lower.includes("gps") || lower.includes("map")) {
-    return "/images/our-fleet/map.svg";
-  }
-  if (lower.includes("usb") || lower.includes("charg") || lower.includes("port")) {
-    return "/images/our-fleet/usb-charging-ports.svg";
-  }
-  if (lower.includes("fuel") || lower.includes("gas") || lower.includes("petrol")) {
-    return "/images/our-fleet/gas-station.svg";
+  if (lower.includes("air condition") || lower.includes("ac") || lower.includes("wind")) {
+    iconFile = "air-conditioner.svg";
+  } else if (lower.includes("bag")) {
+    iconFile = "air-bag.svg";
+  } else if (lower.includes("heat") || lower.includes("seat")) {
+    iconFile = "heated-seats.svg";
+  } else if (lower.includes("climate")) {
+    iconFile = "climate.svg";
+  } else if (lower.includes("usb") || lower.includes("charg") || lower.includes("port")) {
+    iconFile = "usb-charging-ports.svg";
+  } else if (lower.includes("blue") || lower.includes("audio") || lower.includes("sound")) {
+    iconFile = "bluetooth.svg";
+  } else if (lower.includes("anti") || lower.includes("abs") || lower.includes("brak")) {
+    iconFile = "anti-lock.svg";
+  } else if (lower.includes("navig") || lower.includes("gps") || lower.includes("map")) {
+    iconFile = "map.svg";
   }
 
-  return "/images/our-fleet/air-conditioner.svg";
+  return (
+    <Image
+      src={`/images/our-fleet/${iconFile}`}
+      alt={`${name} icon`}
+      width={18}
+      height={18}
+      aria-hidden="true"
+      style={{ width: "18px", height: "18px", objectFit: "contain", flexShrink: 0 }}
+    />
+  );
 }
 
-function resolveFeatureName(f: unknown, allFeatures: FeatureItem[]): string {
-  if (typeof f === "string") return f;
-  if (typeof f === "number") {
-    const matched = allFeatures.find((item) => item.id === f);
-    if (matched) return matched.name || matched.title || `Feature #${f}`;
-    return `Feature #${f}`;
+function resolveFeature(f: unknown, allFeatures: FeatureItem[]): { name: string; icon?: string | null } {
+  if (typeof f === "string") {
+    const matched = allFeatures.find((item) => item.name?.toLowerCase() === f.toLowerCase());
+    return {
+      name: f,
+      icon: matched?.icon || null,
+    };
+  }
+  if (typeof f === "number" || (!isNaN(Number(f)) && typeof f !== "boolean")) {
+    const numId = Number(f);
+    const matched = allFeatures.find((item) => item.id === numId);
+    if (matched) {
+      return {
+        name: matched.name || matched.title || `Feature #${numId}`,
+        icon: matched.icon || null,
+      };
+    }
+    return { name: `Feature #${numId}`, icon: null };
   }
   if (f && typeof f === "object") {
-    const obj = f as { id?: unknown; name?: string; title?: string };
-    return obj.name || obj.title || (obj.id ? resolveFeatureName(obj.id, allFeatures) : "Feature");
+    const obj = f as { id?: unknown; name?: string; title?: string; icon?: string | null };
+    const name = obj.name || obj.title || "";
+    const matched = allFeatures.find(
+      (item) => (obj.id && item.id === obj.id) || (name && item.name?.toLowerCase() === name.toLowerCase())
+    );
+    return {
+      name: name || matched?.name || matched?.title || (obj.id ? `Feature #${obj.id}` : "Feature"),
+      icon: obj.icon || matched?.icon || null,
+    };
   }
-  return String(f);
+  return { name: String(f), icon: null };
 }
 
 function transformApiDetailToVehicle(item: ApiVehicleDetail, allFeatures: FeatureItem[] = []): Vehicle {
@@ -129,8 +173,12 @@ function transformApiDetailToVehicle(item: ApiVehicleDetail, allFeatures: Featur
   const name = `${brandName} ${model} ${year}`.trim() || `Vehicle #${item.id}`;
 
   const resolvedFeatures = Array.isArray(item.features) && item.features.length > 0
-    ? item.features.map((f) => resolveFeatureName(f, allFeatures))
-    : ["Air Conditioning", "Bluetooth", "USB Charging Ports"];
+    ? item.features.map((f) => resolveFeature(f, allFeatures))
+    : [
+        resolveFeature("Air Conditioning", allFeatures),
+        resolveFeature("Bluetooth", allFeatures),
+        resolveFeature("USB Charging Ports", allFeatures)
+      ];
 
   const mappedReviews = Array.isArray(item.reviews)
     ? item.reviews.map((r: any) => {
@@ -174,8 +222,10 @@ function transformApiDetailToVehicle(item: ApiVehicleDetail, allFeatures: Featur
     category: "all",
     rating: mappedReviews.length > 0
       ? (mappedReviews.reduce((sum, r) => sum + r.rating, 0) / mappedReviews.length).toFixed(1)
-      : "4.9",
-    reviewsCount: mappedReviews.length > 0 ? mappedReviews.length : 12,
+      : (item.rating ? Number(item.rating).toFixed(1) : "0.0"),
+    reviewsCount: mappedReviews.length > 0
+      ? mappedReviews.length
+      : (Number(item.reviews_count) || (typeof (item as any).reviews === "number" ? (item as any).reviews : 0)),
     fuel: item.fuel_type ? (item.fuel_type.charAt(0).toUpperCase() + item.fuel_type.slice(1)) : "Petrol",
     gallery: gallery.length > 0 ? gallery : [primaryImg],
     features: resolvedFeatures,
@@ -534,9 +584,15 @@ export default function VehicleDetailPage() {
         <div>
           <h1 className={styles.title}>{vehicle.name}</h1>
           <div className={styles.ratingRow}>
-            <span className={styles.star}>★</span>
-            <span className={styles.rating}>{vehicle.rating}</span>
-            <span className={styles.reviewsCount}>({vehicle.reviewsCount} reviews)</span>
+            {vehicle.reviewsCount > 0 ? (
+              <>
+                <span className={styles.star}>★</span>
+                <span className={styles.rating}>{vehicle.rating}</span>
+                <span className={styles.reviewsCount}>({vehicle.reviewsCount} {vehicle.reviewsCount === 1 ? "review" : "reviews"})</span>
+              </>
+            ) : (
+              <span className={styles.reviewsCount}>No reviews yet</span>
+            )}
           </div>
         </div>
       </div>
@@ -570,17 +626,16 @@ export default function VehicleDetailPage() {
           <div className={styles.section}>
             <h2 className={styles.sectionHeading}>Features</h2>
             <div className={styles.featuresGrid}>
-              {vehicle.features.map((feat, idx) => (
-                <div key={idx} className={styles.featureItem}>
-                  <Image
-                    src={getFeatureIconPath(feat)}
-                    alt={feat}
-                    width={18}
-                    height={18}
-                  />
-                  <span>{feat}</span>
-                </div>
-              ))}
+              {vehicle.features.map((feat: any, idx: number) => {
+                const featName = typeof feat === "object" && feat !== null ? feat.name : String(feat);
+                const featIcon = typeof feat === "object" && feat !== null ? feat.icon : null;
+                return (
+                  <div key={idx} className={styles.featureItem}>
+                    <FeatureIcon name={featName} iconUrl={featIcon} />
+                    <span>{featName}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -608,22 +663,7 @@ export default function VehicleDetailPage() {
                   </div>
                 ))
               ) : (
-                <div className={styles.reviewCard}>
-                  <div className={styles.reviewHeader}>
-                    <span className={styles.reviewTitle}>Wonderful Experience</span>
-                    <div className={styles.reviewStars}>★★★★★</div>
-                  </div>
-                  <p className={styles.reviewComment}>
-                    I had a wonderful experience with this vehicle. It was clean, comfortable, and drove perfectly throughout my trip.
-                  </p>
-                  <div className={styles.reviewerMeta}>
-                    <div className={styles.avatar}>SS</div>
-                    <div>
-                      <div className={styles.authorName}>Sandra Smith</div>
-                      <div className={styles.reviewDate}>30 April 2026</div>
-                    </div>
-                  </div>
-                </div>
+                <p className={styles.noReviews}>No reviews yet.</p>
               )}
             </div>
           </div>

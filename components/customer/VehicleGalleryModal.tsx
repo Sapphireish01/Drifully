@@ -102,15 +102,18 @@ export default function VehicleGalleryModal({
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Features</h3>
           <div className={styles.featuresGrid}>
-            {vehicle.features.map((feat, idx) => (
-              <div key={idx} className={styles.featureItem}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 8v8M8 12h8" />
-                </svg>
-                <span>{feat}</span>
-              </div>
-            ))}
+            {vehicle.features.map((feat, idx) => {
+              const featName = typeof feat === "object" && feat !== null ? feat.name : feat;
+              return (
+                <div key={idx} className={styles.featureItem}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 8v8M8 12h8" />
+                  </svg>
+                  <span>{featName}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 

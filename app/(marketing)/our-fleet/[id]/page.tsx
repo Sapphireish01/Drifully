@@ -29,33 +29,47 @@ function StarIcon({ size = 27, className = "" }) {
 }
 
 
-function FeatureIcon({ name }: { name: string }) {
+function FeatureIcon({ name, iconUrl }: { name: string; iconUrl?: string | null }) {
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [iconUrl]);
+
+  if (iconUrl && !imgError) {
+    return (
+      <Image
+        src={iconUrl}
+        alt={`${name} icon`}
+        width={20}
+        height={20}
+        aria-hidden="true"
+        unoptimized
+        onError={() => setImgError(true)}
+        style={{ width: "20px", height: "20px", objectFit: "contain" }}
+      />
+    );
+  }
+
+  const lower = name.toLowerCase();
   let iconFile = "gas-station.svg"; // default fallback
-  switch (name) {
-    case "Air Conditioning":
-      iconFile = "air-conditioner.svg";
-      break;
-    case "Air Bags":
-      iconFile = "air-bag.svg";
-      break;
-    case "Heated Seats":
-      iconFile = "heated-seats.svg";
-      break;
-    case "Climate Control":
-      iconFile = "climate.svg";
-      break;
-    case "USB Charging Ports":
-      iconFile = "usb-charging-ports.svg";
-      break;
-    case "Bluetooth":
-      iconFile = "bluetooth.svg";
-      break;
-    case "Anti-lock Braking System":
-      iconFile = "anti-lock.svg";
-      break;
-    case "Navigation":
-      iconFile = "map.svg";
-      break;
+
+  if (lower.includes("air condition") || lower.includes("ac") || lower.includes("wind")) {
+    iconFile = "air-conditioner.svg";
+  } else if (lower.includes("bag")) {
+    iconFile = "air-bag.svg";
+  } else if (lower.includes("heat") || lower.includes("seat")) {
+    iconFile = "heated-seats.svg";
+  } else if (lower.includes("climate")) {
+    iconFile = "climate.svg";
+  } else if (lower.includes("usb") || lower.includes("charg") || lower.includes("port")) {
+    iconFile = "usb-charging-ports.svg";
+  } else if (lower.includes("blue") || lower.includes("audio") || lower.includes("sound")) {
+    iconFile = "bluetooth.svg";
+  } else if (lower.includes("anti") || lower.includes("abs") || lower.includes("brak")) {
+    iconFile = "anti-lock.svg";
+  } else if (lower.includes("navig") || lower.includes("gps") || lower.includes("map")) {
+    iconFile = "map.svg";
   }
 
   return (
@@ -65,6 +79,7 @@ function FeatureIcon({ name }: { name: string }) {
       width={20}
       height={20}
       aria-hidden="true"
+      style={{ width: "20px", height: "20px", objectFit: "contain" }}
     />
   );
 }
@@ -281,13 +296,40 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               <div className={styles.featuresSection}>
                 <h2 className={styles.featuresTitle}>Features</h2>
                 <div className={styles.featuresGrid}>
-                  {vehicle.features?.map(featureId => {
-                    const featureData = featuresList.find(f => f.id === featureId);
-                    const featureName = featureData ? featureData.name : `Feature ${featureId}`;
+                  {vehicle.features?.map((featureItem, index) => {
+                    let featureId: number | null = null;
+                    let featureName = "";
+                    let featureIcon: string | null = null;
+
+                    if (typeof featureItem === "object" && featureItem !== null) {
+                      featureId = featureItem.id ?? null;
+                      featureName = featureItem.name || "";
+                      featureIcon = featureItem.icon ?? null;
+                    } else if (typeof featureItem === "number" || (!isNaN(Number(featureItem)) && typeof featureItem !== "boolean")) {
+                      featureId = Number(featureItem);
+                    } else if (typeof featureItem === "string") {
+                      featureName = featureItem;
+                    }
+
+                    const featureData = featuresList.find((f: any) => {
+                      if (featureId !== null && f.id === featureId) return true;
+                      if (featureName && f.name && f.name.toLowerCase() === featureName.toLowerCase()) return true;
+                      return false;
+                    });
+
+                    if (featureData) {
+                      featureName = featureName || featureData.name;
+                      featureIcon = featureIcon || featureData.icon;
+                    }
+
+                    if (!featureName) {
+                      featureName = featureId ? `Feature ${featureId}` : `Feature ${index + 1}`;
+                    }
+
                     return (
-                      <div key={featureId} className={styles.featureItem}>
+                      <div key={featureId ?? index} className={styles.featureItem}>
                         <div className={styles.featureIcon}>
-                          <FeatureIcon name={featureName} />
+                          <FeatureIcon name={featureName} iconUrl={featureIcon} />
                         </div>
                         <span>{featureName}</span>
                       </div>

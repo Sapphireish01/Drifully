@@ -24,7 +24,7 @@ export interface Vehicle {
   reviewsCount: number;
   fuel: string;
   gallery: string[];
-  features: string[];
+  features: any[];
   reviews: Review[];
   rules?: string[];
 }
