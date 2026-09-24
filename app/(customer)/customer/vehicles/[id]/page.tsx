@@ -329,7 +329,10 @@ export default function VehicleDetailPage() {
     if (typeof window === "undefined") return;
     const urlParams = new URLSearchParams(window.location.search);
     const trxref = urlParams.get("trxref") || urlParams.get("reference");
-    const bookingRefFromUrl = urlParams.get("booking_ref") || urlParams.get("booking_reference");
+    const bookingRefFromUrl =
+      urlParams.get("booking_ref") ||
+      urlParams.get("booking_reference") ||
+      urlParams.get("ref");
 
     const activeRef = bookingRefFromUrl || (trxref?.startsWith("BK-") ? trxref : "") || bookingReference;
 
