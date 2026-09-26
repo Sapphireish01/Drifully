@@ -184,6 +184,13 @@ export default function PaymentMethodModal({
             res?.data?.authorization_url;
 
           if (redirectUrl) {
+            if (typeof window !== "undefined") {
+              const currentPath = window.location.pathname;
+              document.cookie = `stripe_booking_path=${encodeURIComponent(currentPath)}; path=/; max-age=3600; SameSite=Lax`;
+              if (bookingRef) {
+                document.cookie = `stripe_booking_ref=${encodeURIComponent(bookingRef)}; path=/; max-age=3600; SameSite=Lax`;
+              }
+            }
             window.location.href = redirectUrl;
             return;
           }
@@ -297,6 +304,13 @@ export default function PaymentMethodModal({
             res?.data?.authorization_url;
 
           if (redirectUrl) {
+            if (typeof window !== "undefined") {
+              const currentPath = window.location.pathname;
+              document.cookie = `stripe_booking_path=${encodeURIComponent(currentPath)}; path=/; max-age=3600; SameSite=Lax`;
+              if (bookingRef) {
+                document.cookie = `stripe_booking_ref=${encodeURIComponent(bookingRef)}; path=/; max-age=3600; SameSite=Lax`;
+              }
+            }
             window.location.href = redirectUrl;
             return;
           }

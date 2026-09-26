@@ -328,36 +328,85 @@ export default function VehicleDetailPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const urlParams = new URLSearchParams(window.location.search);
-    const trxref = urlParams.get("trxref") || urlParams.get("reference");
+    const sessionId =
+      urlParams.get("session_id") ||
+      urlParams.get("sessionId") ||
+      urlParams.get("checkout_session_id");
+    const trxref = urlParams.get("trxref");
+    const rawRef = urlParams.get("reference");
     const bookingRefFromUrl =
       urlParams.get("booking_ref") ||
       urlParams.get("booking_reference") ||
       urlParams.get("ref");
 
-    const activeRef = bookingRefFromUrl || (trxref?.startsWith("BK-") ? trxref : "") || bookingReference;
+    const activeRef =
+      bookingRefFromUrl ||
+      (rawRef?.startsWith("BK-") ? rawRef : "") ||
+      (trxref?.startsWith("BK-") ? trxref : "") ||
+      bookingReference;
 
+    const populateAndConfirm = async (finalRef: string) => {
+      setBookingReference(finalRef);
+      try {
+        const summary = await bookingsService.getBookingSummary(finalRef);
+        if (summary) {
+          if (summary.pickup_date) setPickupDate(summary.pickup_date);
+          if (summary.dropoff_date) setDropOffDate(summary.dropoff_date);
+          if (summary.drive_type) {
+            setSelectedRentalMode(
+              summary.drive_type.toLowerCase().includes("chauffeur") ? "chauffeur" : "self"
+            );
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch booking summary on confirmation return:", err);
+      }
+      setBookingStep(6); // Open Booking Confirmed modal
+      // Clean query params so refreshing doesn't re-trigger
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    };
+
+    // 1. Stripe payment return
+    if (sessionId) {
+      const ref = activeRef || rawRef || "";
+      paymentsService
+        .handleStripeRedirect(sessionId, ref)
+        .then((res: any) => {
+          const resolved =
+            res?.booking_reference ||
+            res?.reference ||
+            res?.booking_ref ||
+            res?.data?.booking_reference ||
+            res?.data?.reference ||
+            ref;
+          populateAndConfirm(resolved);
+        })
+        .catch((err: any) => {
+          console.warn("Stripe redirect confirmation note:", err);
+          if (ref) populateAndConfirm(ref);
+        });
+      return;
+    }
+
+    // 2. Paystack payment return
     if (trxref && activeRef) {
       paymentsService
         .verifyPaystackPayment(trxref, activeRef)
         .then((res: any) => {
-          console.log("Payment verified successfully:", res);
-          if (res?.booking_reference) {
-            setBookingReference(res.booking_reference);
-          } else if (activeRef) {
-            setBookingReference(activeRef);
-          }
-          setBookingStep(6); // Open Booking Confirmed modal
+          const resolved = res?.booking_reference || activeRef;
+          populateAndConfirm(resolved);
         })
         .catch((err: any) => {
           console.error("Payment verification fallback failed:", err);
-          if (activeRef) {
-            setBookingReference(activeRef);
-            setBookingStep(6);
-          }
+          if (activeRef) populateAndConfirm(activeRef);
         });
-    } else if (bookingRefFromUrl) {
-      setBookingReference(bookingRefFromUrl);
-      setBookingStep(6); // Open Booking Confirmed modal directly
+      return;
+    }
+
+    // 3. Direct booking ref return with step=confirmed
+    if (bookingRefFromUrl && urlParams.get("step") === "confirmed") {
+      populateAndConfirm(bookingRefFromUrl);
     }
   }, [bookingReference]);
 

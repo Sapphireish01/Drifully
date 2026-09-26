@@ -65,13 +65,32 @@ export default function TripDetailsPage() {
     };
   }, [bookingRef]);
 
-  // Check for Paystack extension payment verification on redirect return
+  // Check for payment verification on redirect return
   useEffect(() => {
     if (typeof window === "undefined" || !bookingRef) return;
     const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session_id") || urlParams.get("sessionId");
     const txnRef = urlParams.get("transaction_ref") || urlParams.get("trxref") || urlParams.get("reference");
     const dropoffDate = urlParams.get("new_dropoff_date");
     const urlBookingRef = urlParams.get("booking_ref") || bookingRef;
+
+    if (sessionId) {
+      paymentsService
+        .handleStripeRedirect(sessionId, urlBookingRef)
+        .then(() => {
+          setExtendStep(4);
+          bookingsService.getExpandedTripDetail(urlBookingRef).then((data) => {
+            setTripData(data);
+          });
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        })
+        .catch((err) => {
+          console.warn("Stripe extension verification note:", err);
+          setExtendStep(4);
+        });
+      return;
+    }
 
     if (txnRef) {
       paymentsService

@@ -46,8 +46,34 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Redirect customer to the Booking Confirmed confirmation screen
-  const targetUrl = new URL("/customer/booking-confirmed", request.url);
+  // 1. Check if a return path cookie was set when leaving to Stripe (e.g. /customer/vehicles/12)
+  const cookiePath = request.cookies.get("stripe_booking_path")?.value;
+  let targetPath = cookiePath ? decodeURIComponent(cookiePath) : "";
+
+  // 2. If no cookie, try looking up the vehicle id from the booking summary
+  if (!targetPath && reference) {
+    try {
+      const summaryRes = await axios.get(`${BACKEND_URL}/api/v1/bookings/summary/`, {
+        params: { booking_ref: reference },
+        headers: API_KEY ? { 'X-API-KEY': API_KEY } : {},
+        timeout: 5000,
+      });
+      const summary = summaryRes.data?.data || summaryRes.data;
+      const vId = summary?.vehicle?.id || (typeof summary?.vehicle === "number" ? summary.vehicle : null);
+      if (vId) {
+        targetPath = `/customer/vehicles/${vId}`;
+      }
+    } catch (e) {
+      console.warn("Could not lookup vehicle from booking summary:", e);
+    }
+  }
+
+  // 3. Fallback: if we still don't know the vehicle page, use booking-confirmed
+  if (!targetPath || !targetPath.startsWith("/")) {
+    targetPath = "/customer/booking-confirmed";
+  }
+
+  const targetUrl = new URL(targetPath, request.url);
   searchParams.forEach((value, key) => {
     targetUrl.searchParams.set(key, value);
   });
@@ -55,8 +81,12 @@ export async function GET(request: NextRequest) {
   if (reference && !targetUrl.searchParams.has("booking_ref")) {
     targetUrl.searchParams.set("booking_ref", reference);
   }
+  targetUrl.searchParams.set("step", "confirmed");
 
-  return NextResponse.redirect(targetUrl, 307);
+  const response = NextResponse.redirect(targetUrl, 307);
+  response.cookies.delete("stripe_booking_path");
+  response.cookies.delete("stripe_booking_ref");
+  return response;
 }
 
 export async function POST(request: NextRequest) {
