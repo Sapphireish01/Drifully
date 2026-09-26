@@ -28,6 +28,7 @@ function BookingConfirmedContent() {
   // If booking_ref wasn't explicit, but reference starts with BK-, use it
   const resolvedBookingRef = rawBookingRef || (trxref.startsWith("BK-") ? trxref : "");
 
+  const [confirmedBookingRef, setConfirmedBookingRef] = useState<string>(resolvedBookingRef || trxref);
   const [tripData, setTripData] = useState<ExpandedTripData | null>(null);
   const [summaryData, setSummaryData] = useState<BookingSummaryData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(Boolean(resolvedBookingRef || trxref || sessionId));
@@ -35,7 +36,7 @@ function BookingConfirmedContent() {
   const [copied, setCopied] = useState<boolean>(false);
 
   useEffect(() => {
-    const activeRef = resolvedBookingRef || trxref;
+    let activeRef = confirmedBookingRef || resolvedBookingRef || trxref;
     if (!activeRef && !sessionId) return;
 
     let isMounted = true;
@@ -46,7 +47,17 @@ function BookingConfirmedContent() {
       if (sessionId) {
         setIsVerifying(true);
         try {
-          await paymentsService.handleStripeRedirect(sessionId, activeRef);
+          const res = await paymentsService.handleStripeRedirect(sessionId, activeRef);
+          const retrievedRef =
+            res?.booking_reference ||
+            res?.reference ||
+            res?.booking_ref ||
+            res?.data?.booking_reference ||
+            res?.data?.reference;
+          if (retrievedRef) {
+            activeRef = retrievedRef;
+            if (isMounted) setConfirmedBookingRef(retrievedRef);
+          }
         } catch (sErr) {
           console.warn("Stripe redirect confirmation note:", sErr);
         } finally {
@@ -65,7 +76,12 @@ function BookingConfirmedContent() {
         }
       }
 
-      // 2. Fetch detailed trip information
+      if (!activeRef) {
+        if (isMounted) setIsLoading(false);
+        return;
+      }
+
+      // 3. Fetch detailed trip information
       try {
         const data = await bookingsService.getExpandedTripDetail(activeRef);
         if (isMounted && data) {
@@ -77,7 +93,7 @@ function BookingConfirmedContent() {
         console.warn("Could not fetch expanded trip, falling back to booking summary:", err);
       }
 
-      // 3. Fallback to booking summary
+      // 4. Fallback to booking summary
       try {
         const summary = await bookingsService.getBookingSummary(activeRef);
         if (isMounted && summary) {
@@ -95,9 +111,9 @@ function BookingConfirmedContent() {
     return () => {
       isMounted = false;
     };
-  }, [resolvedBookingRef, trxref]);
+  }, [resolvedBookingRef, trxref, sessionId]);
 
-  const bookingRef = resolvedBookingRef || trxref;
+  const bookingRef = confirmedBookingRef || resolvedBookingRef || trxref;
 
   const handleCopyRef = () => {
     if (!bookingRef) return;
