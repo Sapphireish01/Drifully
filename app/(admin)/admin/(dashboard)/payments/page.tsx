@@ -86,22 +86,41 @@ export default function PaymentsPage() {
     try {
       await paymentsService.markAsSuccessful(id);
       setTransactions((prev) => prev.map(t => t.id === id ? { ...t, status: "Completed" } : t));
+      setPayouts((prev) => prev.map(p => p.id === id ? { ...p, status: "Completed" } : p));
     } catch (error) {
       console.error("Failed to mark payment as successful:", error);
     }
   };
 
+  const q = (searchQuery || "").toLowerCase();
+
   const filteredTransactions = transactions.filter(
     (t) =>
-      t.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.id.toLowerCase().includes(searchQuery.toLowerCase())
+      (t?.customerName || "").toLowerCase().includes(q) ||
+      (t?.id || "").toLowerCase().includes(q)
   );
 
   const filteredPayouts = payouts.filter(
     (p) =>
-      p.driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.id.toLowerCase().includes(searchQuery.toLowerCase())
+      (p?.driverName || "").toLowerCase().includes(q) ||
+      (p?.id || "").toLowerCase().includes(q) ||
+      (p?.transactionReference || "").toLowerCase().includes(q)
   );
+
+  const handlePayoutDetails = (payout: Payout) => {
+    const payoutId = payout.payout_id || payout.id;
+    router.push(`/admin/payments/${encodeURIComponent(payoutId)}?reference=${encodeURIComponent(payoutId)}`);
+  };
+
+  // const handleTransactionDetails = (transaction: Transaction) => {
+  //   paymentsService.getTransactionsDetails(transaction.id)
+  //     .then((response) => {
+  //       console.log("Transaction details:", response);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Failed to fetch transaction details:", error);
+  //     });
+  // };
 
   // Reset to page 1 whenever search or tab changes
   useEffect(() => { setCurrentPage(1); }, [searchQuery, activeTab]);
@@ -204,7 +223,12 @@ export default function PaymentsPage() {
                     <td className={styles.checkCol}>
                       <input type="checkbox" className={styles.checkbox} aria-label={`Select ${t.customerName}`} />
                     </td>
-                    <td>{t.id}</td>
+                    <td
+                      style={{ cursor: "pointer", fontWeight: 600 }}
+                      onClick={() => router.push(`/admin/payments/${t.id}`)}
+                    >
+                      {t.id}
+                    </td>
                     <td>{t.amount}</td>
                     <td>{t.type}</td>
                     <td>{t.date}</td>
@@ -272,7 +296,12 @@ export default function PaymentsPage() {
                     <td className={styles.checkCol}>
                       <input type="checkbox" className={styles.checkbox} aria-label={`Select ${p.driverName}`} />
                     </td>
-                    <td>{p.id}</td>
+                    <td
+                      style={{ cursor: "pointer", fontWeight: 600 }}
+                      onClick={() => handlePayoutDetails(p)}
+                    >
+                      {p.id}
+                    </td>
                     <td>{p.driverName}</td>
                     <td>{p.amount}</td>
                     <td>{p.transactionReference}</td>
@@ -285,6 +314,8 @@ export default function PaymentsPage() {
                         rowId={`payout-${i}`}
                         openKebab={openKebab}
                         setOpenKebab={setOpenKebab}
+                        onViewDetails={() => handlePayoutDetails(p)}
+                        onMarkAsSuccessful={() => handleMarkAsSuccessful(p.id)}
                       />
                     </td>
                   </tr>
@@ -373,11 +404,13 @@ function TransactionKebab({
 }
 
 function PayoutKebab({
-  rowId, openKebab, setOpenKebab,
+  rowId, openKebab, setOpenKebab, onViewDetails, onMarkAsSuccessful,
 }: {
   rowId: string;
   openKebab: string | null;
   setOpenKebab: (v: string | null) => void;
+  onViewDetails?: () => void;
+  onMarkAsSuccessful?: () => void;
 }) {
   return (
     <div className={styles.kebabWrap}>
@@ -390,8 +423,8 @@ function PayoutKebab({
       </button>
       {openKebab === rowId && (
         <div className={styles.kebabMenu}>
-          <button className={styles.kebabItem}>View Details</button>
-          <button className={styles.kebabItem}>Mark As Successful</button>
+          <button className={styles.kebabItem} onClick={onViewDetails}>View Details</button>
+          <button className={styles.kebabItem} onClick={onMarkAsSuccessful}>Mark As Successful</button>
         </div>
       )}
     </div>

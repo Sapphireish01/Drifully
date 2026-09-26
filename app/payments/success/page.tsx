@@ -16,11 +16,15 @@ function PaymentsSuccessRedirect() {
       searchParams.get("trxref") ||
       "";
 
-    const target = bookingRef
-      ? `/customer/booking-confirmed?booking_ref=${encodeURIComponent(bookingRef)}`
-      : "/customer/booking-confirmed";
+    const targetUrl = new URL("/customer/booking-confirmed", window.location.origin);
+    searchParams.forEach((value, key) => {
+      targetUrl.searchParams.set(key, value);
+    });
+    if (bookingRef && !targetUrl.searchParams.has("booking_ref")) {
+      targetUrl.searchParams.set("booking_ref", bookingRef);
+    }
 
-    router.replace(target);
+    router.replace(targetUrl.pathname + targetUrl.search);
   }, [searchParams, router]);
 
   return (

@@ -175,8 +175,13 @@ export default function PaymentMethodModal({
           );
           const redirectUrl =
             (typeof res === "string" && res.startsWith("http") ? res : null) ||
+            res?.checkout_url ||
             res?.url ||
-            res?.data?.url;
+            res?.authorization_url ||
+            res?.redirect_url ||
+            res?.data?.checkout_url ||
+            res?.data?.url ||
+            res?.data?.authorization_url;
 
           if (redirectUrl) {
             window.location.href = redirectUrl;
@@ -283,8 +288,13 @@ export default function PaymentMethodModal({
           const res = await paymentsService.initiateStripePayment(bookingRef);
           const redirectUrl =
             (typeof res === "string" && res.startsWith("http") ? res : null) ||
+            res?.checkout_url ||
             res?.url ||
-            res?.data?.url;
+            res?.authorization_url ||
+            res?.redirect_url ||
+            res?.data?.checkout_url ||
+            res?.data?.url ||
+            res?.data?.authorization_url;
 
           if (redirectUrl) {
             window.location.href = redirectUrl;

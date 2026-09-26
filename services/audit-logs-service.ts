@@ -20,7 +20,7 @@ export const auditLogsService = {
       const response = await publicApi.get('', {
         params: { path: 'api/v1/admin/audit-logs/info/', audit_id: auditId }
       });
-      return response.data;
+      return response.data?.data || response.data;
     } catch (error) {
       console.error(`Failed to fetch audit log detail for ${auditId}:`, error);
       throw error;

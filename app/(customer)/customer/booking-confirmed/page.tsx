@@ -19,25 +19,42 @@ function BookingConfirmedContent() {
     "";
 
   const trxref = searchParams.get("trxref") || searchParams.get("reference") || "";
+  const sessionId =
+    searchParams.get("session_id") ||
+    searchParams.get("sessionId") ||
+    searchParams.get("checkout_session_id") ||
+    "";
+
   // If booking_ref wasn't explicit, but reference starts with BK-, use it
   const resolvedBookingRef = rawBookingRef || (trxref.startsWith("BK-") ? trxref : "");
 
   const [tripData, setTripData] = useState<ExpandedTripData | null>(null);
   const [summaryData, setSummaryData] = useState<BookingSummaryData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(Boolean(resolvedBookingRef || trxref));
-  const [isVerifying, setIsVerifying] = useState<boolean>(Boolean(trxref));
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(resolvedBookingRef || trxref || sessionId));
+  const [isVerifying, setIsVerifying] = useState<boolean>(Boolean(trxref || sessionId));
   const [copied, setCopied] = useState<boolean>(false);
 
   useEffect(() => {
     const activeRef = resolvedBookingRef || trxref;
-    if (!activeRef) return;
+    if (!activeRef && !sessionId) return;
 
     let isMounted = true;
     setIsLoading(true);
 
     const loadConfirmation = async () => {
-      // 1. Verify Paystack transaction if reference is present
-      if (trxref) {
+      // 1. Verify Stripe session if session_id is present
+      if (sessionId) {
+        setIsVerifying(true);
+        try {
+          await paymentsService.handleStripeRedirect(sessionId, activeRef);
+        } catch (sErr) {
+          console.warn("Stripe redirect confirmation note:", sErr);
+        } finally {
+          if (isMounted) setIsVerifying(false);
+        }
+      }
+      // 2. Verify Paystack transaction if reference is present
+      else if (trxref) {
         setIsVerifying(true);
         try {
           await paymentsService.verifyPaystackPayment(trxref, activeRef);
@@ -127,7 +144,11 @@ function BookingConfirmedContent() {
     return (
       <div className={styles.loadingWrapper}>
         <Spinner size={36} />
-        <p>{isVerifying ? "Verifying payment with Paystack..." : "Loading your booking confirmation..."}</p>
+        <p>
+          {isVerifying
+            ? (sessionId ? "Verifying payment with Stripe..." : "Verifying payment with Paystack...")
+            : "Loading your booking confirmation..."}
+        </p>
       </div>
     );
   }
