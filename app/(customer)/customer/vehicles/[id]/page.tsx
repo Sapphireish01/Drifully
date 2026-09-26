@@ -317,6 +317,14 @@ export default function VehicleDetailPage() {
     }
   }, [searchParams, vehicle]);
 
+  // Auto-cache booking configuration in sessionStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (pickupDate) sessionStorage.setItem("drifully_booking_pickup", pickupDate);
+    if (dropOffDate) sessionStorage.setItem("drifully_booking_dropoff", dropOffDate);
+    if (selectedRentalMode) sessionStorage.setItem("drifully_booking_mode", selectedRentalMode);
+  }, [pickupDate, dropOffDate, selectedRentalMode]);
+
   // Auto-open booking modal if navigated with autoOpenBooking=true
   useEffect(() => {
     if (!isLoading && vehicle && searchParams.get("autoOpenBooking") === "true") {
@@ -345,22 +353,21 @@ export default function VehicleDetailPage() {
       (trxref?.startsWith("BK-") ? trxref : "") ||
       bookingReference;
 
-    const populateAndConfirm = async (finalRef: string) => {
+    const populateAndConfirm = (finalRef: string) => {
       setBookingReference(finalRef);
-      try {
-        const summary = await bookingsService.getBookingSummary(finalRef);
-        if (summary) {
-          if (summary.pickup_date) setPickupDate(summary.pickup_date);
-          if (summary.dropoff_date) setDropOffDate(summary.dropoff_date);
-          if (summary.drive_type) {
-            setSelectedRentalMode(
-              summary.drive_type.toLowerCase().includes("chauffeur") ? "chauffeur" : "self"
-            );
-          }
+      // Restore dates and rental mode from sessionStorage if available
+      if (typeof window !== "undefined") {
+        const savedPickup = sessionStorage.getItem("stripe_pickup_date") || sessionStorage.getItem("drifully_booking_pickup");
+        const savedDropoff = sessionStorage.getItem("stripe_dropoff_date") || sessionStorage.getItem("drifully_booking_dropoff");
+        const savedMode = sessionStorage.getItem("stripe_selected_mode") || sessionStorage.getItem("drifully_booking_mode");
+
+        if (savedPickup) setPickupDate(savedPickup);
+        if (savedDropoff) setDropOffDate(savedDropoff);
+        if (savedMode && (savedMode === "chauffeur" || savedMode === "self")) {
+          setSelectedRentalMode(savedMode);
         }
-      } catch (err) {
-        console.warn("Could not fetch booking summary on confirmation return:", err);
       }
+
       setBookingStep(6); // Open Booking Confirmed modal
       // Clean query params so refreshing doesn't re-trigger
       const cleanUrl = window.location.pathname;
@@ -918,6 +925,9 @@ export default function VehicleDetailPage() {
         onBack={() => setBookingStep(4)}
         onConfirm={() => setBookingStep(6)}
         bookingRef={bookingReference}
+        pickupDate={pickupDate}
+        dropOffDate={dropOffDate}
+        selectedMode={selectedRentalMode}
       />
 
       {/* Step 6: Booking Confirmed 🎉 */}

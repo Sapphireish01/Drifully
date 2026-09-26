@@ -50,27 +50,9 @@ export async function GET(request: NextRequest) {
   const cookiePath = request.cookies.get("stripe_booking_path")?.value;
   let targetPath = cookiePath ? decodeURIComponent(cookiePath) : "";
 
-  // 2. If no cookie, try looking up the vehicle id from the booking summary
-  if (!targetPath && reference) {
-    try {
-      const summaryRes = await axios.get(`${BACKEND_URL}/api/v1/bookings/summary/`, {
-        params: { booking_ref: reference },
-        headers: API_KEY ? { 'X-API-KEY': API_KEY } : {},
-        timeout: 5000,
-      });
-      const summary = summaryRes.data?.data || summaryRes.data;
-      const vId = summary?.vehicle?.id || (typeof summary?.vehicle === "number" ? summary.vehicle : null);
-      if (vId) {
-        targetPath = `/customer/vehicles/${vId}`;
-      }
-    } catch (e) {
-      console.warn("Could not lookup vehicle from booking summary:", e);
-    }
-  }
-
-  // 3. Fallback: if we still don't know the vehicle page, use booking-confirmed
+  // 2. Fallback: if no cookie was set, default to customer vehicles directory
   if (!targetPath || !targetPath.startsWith("/")) {
-    targetPath = "/customer/booking-confirmed";
+    targetPath = "/customer/vehicles";
   }
 
   const targetUrl = new URL(targetPath, request.url);

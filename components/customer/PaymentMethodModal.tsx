@@ -17,6 +17,9 @@ interface PaymentMethodModalProps {
   isExtension?: boolean;
   additionalAmount?: string | number;
   newDropoffDate?: string;
+  pickupDate?: string;
+  dropOffDate?: string;
+  selectedMode?: "self" | "chauffeur";
 }
 
 export default function PaymentMethodModal({
@@ -28,6 +31,9 @@ export default function PaymentMethodModal({
   isExtension = false,
   additionalAmount,
   newDropoffDate,
+  pickupDate,
+  dropOffDate,
+  selectedMode,
 }: PaymentMethodModalProps) {
   const [selectedMethod, setSelectedMethod] = useState<string>("paystack");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -190,6 +196,9 @@ export default function PaymentMethodModal({
               if (bookingRef) {
                 document.cookie = `stripe_booking_ref=${encodeURIComponent(bookingRef)}; path=/; max-age=3600; SameSite=Lax`;
               }
+              if (newDropoffDate) {
+                sessionStorage.setItem("stripe_dropoff_date", newDropoffDate);
+              }
             }
             window.location.href = redirectUrl;
             return;
@@ -310,6 +319,9 @@ export default function PaymentMethodModal({
               if (bookingRef) {
                 document.cookie = `stripe_booking_ref=${encodeURIComponent(bookingRef)}; path=/; max-age=3600; SameSite=Lax`;
               }
+              if (pickupDate) sessionStorage.setItem("stripe_pickup_date", pickupDate);
+              if (dropOffDate) sessionStorage.setItem("stripe_dropoff_date", dropOffDate);
+              if (selectedMode) sessionStorage.setItem("stripe_selected_mode", selectedMode);
             }
             window.location.href = redirectUrl;
             return;
