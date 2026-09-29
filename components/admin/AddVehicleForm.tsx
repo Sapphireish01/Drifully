@@ -386,7 +386,7 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
                   <p className={styles.uploadText}>
                     <strong>Choose a file</strong> or drag & drop it here.
                   </p>
-                  <p className={styles.uploadHint}>JPEG, PNG, and WebP formats, up to 50 MB.</p>
+                  <p className={styles.uploadHint}>JPEG, PNG, and WebP formats, up to 5 mb.</p>
                   <button
                     className={styles.browseBtn}
                     type="button"

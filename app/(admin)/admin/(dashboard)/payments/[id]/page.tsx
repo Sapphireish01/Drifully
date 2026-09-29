@@ -1,23 +1,88 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { TransactionStatus } from "@/data/admin-payments";
 import styles from "./payment-details.module.css";
 import { paymentsService } from "@/services/payments-service";
+import { bookingsService, BookingReceiptData } from "@/services/bookings-service";
 import Spinner from "@/components/admin/Spinner";
+import ReceiptModal from "@/components/admin/ReceiptModal";
 
-export default function PaymentDetailsPage({ params }: { params: { id: string } }) {
+function formatCurrency(val: any): string {
+  if (val == null || val === "" || val === "N/A") return "₦0.00";
+  const str = String(val).trim();
+  if (str.startsWith("₦") || str.startsWith("$")) return str;
+  const num = typeof val === "number" ? val : parseFloat(str.replace(/[^0-9.-]/g, ""));
+  if (isNaN(num)) return str;
+  return `₦${num.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatDate(val: any): string {
+  if (!val || val === "N/A" || val === "--") return "N/A";
+  try {
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }) + "  " + d.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    }
+  } catch {}
+  return String(val);
+}
+
+export default function PaymentDetailsPage({ params }: { params?: any }) {
   const router = useRouter();
+  const routeParams = useParams();
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get("type");
+  const referenceParam = searchParams.get("reference");
+  const paymentIdParam = searchParams.get("payment_id") || searchParams.get("id");
+  const rawRouteId = (routeParams?.id as string) || (params as any)?.id || "";
+  const routeId = rawRouteId && rawRouteId !== "info" ? rawRouteId : "";
+  const lookupReference = paymentIdParam || referenceParam || routeId;
+
   const [tx, setTx] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [receiptLoading, setReceiptLoading] = useState(false);
+  const [receiptData, setReceiptData] = useState<BookingReceiptData | null>(null);
+
+  const isPayout =
+    typeParam === "payout" ||
+    (!paymentIdParam && Boolean(referenceParam)) ||
+    lookupReference?.toUpperCase().startsWith("PAYOUT-") ||
+    Boolean(tx?.payout_id);
 
   useEffect(() => {
+    if (!lookupReference) return;
+
     const fetchPayment = async () => {
       try {
         setLoading(true);
-        const data = await paymentsService.getPaymentDetails(params.id);
-        setTx(data);
+        if (typeParam === "payout" || (!paymentIdParam && (Boolean(referenceParam) || lookupReference.toUpperCase().startsWith("PAYOUT-")))) {
+          const data = await paymentsService.getPayoutDetails(lookupReference);
+          setTx(data);
+        } else {
+          try {
+            const data = await paymentsService.getPaymentDetails(lookupReference);
+            setTx(data);
+          } catch (err) {
+            // Fallback: attempt getPayoutDetails if payment details lookup fails
+            try {
+              const payoutData = await paymentsService.getPayoutDetails(lookupReference);
+              setTx(payoutData);
+            } catch {
+              throw err;
+            }
+          }
+        }
       } catch (error) {
         console.error("Failed to fetch payment details:", error);
       } finally {
@@ -25,7 +90,69 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
       }
     };
     fetchPayment();
-  }, [params.id]);
+  }, [lookupReference, typeParam, referenceParam, paymentIdParam]);
+
+  const handleMarkAsSuccessful = async () => {
+    try {
+      const targetId = tx?.payout_id || tx?.payment_information?.transaction_id || tx?.id || lookupReference;
+      await paymentsService.markAsSuccessful(targetId);
+      setTx((prev: any) => ({
+        ...prev,
+        status: "completed",
+        status_display: "Completed",
+        payment_details: prev?.payment_details
+          ? { ...prev.payment_details, status: "Success" }
+          : prev?.payment_details,
+      }));
+    } catch (error) {
+      console.error("Failed to mark as successful:", error);
+    }
+  };
+
+  const handleOpenReceipt = async () => {
+    const bookingRef =
+      tx?.payment_information?.booking_id ||
+      tx?.bookingId ||
+      tx?.booking_id ||
+      tx?.booking_reference ||
+      tx?.booking ||
+      lookupReference;
+
+    setIsReceiptOpen(true);
+    setReceiptLoading(true);
+    try {
+      const data = await bookingsService.getBookingReceipt(bookingRef);
+      setReceiptData(data);
+    } catch (err) {
+      console.error("Failed to load receipt:", err);
+      // Fallback to synthesizing receipt data from current transaction details
+      if (tx) {
+        const rawAmount = tx?.payment_information?.amount ?? tx.amount ?? "0";
+        const rawFees = tx?.payment_information?.fees ?? tx.fees;
+        const rawTaxes = tx?.payment_information?.taxes ?? tx.taxes;
+
+        setReceiptData({
+          customer_name: tx?.customer_info?.name || tx.customerName || tx.customer_name,
+          customer_email: tx?.customer_info?.email || tx.customerEmail || tx.customer_email,
+          customer_phone: tx?.customer_info?.phone || tx.customerPhone || tx.customer_phone,
+          date_created: tx?.customer_info?.date_created || tx.dateCreated || tx.created_at,
+          booking_type: tx?.customer_info?.booking_type || tx.bookingType || tx.booking_type,
+          transaction_id: tx?.payment_information?.transaction_id || tx.id || tx.transaction_id || lookupReference,
+          booking_id: tx?.payment_information?.booking_id || tx.bookingId || tx.booking_id,
+          amount: parseFloat(String(rawAmount).replace(/[^0-9.]/g, "")),
+          fees: rawFees && rawFees !== "N/A" ? parseFloat(String(rawFees).replace(/[^0-9.]/g, "")) : null,
+          taxes: rawTaxes && rawTaxes !== "N/A" ? parseFloat(String(rawTaxes).replace(/[^0-9.]/g, "")) : 0,
+          payment_method: tx?.payment_details?.payment_method || tx.paymentMethod || tx.payment_method || "Stripe",
+          reference_number: tx?.payment_details?.reference_number || tx.referenceNumber || tx.reference_number,
+          paid_at: tx?.payment_timeline?.paid_at || tx.paymentReceived || tx.payment_received || tx.created_at,
+          payable_type: "booking",
+          amount_paid: parseFloat(String(rawAmount).replace(/[^0-9.]/g, "")),
+        });
+      }
+    } finally {
+      setReceiptLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -36,17 +163,41 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
   }
 
   if (!tx) {
-    return <div style={{ padding: "24px" }}>Payment not found.</div>;
+    return <div style={{ padding: "24px" }}>Payment details not found.</div>;
   }
 
-  const statusStr = String(tx.status || tx.transaction_status || "Pending");
+  const rawStatus = String(
+    tx.payment_details?.status ||
+    tx.status_display ||
+    tx.status ||
+    tx.transaction_status ||
+    "Pending"
+  );
   let mappedStatus = "Pending";
-  if (statusStr.toLowerCase().includes("success") || statusStr.toLowerCase() === "completed") mappedStatus = "Completed";
-  else if (statusStr.toLowerCase() === "failed") mappedStatus = "Failed";
-  else if (statusStr.toLowerCase() === "reversed") mappedStatus = "Reversed";
-  else if (statusStr.toLowerCase() === "processing") mappedStatus = "Processing";
+  const s = rawStatus.toLowerCase();
+  if (s.includes("success") || s === "completed" || s === "paid") mappedStatus = "Completed";
+  else if (s === "failed") mappedStatus = "Failed";
+  else if (s === "reversed") mappedStatus = "Reversed";
+  else if (s === "processing") mappedStatus = "Processing";
 
   const isPending = mappedStatus === "Pending" || mappedStatus === "Processing";
+
+  // Display values
+  const displayId =
+    tx.payment_information?.transaction_id ||
+    tx.payment_details?.reference_number ||
+    tx.payout_id ||
+    tx.id ||
+    tx.transaction_id ||
+    lookupReference;
+
+  const headerDate = formatDate(
+    tx.payment_timeline?.created_at ||
+    tx.payment_details?.payment_initiated ||
+    tx.paymentInitiated ||
+    tx.created_at ||
+    tx.payment_initiated
+  );
 
   return (
     <div className={styles.page}>
@@ -57,151 +208,284 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
         </button>
         <div className={styles.actionBtns}>
           {isPending && (
-            <button className={styles.btnOutline}>Mark As Successful</button>
+            <button className={styles.btnOutline} onClick={handleMarkAsSuccessful}>
+              Mark As Successful
+            </button>
           )}
-          <button className={styles.btnFill}>Download Receipt</button>
+          {!isPayout && (
+            <button className={styles.btnFill} onClick={handleOpenReceipt}>
+              Download Receipt
+            </button>
+          )}
         </div>
       </div>
 
       {/* ─── Header ─── */}
       <div className={styles.pageHeader}>
         <div className={styles.transactionIdRow}>
-          <h1 className={styles.transactionId}>{tx.id || tx.transaction_id || params.id}</h1>
-          <button className={styles.copyBtn} aria-label="Copy transaction ID" onClick={() => navigator.clipboard.writeText(tx.id || tx.transaction_id || params.id)}>
+          <h1 className={styles.transactionId}>{displayId}</h1>
+          <button className={styles.copyBtn} aria-label="Copy ID" onClick={() => navigator.clipboard.writeText(displayId)}>
             <CopyIcon />
           </button>
           <StatusBadge status={mappedStatus as TransactionStatus} />
         </div>
-        <p className={styles.headerDate}>{tx.paymentInitiated || tx.created_at || tx.payment_initiated || "N/A"}</p>
+        <p className={styles.headerDate}>{headerDate}</p>
       </div>
 
       {/* ─── Two-Column Layout ─── */}
       <div className={styles.layout}>
         {/* Left: Info Cards */}
         <div className={styles.cardsCol}>
-          {/* Customer Information */}
+          {/* Customer / Driver Information */}
           <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Customer Information</h2>
+            <h2 className={styles.cardTitle}>{isPayout ? "Driver Information" : "Customer Information"}</h2>
             <div className={styles.grid3}>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Name</span>
-                <span className={styles.fieldValue}>{tx.customerName || tx.customer_name || "N/A"}</span>
+                <span className={styles.fieldValue}>
+                  {isPayout
+                    ? (tx.driver_details?.name || tx.driverName || "N/A")
+                    : (tx.customer_info?.name || tx.customer_name || tx.customerName || tx.customer?.name || tx.user?.full_name || tx.full_name || "N/A")}
+                </span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Email</span>
-                <span className={styles.fieldValue}>{tx.customerEmail || tx.customer_email || "N/A"}</span>
+                <span className={styles.fieldValue}>
+                  {isPayout
+                    ? (tx.driver_details?.email || "N/A")
+                    : (tx.customer_info?.email || tx.customer_email || tx.customerEmail || tx.customer?.email || tx.user?.email || "N/A")}
+                </span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Phone</span>
-                <span className={styles.fieldValue}>{tx.customerPhone || tx.customer_phone || "N/A"}</span>
+                <span className={styles.fieldValue}>
+                  {isPayout
+                    ? (tx.driver_details?.phone_number || tx.driver_details?.phone || "N/A")
+                    : (tx.customer_info?.phone || tx.customer_phone || tx.customerPhone || tx.customer?.phone_number || tx.user?.phone_number || "N/A")}
+                </span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Date Created</span>
-                <span className={styles.fieldValue}>{tx.dateCreated || tx.created_at || "N/A"}</span>
+                <span className={styles.fieldValue}>
+                  {formatDate(tx.customer_info?.date_created || tx.dateCreated || tx.created_at || tx.date)}
+                </span>
               </div>
-            </div>
-            <div className={styles.field} style={{ marginTop: "20px" }}>
-              <span className={styles.fieldLabel}>Booking Type</span>
-              <span className={styles.fieldValue}>{tx.bookingType || tx.booking_type || "N/A"}</span>
+              <div className={styles.field}>
+                <span className={styles.fieldLabel}>{isPayout ? "Trip Status" : "Booking Type"}</span>
+                <span className={styles.fieldValue}>
+                  {isPayout
+                    ? (tx.driver_details?.trip_status?.label || tx.driver_details?.trip_status?.value || "N/A")
+                    : (tx.customer_info?.booking_type || tx.booking_type || tx.bookingType || tx.transaction_type || tx.type || "N/A")}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Payment Information */}
+          {/* Payment / Payout Information */}
           <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Payment Information</h2>
+            <h2 className={styles.cardTitle}>{isPayout ? "Payout Information" : "Payment Information"}</h2>
             <div className={styles.grid2}>
               <div className={styles.field}>
-                <span className={styles.fieldLabel}>Transaction ID</span>
+                <span className={styles.fieldLabel}>{isPayout ? "Payout ID" : "Transaction ID"}</span>
                 <span className={styles.fieldValue}>
-                  {tx.id || tx.transaction_id || params.id}
-                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(tx.id || tx.transaction_id || params.id)} aria-label="Copy">
+                  {displayId}
+                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(displayId)} aria-label="Copy">
                     <CopySmIcon />
                   </button>
                 </span>
               </div>
               <div className={styles.field}>
-                <span className={styles.fieldLabel}>Booking ID</span>
+                <span className={styles.fieldLabel}>{isPayout ? "Booking Reference" : "Booking ID"}</span>
                 <span className={styles.fieldValue}>
-                  {tx.bookingId || tx.booking_id || "N/A"}
-                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(tx.bookingId || tx.booking_id || "")} aria-label="Copy">
+                  {isPayout
+                    ? (tx.booking_reference || tx.booking_ref || "N/A")
+                    : (tx.payment_information?.booking_id || tx.booking_reference || tx.booking_ref || tx.bookingId || tx.booking_id || "N/A")}
+                  <button
+                    className={styles.inlineCopyBtn}
+                    onClick={() => navigator.clipboard.writeText(
+                      isPayout
+                        ? (tx.booking_reference || tx.booking_ref || "")
+                        : (tx.payment_information?.booking_id || tx.booking_reference || tx.booking_ref || tx.bookingId || tx.booking_id || "")
+                    )}
+                    aria-label="Copy"
+                  >
                     <CopySmIcon />
                   </button>
                 </span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Amount</span>
-                <span className={styles.fieldValue}>{tx.amount || "$0.00"}</span>
+                <span className={styles.fieldValue}>
+                  {isPayout && tx.payment_details?.amount != null
+                    ? formatCurrency(tx.payment_details.amount)
+                    : formatCurrency(tx.payment_information?.amount ?? tx.amount ?? tx.total_amount)}
+                </span>
               </div>
               <div className={styles.field}>
-                <span className={styles.fieldLabel}>Fees</span>
-                <span className={styles.fieldValue}>{tx.fees || "$0.00"}</span>
+                <span className={styles.fieldLabel}>{isPayout ? "Commission Amount" : "Fees"}</span>
+                <span className={styles.fieldValue}>
+                  {isPayout
+                    ? (tx.payment_details?.commission_amount != null
+                        ? `${formatCurrency(tx.payment_details.commission_amount)}${tx.payment_details?.commission_rate ? ` (${tx.payment_details.commission_rate}%)` : ""}`
+                        : "N/A")
+                    : (tx.payment_information?.fees != null
+                        ? (tx.payment_information.fees === "N/A" ? "N/A" : formatCurrency(tx.payment_information.fees))
+                        : (tx.fees ? formatCurrency(tx.fees) : "N/A"))}
+                </span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Taxes</span>
-                <span className={styles.fieldValue}>{tx.taxes || "$0.00"}</span>
+                <span className={styles.fieldValue}>
+                  {isPayout
+                    ? (tx.payment_details?.taxes != null ? formatCurrency(tx.payment_details.taxes) : "N/A")
+                    : (tx.payment_information?.taxes != null
+                        ? (tx.payment_information.taxes === "N/A" ? "N/A" : formatCurrency(tx.payment_information.taxes))
+                        : (tx.taxes ? formatCurrency(tx.taxes) : "N/A"))}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Payment Details */}
+          {/* Payment Details / Bank Details */}
           <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Payment Details</h2>
+            <h2 className={styles.cardTitle}>{isPayout ? "Bank & Payment Details" : "Payment Details"}</h2>
             <div className={styles.grid2}>
-              <div className={styles.field}>
-                <span className={styles.fieldLabel}>Payment Method</span>
-                <span className={styles.fieldValue}>{tx.paymentMethod || tx.payment_method || "N/A"}</span>
-              </div>
-              <div className={styles.field}>
-                <span className={styles.fieldLabel}>Reference Number</span>
-                <span className={styles.fieldValue}>
-                  {tx.referenceNumber || tx.reference_number || "N/A"}
-                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(tx.referenceNumber || tx.reference_number || "")} aria-label="Copy">
-                    <CopySmIcon />
-                  </button>
-                </span>
-              </div>
-              <div className={styles.field}>
-                <span className={styles.fieldLabel}>Payment Initiated</span>
-                <span className={styles.fieldValue}>{tx.paymentInitiated || tx.payment_initiated || "N/A"}</span>
-              </div>
-              <div className={styles.field}>
-                <span className={styles.fieldLabel}>Payment Received</span>
-                <span className={styles.fieldValue}>{tx.paymentReceived || tx.payment_received || "N/A"}</span>
-              </div>
+              {isPayout ? (
+                <>
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>Bank Name</span>
+                    <span className={styles.fieldValue}>{tx.payment_details?.bank_name || "N/A"}</span>
+                  </div>
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>Account Number</span>
+                    <span className={styles.fieldValue}>{tx.payment_details?.account_number || "N/A"}</span>
+                  </div>
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>Payout Initiated</span>
+                    <span className={styles.fieldValue}>{formatDate(tx.created_at)}</span>
+                  </div>
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>Transaction Date</span>
+                    <span className={styles.fieldValue}>{formatDate(tx.payment_details?.transaction_date)}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>Payment Method</span>
+                    <span className={styles.fieldValue}>{tx.payment_details?.payment_method || tx.paymentMethod || tx.payment_method || "N/A"}</span>
+                  </div>
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>Reference Number</span>
+                    <span className={styles.fieldValue}>
+                      {tx.payment_details?.reference_number || tx.referenceNumber || tx.reference_number || "N/A"}
+                      {(tx.payment_details?.reference_number || tx.referenceNumber || tx.reference_number) && (
+                        <button
+                          className={styles.inlineCopyBtn}
+                          onClick={() => navigator.clipboard.writeText(tx.payment_details?.reference_number || tx.referenceNumber || tx.reference_number || "")}
+                          aria-label="Copy"
+                        >
+                          <CopySmIcon />
+                        </button>
+                      )}
+                    </span>
+                  </div>
+                  {tx.payment_details?.gateway && (
+                    <div className={styles.field}>
+                      <span className={styles.fieldLabel}>Gateway</span>
+                      <span className={styles.fieldValue}>{tx.payment_details.gateway}</span>
+                    </div>
+                  )}
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>Payment Initiated</span>
+                    <span className={styles.fieldValue}>
+                      {formatDate(tx.payment_details?.payment_initiated || tx.payment_timeline?.created_at || tx.paymentInitiated || tx.payment_initiated || tx.created_at)}
+                    </span>
+                  </div>
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>Payment Received</span>
+                    <span className={styles.fieldValue}>
+                      {formatDate(tx.payment_timeline?.paid_at || tx.paymentReceived || tx.payment_received)}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Right: Payment Status Timeline */}
+        {/* Right: Status Timeline */}
         <div className={styles.statusCard}>
-          <h2 className={styles.statusTitle}>Payment Status</h2>
+          <h2 className={styles.statusTitle}>{isPayout ? "Payout Status" : "Payment Status"}</h2>
           <div className={styles.timeline}>
-            {/* Step 1: Payment Initiated */}
+            {/* Step 1: Initiated */}
             <div className={styles.timelineStep}>
               <div className={`${styles.stepIndicator} ${styles.stepIndicatorDone}`}>
                 <CheckIcon />
               </div>
               <div className={styles.stepContent}>
-                <p className={styles.stepLabel}>Payment Initiated</p>
-                <p className={styles.stepDate}>{tx.paymentInitiatedAt || tx.payment_initiated_at || tx.created_at || "N/A"}</p>
+                <p className={styles.stepLabel}>{isPayout ? "Payout Initiated" : "Payment Initiated"}</p>
+                <p className={styles.stepDate}>
+                  {formatDate(
+                    tx.payment_timeline?.created_at ||
+                    tx.payment_details?.payment_initiated ||
+                    tx.created_at ||
+                    tx.paymentInitiatedAt ||
+                    tx.payment_initiated_at
+                  )}
+                </p>
               </div>
             </div>
 
-            {/* Step 2: Payment Completed */}
+            {/* Step 2: Completed */}
             <div className={styles.timelineStep}>
-              <div className={`${styles.stepIndicator} ${(tx.paymentCompletedAt || tx.payment_completed_at || mappedStatus === "Completed") ? styles.stepIndicatorDone : ""}`}>
-                {(tx.paymentCompletedAt || tx.payment_completed_at || mappedStatus === "Completed") && <CheckIcon />}
+              <div
+                className={`${styles.stepIndicator} ${
+                  (tx.payment_timeline?.paid_at ||
+                  tx.paymentCompletedAt ||
+                  tx.payment_completed_at ||
+                  tx.payment_details?.transaction_date ||
+                  mappedStatus === "Completed")
+                    ? styles.stepIndicatorDone
+                    : ""
+                }`}
+              >
+                {(tx.payment_timeline?.paid_at ||
+                  tx.paymentCompletedAt ||
+                  tx.payment_completed_at ||
+                  tx.payment_details?.transaction_date ||
+                  mappedStatus === "Completed") && <CheckIcon />}
               </div>
               <div className={styles.stepContent}>
-                <p className={styles.stepLabel}>Payment Completed</p>
-                {(tx.paymentCompletedAt || tx.payment_completed_at) && (
-                  <p className={styles.stepDate}>{tx.paymentCompletedAt || tx.payment_completed_at}</p>
+                <p className={styles.stepLabel}>{isPayout ? "Payout Completed" : "Payment Completed"}</p>
+                {(tx.payment_timeline?.paid_at ||
+                  tx.payment_details?.transaction_date ||
+                  tx.paymentCompletedAt ||
+                  tx.payment_completed_at ||
+                  (mappedStatus === "Completed" && (tx.payment_timeline?.updated_at || tx.updated_at))) && (
+                  <p className={styles.stepDate}>
+                    {formatDate(
+                      tx.payment_timeline?.paid_at ||
+                      tx.payment_details?.transaction_date ||
+                      tx.paymentCompletedAt ||
+                      tx.payment_completed_at ||
+                      tx.payment_timeline?.updated_at ||
+                      tx.updated_at
+                    )}
+                  </p>
                 )}
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <ReceiptModal
+        isOpen={isReceiptOpen}
+        onClose={() => setIsReceiptOpen(false)}
+        receiptData={receiptData}
+        isLoading={receiptLoading}
+      />
     </div>
   );
 }

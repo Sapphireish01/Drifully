@@ -8,18 +8,20 @@
 .searchBox {
   display: flex;
   align-items: center;
-  gap: 8px;
+  position: relative;
   border: 1px solid var(--admin-card-border, #E2E4E9);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 0 12px;
-  height: 36px;
+  height: 40px;
   background: var(--admin-card-bg, #ffffff);
-  min-width: 240px;
+  min-width: 260px;
 }
 
 .searchIcon {
   flex-shrink: 0;
-  opacity: 0.5;
+  color: #868C98;
+  pointer-events: none;
+  margin-left: 6px;
 }
 
 .searchInput {
@@ -39,16 +41,16 @@
 .toolBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 14px;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
   border: 1px solid var(--admin-card-border, #E2E4E9);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--admin-card-bg, #ffffff);
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
-  color: #868C98;
+  color: #525866;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
   white-space: nowrap;

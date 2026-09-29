@@ -2,6 +2,8 @@ import React from 'react';
 import Image from 'next/image';
 import styles from './FilterBar.module.css';
 
+import FilterIcon from '@/components/icons/FilterIcon';
+
 interface FilterBarProps {
   searchPlaceholder?: string;
   searchValue?: string;
@@ -55,13 +57,6 @@ export default function FilterBar({
   return (
     <div className={styles.toolbar}>
       <div className={styles.searchBox}>
-        <Image
-          src="/images/admin/sidebar-icons/search-glass.svg"
-          alt="Search"
-          width={18}
-          height={18}
-          className={styles.searchIcon}
-        />
         <input
           type="text"
           placeholder={searchPlaceholder}
@@ -69,6 +64,10 @@ export default function FilterBar({
           value={currentSearch}
           onChange={handleSearchChange}
         />
+        <svg className={styles.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#868C98" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
       </div>
       {!hideFilter && filterDropdown && (
         <div className={styles.popoverWrapper} ref={filterRef}>
@@ -82,12 +81,7 @@ export default function FilterBar({
               }
             }}
           >
-            <Image
-              src="/images/admin/sidebar-icons/filter.svg"
-              alt="Filter"
-              width={16}
-              height={16}
-            />
+            <FilterIcon size={18} color="#868C98" />
             Filter
           </button>
           {activeDropdown === 'filter' && filterDropdown && (

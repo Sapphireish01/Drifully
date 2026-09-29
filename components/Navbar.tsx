@@ -4,11 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { performSearch } from "@/lib/searchData";
+import { performSearch, hydrateSearchIndex, STATIC_SEARCH_ITEMS, SearchItem } from "@/lib/searchData";
 import SearchDropdown from "@/components/search/SearchDropdown";
 
 const NAV_LINKS = [
-  { label: "Home", href: "/" },
+  { label: "Home", href: "/home" },
   { label: "About Us", href: "/about-us" },
   { label: "Our Fleet", href: "/our-fleet" },
   { label: "Blog", href: "/blog" },
@@ -24,6 +24,16 @@ export default function Navbar() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
   const [downloadLink, setDownloadLink] = useState("https://play.google.com/store/apps/details?id=com.drifully.app");
+  const [searchItems, setSearchItems] = useState<SearchItem[]>(STATIC_SEARCH_ITEMS);
+
+  // Hydrate search index in background on mount
+  useEffect(() => {
+    hydrateSearchIndex().then((items) => {
+      if (items && items.length > 0) {
+        setSearchItems([...items]);
+      }
+    });
+  }, []);
 
   // Close menu & search when route changes
   useEffect(() => {
@@ -92,7 +102,7 @@ export default function Navbar() {
     setSearchQuery("");
   };
 
-  const searchResults = performSearch(searchQuery);
+  const searchResults = performSearch(searchQuery, searchItems);
 
   const SearchIcon = (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -118,65 +128,106 @@ export default function Navbar() {
       <div className="navbar__inner">
         {/* Logo */}
         <Link
-          href="/"
+          href="/home"
           className={`navbar__logo-link ${isOpen ? "navbar__logo-link--hidden" : ""}`}
           aria-label="Drifully home"
         >
           <Image src="/images/logo.svg" alt="Drifully" width={120} height={36} priority />
         </Link>
 
-        {/* Actions Container (Search + Download App CTA) */}
-        <div className="navbar__actions">
-          {/* Search Container */}
-          <div ref={searchRef} className={`navbar__search ${isSearchExpanded ? "navbar__search--expanded" : ""}`}>
-            {isSearchExpanded ? (
-              <div className="navbar__search-input-wrapper">
-                <span className="navbar__search-icon">{SearchIcon}</span>
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  className="navbar__search-input"
-                  placeholder="What would you like to search for"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  aria-label="Search Drifully"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    className="navbar__search-clear"
-                    onClick={() => setSearchQuery("")}
-                    aria-label="Clear search"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M18 6L6 18M6 6L18 18" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="navbar__search-btn"
-                onClick={handleSearchClick}
-                aria-label="Open search"
-                title="Search (Cmd+K / Ctrl+K)"
-              >
-                {SearchIcon}
-              </button>
-            )}
-
-            {/* Dropdown Results Popover */}
-            {isSearchExpanded && searchQuery.trim().length > 0 && (
-              <SearchDropdown query={searchQuery} results={searchResults} onItemClick={handleCloseSearch} />
-            )}
+        {/* Nav links / Mobile Menu */}
+        <div className={`navbar__menu ${isOpen ? "is-open" : ""}`}>
+          <div className="navbar__mobile-watermark" aria-hidden="true">
+            DRIFULLY
+          </div>
+          <div className="navbar__mobile-header">
+            <Link href="/home" onClick={() => setIsOpen(false)}>
+              <Image src="/images/logo.svg" alt="Drifully" width={120} height={36} />
+            </Link>
           </div>
 
-          {/* Desktop CTA */}
-          <Link href={downloadLink} className="btn btn-primary btn-sm navbar__cta-desktop">
+          <ul className="navbar__nav" role="list">
+            {NAV_LINKS.map((item) => {
+              const isActive = pathname === item.href;
+
+              return (
+                <li key={item.label} className="navbar__nav-item">
+                  <Link
+                    href={item.href}
+                    className="navbar__link"
+                    data-active={isActive ? true : undefined}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Mobile CTA */}
+          <Link href={downloadLink} className="btn btn-primary navbar__cta-mobile" onClick={() => setIsOpen(false)}>
             Download App
           </Link>
         </div>
+
+        {/* Actions Container (Search + Download App CTA) */}
+        {!isOpen && (
+          <div className="navbar__actions">
+            {/* Search Container */}
+            <div ref={searchRef} className={`navbar__search ${isSearchExpanded ? "navbar__search--expanded" : ""}`}>
+              {isSearchExpanded ? (
+                <div className="navbar__search-input-wrapper">
+                  <span className="navbar__search-icon">{SearchIcon}</span>
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    className="navbar__search-input"
+                    placeholder="What would you like to search for"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    aria-label="Search Drifully"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      className="navbar__search-clear"
+                      onClick={() => setSearchQuery("")}
+                      aria-label="Clear search"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 6L6 18M6 6L18 18" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="navbar__search-btn"
+                  onClick={handleSearchClick}
+                  aria-label="Open search"
+                  title="Search (Cmd+K / Ctrl+K)"
+                >
+                  {SearchIcon}
+                </button>
+              )}
+
+              {/* Dropdown Results Popover */}
+              {isSearchExpanded && searchQuery.trim().length > 0 && (
+                <SearchDropdown query={searchQuery} results={searchResults} onItemClick={handleCloseSearch} />
+              )}
+            </div>
+
+            {/* Desktop account and app actions */}
+            <Link href="/customer/login" className="navbar__join-desktop">
+              Join/Login
+            </Link>
+            <Link href={downloadLink} className="btn btn-primary btn-sm navbar__cta-desktop">
+              Download App
+            </Link>
+          </div>
+        )}
 
         {/* Mobile Toggle Button */}
         <button

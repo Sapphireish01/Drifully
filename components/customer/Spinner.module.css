@@ -1,0 +1,46 @@
+.spinnerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 12px;
+  width: 100%;
+}
+
+.spinner {
+  animation: rotate 1.5s linear infinite;
+  display: inline-block;
+}
+
+.path {
+  stroke-linecap: round;
+  animation: dash 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35px;
+  }
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124px;
+  }
+}

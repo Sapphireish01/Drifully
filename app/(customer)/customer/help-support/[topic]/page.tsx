@@ -1,0 +1,4 @@
+import Link from "next/link";
+import styles from "@/components/customer/CustomerShell.module.css";
+
+export default async function SupportTopicPage({ params }: { params: Promise<{ topic: string }> }) { const { topic } = await params; const title = topic.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()); return <div><Link href="/customer/help-support" className={styles.cardLink}>← Back to support</Link><p className={styles.eyebrow}>HELP & SUPPORT</p><h1 className={styles.title}>{title}</h1><section className={styles.card}><p className={styles.subtitle}>This support area is ready for the {title.toLowerCase()} workflow and backend connection.</p><textarea className={styles.textarea} placeholder="How can we help?" aria-label="Support message" /><button className={styles.primaryButton}>Send request</button></section></div>; }

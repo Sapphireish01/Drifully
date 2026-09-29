@@ -65,7 +65,7 @@ export default function CustomSelect({
             ? (selectedOptions.length > 0 ? selectedOptions.map(o => o.label).join(', ') : placeholder)
             : (selectedOption ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                {selectedOption.icon && (typeof selectedOption.icon === 'string' ? <img src={selectedOption.icon as string} alt="" style={{ width: 20, height: 20, objectFit: 'cover', borderRadius: '50%' }} /> : selectedOption.icon)}
+                {renderOptionIcon(selectedOption.icon)}
                 {selectedOption.label}
               </div>
             ) : placeholder)}
@@ -114,7 +114,7 @@ export default function CustomSelect({
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {option.icon && (typeof option.icon === 'string' ? <img src={option.icon as string} alt="" style={{ width: 20, height: 20, objectFit: 'cover', borderRadius: '50%' }} /> : option.icon)}
+                      {renderOptionIcon(option.icon)}
                       {option.label}
                     </div>
                     {isSelected && <CheckIcon />}
@@ -167,4 +167,21 @@ function CheckIcon() {
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );
+}
+
+function renderOptionIcon(icon: string | React.ReactNode) {
+  if (!icon) return null;
+  if (typeof icon === "string") {
+    if (icon.startsWith("http") || icon.startsWith("/") || icon.startsWith("data:")) {
+      return (
+        <img
+          src={icon}
+          alt=""
+          style={{ width: 20, height: 20, objectFit: "cover", borderRadius: "50%" }}
+        />
+      );
+    }
+    return <span style={{ fontSize: "16px", lineHeight: 1 }}>{icon}</span>;
+  }
+  return icon;
 }

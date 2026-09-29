@@ -10,6 +10,7 @@ export type PayoutStatus = "Pending" | "Completed";
 
 export interface Transaction {
   id: string;
+  paymentId?: string;
   customerId: string;
   customerName: string;
   amount: string;
@@ -35,6 +36,7 @@ export interface Transaction {
 
 export interface Payout {
   id: string;
+  payout_id?: string;
   driverName: string;
   amount: string;
   transactionReference: TransactionType;

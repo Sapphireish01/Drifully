@@ -16,6 +16,8 @@ export function useNotifications() {
   const [isConnected, setIsConnected] = useState(false);
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
+  // WebSocket implementation commented out for now
+  /*
   useEffect(() => {
     let ws: WebSocket | null = null;
     let reconnectTimeout: NodeJS.Timeout;
@@ -100,6 +102,7 @@ export function useNotifications() {
       }
     };
   }, []);
+  */
 
   const markAsRead = useCallback((id: string) => {
     // Implement API call to mark as read if needed

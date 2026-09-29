@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./HomepageModal.module.css";
 
 export default function HomepageModal() {
@@ -131,13 +132,13 @@ export default function HomepageModal() {
             >
               Download App
             </a>
-            <button
-              type="button"
+            <Link
+              href="/our-fleet"
               className={styles.proceedBtn}
               onClick={() => setIsOpen(false)}
             >
               Proceed to site
-            </button>
+            </Link>
           </div>
         </div>
       </div>

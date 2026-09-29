@@ -1,12 +1,51 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import DownloadButtons from "./DownloadButtons";
 import Image from "next/image";
+import { accountsService, formatApiError } from "@/services/accounts-service";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "success" | "error">("idle");
+  const [newsletterMessage, setNewsletterMessage] = useState("");
+
+  useEffect(() => {
+    if (newsletterStatus === "success") {
+      const timer = setTimeout(() => {
+        setNewsletterStatus("idle");
+        setNewsletterMessage("");
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [newsletterStatus]);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = newsletterEmail.trim();
+    if (!email) return;
+
+    setIsSubscribing(true);
+    setNewsletterStatus("idle");
+    setNewsletterMessage("");
+
+    try {
+      const res = await accountsService.subscribeNewsletter(email);
+      setNewsletterStatus("success");
+      setNewsletterMessage(res?.message || "Thank you for subscribing to our newsletter!");
+      setNewsletterEmail("");
+    } catch (err: any) {
+      setNewsletterStatus("error");
+      setNewsletterMessage(formatApiError(err, "Failed to subscribe. Please try again."));
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
 
   return (
     <footer className={styles['footer']} aria-labelledby="footer-logo">
@@ -20,7 +59,7 @@ export default function Footer() {
         <div className={styles['footer__grid']}>
           {/* Brand & Apps column */}
           <div className={styles['footer__brand-col']} style={{ minWidth: "403px" }}>
-            <Link href="/" className={styles['footer__logo-link']}>
+            <Link href="/home" className={styles['footer__logo-link']}>
               <span className={styles['footer__logo']} id="footer-logo">
                 DRIFULLY
               </span>
@@ -38,7 +77,7 @@ export default function Footer() {
             <div className={styles['footer__nav-col']}>
               <h3 className={styles['footer__col-title']}>Company</h3>
               <ul className={styles['footer__links']}>
-                <li><Link href="/" className={styles['footer__link']}>Home</Link></li>
+                <li><Link href="/home" className={styles['footer__link']}>Home</Link></li>
                 <li><Link href="/about-us" className={styles['footer__link']}>About Us</Link></li>
                 <li><Link href="/our-fleet" className={styles['footer__link']}>Our Fleet</Link></li>
                 <li><Link href="/blog" className={styles['footer__link']}>Blog</Link></li>
@@ -65,15 +104,34 @@ export default function Footer() {
             <p className={styles['footer__newsletter-text']}>
               Join our newsletter for exclusive offers and updates.
             </p>
-            <form className={styles['footer__newsletter-form']} onSubmit={(e) => e.preventDefault()}>
+            <form className={styles['footer__newsletter-form']} onSubmit={handleNewsletterSubmit}>
               <input
                 type="email"
                 placeholder="Enter your email to get notified"
                 className={styles['footer__newsletter-input']}
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                disabled={isSubscribing}
                 required
               />
-              <button type="submit" className={styles['footer__newsletter-btn']}>Join Now</button>
+              <button 
+                type="submit" 
+                className={styles['footer__newsletter-btn']}
+                disabled={isSubscribing}
+              >
+                {isSubscribing ? "Joining..." : "Join Now"}
+              </button>
             </form>
+            {newsletterStatus === "success" && (
+              <p className={styles['footer__newsletter-success']}>
+                {newsletterMessage}
+              </p>
+            )}
+            {newsletterStatus === "error" && (
+              <p className={styles['footer__newsletter-error']}>
+                {newsletterMessage}
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -6,6 +6,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Spinner from "@/components/admin/Spinner";
+import DatePickerModal from "@/components/customer/DatePickerModal";
+import { useRouter } from "next/navigation";
 import { marketingService } from "@/services/marketing-service";
 import { vehiclesService } from "@/services/vehicles-service";
 import { Vehicle } from "@/types/vehicle";
@@ -27,33 +29,47 @@ function StarIcon({ size = 27, className = "" }) {
 }
 
 
-function FeatureIcon({ name }: { name: string }) {
+function FeatureIcon({ name, iconUrl }: { name: string; iconUrl?: string | null }) {
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [iconUrl]);
+
+  if (iconUrl && !imgError) {
+    return (
+      <Image
+        src={iconUrl}
+        alt={`${name} icon`}
+        width={20}
+        height={20}
+        aria-hidden="true"
+        unoptimized
+        onError={() => setImgError(true)}
+        style={{ width: "20px", height: "20px", objectFit: "contain" }}
+      />
+    );
+  }
+
+  const lower = name.toLowerCase();
   let iconFile = "gas-station.svg"; // default fallback
-  switch (name) {
-    case "Air Conditioning":
-      iconFile = "air-conditioner.svg";
-      break;
-    case "Air Bags":
-      iconFile = "air-bag.svg";
-      break;
-    case "Heated Seats":
-      iconFile = "heated-seats.svg";
-      break;
-    case "Climate Control":
-      iconFile = "climate.svg";
-      break;
-    case "USB Charging Ports":
-      iconFile = "usb-charging-ports.svg";
-      break;
-    case "Bluetooth":
-      iconFile = "bluetooth.svg";
-      break;
-    case "Anti-lock Braking System":
-      iconFile = "anti-lock.svg";
-      break;
-    case "Navigation":
-      iconFile = "map.svg";
-      break;
+
+  if (lower.includes("air condition") || lower.includes("ac") || lower.includes("wind")) {
+    iconFile = "air-conditioner.svg";
+  } else if (lower.includes("bag")) {
+    iconFile = "air-bag.svg";
+  } else if (lower.includes("heat") || lower.includes("seat")) {
+    iconFile = "heated-seats.svg";
+  } else if (lower.includes("climate")) {
+    iconFile = "climate.svg";
+  } else if (lower.includes("usb") || lower.includes("charg") || lower.includes("port")) {
+    iconFile = "usb-charging-ports.svg";
+  } else if (lower.includes("blue") || lower.includes("audio") || lower.includes("sound")) {
+    iconFile = "bluetooth.svg";
+  } else if (lower.includes("anti") || lower.includes("abs") || lower.includes("brak")) {
+    iconFile = "anti-lock.svg";
+  } else if (lower.includes("navig") || lower.includes("gps") || lower.includes("map")) {
+    iconFile = "map.svg";
   }
 
   return (
@@ -63,11 +79,13 @@ function FeatureIcon({ name }: { name: string }) {
       width={20}
       height={20}
       aria-hidden="true"
+      style={{ width: "20px", height: "20px", objectFit: "contain" }}
     />
   );
 }
 
 export default function VehicleDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
   const unwrappedParams = use(params);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [brands, setBrands] = useState<any[]>([]);
@@ -76,6 +94,10 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
   const [currency, setCurrency] = useState<string>("USD");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [pickupDate, setPickupDate] = useState("");
+  const [dropOffDate, setDropOffDate] = useState("");
+  const [activeDateTarget, setActiveDateTarget] = useState<"pickup" | "dropoff" | null>(null);
 
   // Read cached currency (set by fleet page via ipapi.co)
   useEffect(() => {
@@ -115,14 +137,42 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
   const displayCategory = categoryData ? categoryData.name : vehicle?.category;
   const displayName = vehicle ? (brandData ? `${displayBrand} ${vehicle.model}` : vehicle.name) : "";
 
-  const handleBookNow = () => {
-    if (typeof window !== "undefined") {
-      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-      if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
-        window.open("https://apps.apple.com/app/drifully", "_blank");
-      } else {
-        window.open("https://play.google.com/store/apps/details?id=com.drifully.app", "_blank");
+  const handleSelectDate = (date: string) => {
+    if (activeDateTarget === "pickup") {
+      setPickupDate(date);
+      // Ensure drop-off date is strictly after the newly selected pickup date
+      if (dropOffDate) {
+        const pickupD = new Date(date);
+        const dropoffD = new Date(dropOffDate);
+        if (!isNaN(pickupD.getTime()) && !isNaN(dropoffD.getTime())) {
+          if (dropoffD.getTime() <= pickupD.getTime()) {
+            const nextDay = new Date(pickupD);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const y = nextDay.getFullYear();
+            const m = String(nextDay.getMonth() + 1).padStart(2, "0");
+            const d = String(nextDay.getDate()).padStart(2, "0");
+            setDropOffDate(`${y}-${m}-${d}`);
+          }
+        }
       }
+    } else if (activeDateTarget === "dropoff") {
+      setDropOffDate(date);
+    }
+  };
+
+  const handleBookNow = () => {
+    const query = new URLSearchParams();
+    query.set("autoOpenBooking", "true");
+    if (pickupDate) query.set("pickupDate", pickupDate);
+    if (dropOffDate) query.set("dropOffDate", dropOffDate);
+
+    const targetPath = `/customer/vehicles/${unwrappedParams.id}?${query.toString()}`;
+    const isAuthenticated = typeof window !== "undefined" && Boolean(localStorage.getItem("drifully_customer_user"));
+
+    if (isAuthenticated) {
+      router.push(targetPath);
+    } else {
+      router.push(`/customer/login?redirect=${encodeURIComponent(targetPath)}`);
     }
   };
 
@@ -246,13 +296,40 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               <div className={styles.featuresSection}>
                 <h2 className={styles.featuresTitle}>Features</h2>
                 <div className={styles.featuresGrid}>
-                  {vehicle.features?.map(featureId => {
-                    const featureData = featuresList.find(f => f.id === featureId);
-                    const featureName = featureData ? featureData.name : `Feature ${featureId}`;
+                  {vehicle.features?.map((featureItem, index) => {
+                    let featureId: number | null = null;
+                    let featureName = "";
+                    let featureIcon: string | null = null;
+
+                    if (typeof featureItem === "object" && featureItem !== null) {
+                      featureId = featureItem.id ?? null;
+                      featureName = featureItem.name || "";
+                      featureIcon = featureItem.icon ?? null;
+                    } else if (typeof featureItem === "number" || (!isNaN(Number(featureItem)) && typeof featureItem !== "boolean")) {
+                      featureId = Number(featureItem);
+                    } else if (typeof featureItem === "string") {
+                      featureName = featureItem;
+                    }
+
+                    const featureData = featuresList.find((f: any) => {
+                      if (featureId !== null && f.id === featureId) return true;
+                      if (featureName && f.name && f.name.toLowerCase() === featureName.toLowerCase()) return true;
+                      return false;
+                    });
+
+                    if (featureData) {
+                      featureName = featureName || featureData.name;
+                      featureIcon = featureIcon || featureData.icon;
+                    }
+
+                    if (!featureName) {
+                      featureName = featureId ? `Feature ${featureId}` : `Feature ${index + 1}`;
+                    }
+
                     return (
-                      <div key={featureId} className={styles.featureItem}>
+                      <div key={featureId ?? index} className={styles.featureItem}>
                         <div className={styles.featureIcon}>
-                          <FeatureIcon name={featureName} />
+                          <FeatureIcon name={featureName} iconUrl={featureIcon} />
                         </div>
                         <span>{featureName}</span>
                       </div>
@@ -299,6 +376,47 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
                   </span>
                   <span className={styles.priceTaxes}>Before taxes</span>
                 </div>
+
+                <div className={styles.dateFields}>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>Pickup Date</label>
+                    <div className={styles.dateInputWrap} onClick={() => setActiveDateTarget("pickup")}>
+                      <input
+                        type="text"
+                        className={styles.dateInput}
+                        placeholder="Select pickup date"
+                        value={pickupDate}
+                        readOnly
+                      />
+                      <svg className={styles.calIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>Drop Off Date</label>
+                    <div className={styles.dateInputWrap} onClick={() => setActiveDateTarget("dropoff")}>
+                      <input
+                        type="text"
+                        className={styles.dateInput}
+                        placeholder="Select drop-off date"
+                        value={dropOffDate}
+                        readOnly
+                      />
+                      <svg className={styles.calIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
                 <button className={`btn btn-primary ${styles.bookBtn}`} onClick={handleBookNow}>
                   Book Now
                 </button>
@@ -313,6 +431,28 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
             Book Now
           </button>
         </div>
+
+        <DatePickerModal
+          isOpen={activeDateTarget !== null}
+          onClose={() => setActiveDateTarget(null)}
+          onSelectDate={handleSelectDate}
+          minDate={
+            activeDateTarget === "dropoff"
+              ? (pickupDate
+                ? (() => {
+                  const d = new Date(pickupDate);
+                  d.setDate(d.getDate() + 1);
+                  return d;
+                })()
+                : (() => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + 1);
+                  return d;
+                })())
+              : new Date()
+          }
+          selectedDate={activeDateTarget === "pickup" ? pickupDate : dropOffDate}
+        />
       </main>
 
       <Footer />

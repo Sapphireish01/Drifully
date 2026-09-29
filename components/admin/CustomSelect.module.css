@@ -41,18 +41,18 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  min-width: 100%;
+  min-width: 180px;
   white-space: nowrap;
   background: #ffffff;
   border: 1px solid #E2E4E9;
   border-radius: 12px;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   margin: 0;
   padding: 8px;
   list-style: none;
-  z-index: 100;
+  z-index: 1000;
   animation: slideDown 0.2s ease-out;
-  max-height: 320px;
+  max-height: 260px;
   display: flex;
   flex-direction: column;
 }

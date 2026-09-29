@@ -242,7 +242,7 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
           <div className={styles.sideCard}>
             <h2 className={styles.timelineTitle}>Activity Timeline</h2>
             <p style={{ fontSize: 13, color: "#868C98", padding: "8px 0" }}>
-              N/A — activity timeline not returned by API
+              N/A — No activity available
             </p>
           </div>
 

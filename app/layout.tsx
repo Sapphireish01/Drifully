@@ -126,6 +126,9 @@ const jsonLd = {
   },
 };
 
+import { ToastProvider } from "@/lib/toast-context";
+import { ToastContainer } from "@/components/admin/Toast";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={dmSans.variable} suppressHydrationWarning data-scroll-behavior="smooth">
@@ -136,7 +139,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
           }}
         />
-        {children}
+        <ToastProvider>
+          {children}
+          <ToastContainer />
+        </ToastProvider>
       </body>
     </html>
   );

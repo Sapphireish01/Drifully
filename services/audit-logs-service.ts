@@ -15,22 +15,27 @@ export const auditLogsService = {
     }
   },
 
-  getAuditLogDetail: async (auditId: string) => {
+  getAuditLogDetail: async (auditId: string | number) => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/audit-logs/info/', audit_id: auditId }
+        params: { path: 'api/v1/admin/audit-logs/info/', audit_id: auditId, id: auditId },
+        skipToast: true,
       });
-      return response.data;
+      if (response.data) {
+        return response.data?.data || response.data?.result || response.data;
+      }
     } catch (error) {
       try {
-        const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/audit-logs/info/', audit_id: auditId }
+        const fallbackRes = await publicApi.get('', {
+          params: { path: `api/v1/admin/audit-logs/${auditId}/` },
+          skipToast: true,
         });
-        return fallbackResponse.data;
-      } catch (fallbackError) {
-        console.error(`Failed to fetch audit log detail for ${auditId}:`, fallbackError);
-        throw fallbackError;
-      }
+        if (fallbackRes.data) {
+          return fallbackRes.data?.data || fallbackRes.data?.result || fallbackRes.data;
+        }
+      } catch {}
+      console.error(`Failed to fetch audit log detail for ${auditId}:`, error);
+      throw error;
     }
   },
 
@@ -42,16 +47,8 @@ export const auditLogsService = {
       });
       return response;
     } catch (error) {
-      try {
-        const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/audit-logs/', export: format },
-          responseType: 'arraybuffer',
-        });
-        return fallbackResponse;
-      } catch (fallbackError) {
-        console.error('Failed to export audit logs:', fallbackError);
-        throw fallbackError;
-      }
+      console.error('Failed to export audit logs:', error);
+      throw error;
     }
   }
 };

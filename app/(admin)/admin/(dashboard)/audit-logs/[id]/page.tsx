@@ -1,25 +1,41 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { auditLogsService } from "@/services/audit-logs-service";
 import Spinner from "@/components/admin/Spinner";
 import styles from "./audit-log-details.module.css";
 
 interface AuditLogDetailsProps {
-  params: Promise<{ id: string }>;
+  params?: any;
 }
 
 export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
   const router = useRouter();
-  const { id } = use(params);
+  const routeParams = useParams();
+  const searchParams = useSearchParams();
+
+  const rawId =
+    (routeParams?.id as string) ||
+    (params as any)?.id ||
+    "";
+  const queryAuditId =
+    searchParams.get("audit_id") ||
+    searchParams.get("id");
+  const id =
+    rawId && rawId !== "info"
+      ? rawId
+      : (queryAuditId || rawId);
+
   const [log, setLog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
     const fetchLog = async () => {
       try {
+        setLoading(true);
         const data = await auditLogsService.getAuditLogDetail(id);
         setLog(data);
       } catch (err) {
@@ -40,6 +56,7 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
     switch (normalized) {
       case "Success": return styles.statusSuccess;
       case "Denied": return styles.statusDenied;
+      case "Failed": return styles.statusDenied;
       case "Pending": return styles.statusPending;
       default: return "";
     }
@@ -47,6 +64,38 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
 
   const isStatusSuccess = (statusStr: string) =>
     normalizeStatus(statusStr) === "Success";
+
+  const formatAction = (act: string) => {
+    if (!act) return "N/A";
+    return act
+      .replace(/_/g, " ")
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  const formatTimestamp = (val: string) => {
+    if (!val || val === "N/A") return "N/A";
+    try {
+      const d = new Date(val);
+      if (!isNaN(d.getTime())) {
+        return (
+          d.toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }) +
+          " at " +
+          d.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })
+        );
+      }
+    } catch {}
+    return String(val);
+  };
 
   if (loading) {
     return (
@@ -62,25 +111,47 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
 
   // Derived values from flat API response
   const displayStatus = normalizeStatus(log.status);
-  const deviceBrowser = [log.device_type, log.device_os]
-    .filter(Boolean)
-    .join(" on ") || log.user_agent || "N/A";
+
+  let deviceBrowser = "N/A";
+  if (log.device_type && log.device_type !== "Unknown") {
+    deviceBrowser = log.device_os && log.device_os !== "Other"
+      ? `${log.device_type} on ${log.device_os}`
+      : log.device_type;
+  } else if (log.device_os && log.device_os !== "Other") {
+    deviceBrowser = log.device_os;
+  } else if (log.user_agent) {
+    deviceBrowser = log.user_agent.split("/")[0] || log.user_agent;
+  }
+
   const location = log.location_label || (
     log.latitude && log.longitude ? `${log.latitude}, ${log.longitude}` : null
   );
 
-  // Change details: build from previous_value / new_value if present
+  // Change details: build from previous_value / new_value or changes list if present
   const changeDetails: Array<{ field: string; before: string; after: string }> = [];
-  if (log.previous_value != null || log.new_value != null) {
+  if (Array.isArray(log.changes)) {
+    log.changes.forEach((c: any) => {
+      changeDetails.push({
+        field: c.field || c.name || "Field",
+        before: c.before != null ? String(c.before) : (c.old_value != null ? String(c.old_value) : "—"),
+        after: c.after != null ? String(c.after) : (c.new_value != null ? String(c.new_value) : "—"),
+      });
+    });
+  } else if (Array.isArray(log.change_details)) {
+    log.change_details.forEach((c: any) => {
+      changeDetails.push({
+        field: c.field || c.name || "Field",
+        before: c.before != null ? String(c.before) : "—",
+        after: c.after != null ? String(c.after) : "—",
+      });
+    });
+  } else if (log.previous_value != null || log.new_value != null) {
     changeDetails.push({
-      field: log.object_type || "Value",
+      field: log.field_changed || log.object_type || "Value",
       before: log.previous_value != null ? String(log.previous_value) : "—",
       after: log.new_value != null ? String(log.new_value) : "—",
     });
   }
-
-  // Affected record: show when object_type or object_id is present
-  const hasAffectedRecord = log.object_type || log.object_id;
 
   return (
     <div className={styles.page}>
@@ -91,25 +162,25 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
             <BackIcon />
           </button>
           <div className={styles.headerInfo}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span className={styles.actionTitle}>Action: {log.action.replace('_', ' ')}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span className={styles.actionTitle}>Action: {formatAction(log.action)}</span>
               <span className={`${styles.badge} ${statusClass(log.status)}`}>
                 <span className={styles.badgeDot}></span>
                 {displayStatus}
               </span>
             </div>
-            <div className={styles.timestamp}>Timestamp: On {log.timestamp || log.created_at || 'N/A'}</div>
+            <div className={styles.timestamp}>Timestamp: On {formatTimestamp(log.timestamp || log.created_at)}</div>
           </div>
         </div>
         <button
           className={styles.exportBtn}
           onClick={async () => {
             try {
-              const response = await auditLogsService.exportAuditLogs();
+              const response = await auditLogsService.exportAuditLogs('xlsx');
               const url = window.URL.createObjectURL(new Blob([response.data]));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `audit_log_${log.id}.xlsx`);
+              link.setAttribute('download', `audit_log_${log.id || id}.xlsx`);
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
@@ -135,17 +206,18 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
                   width={64}
                   height={64}
                   className={styles.avatar}
+                  unoptimized={true}
                 />
               ) : (
                 <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#ccc' }} className={styles.avatar} />
               )}
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Name</span>
-                <span className={styles.infoValue}>{log.user || 'System'}</span>
+                <span className={styles.infoValue}>{log.user || log.performed_by || log.actor_name || 'System'}</span>
               </div>
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Role</span>
-                <span className={styles.infoValue}>{log.actor_type || 'N/A'}</span>
+                <span className={styles.infoValue}>{log.actor_type || log.role || 'N/A'}</span>
               </div>
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Category</span>
@@ -155,39 +227,37 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
           </div>
 
           {/* Affected Record */}
-          {hasAffectedRecord && (
-            <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Affected Record</h2>
-              <div className={styles.recordGrid}>
-                {log.object_type && (
-                  <div className={styles.infoBlock}>
-                    <span className={styles.infoLabel}>Object Type</span>
-                    <span className={styles.infoValue}>{log.object_type}</span>
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Affected Record</h2>
+            <div className={styles.recordGrid}>
+              <div className={styles.infoBlock}>
+                <span className={styles.infoLabel}>Object Type</span>
+                <span className={styles.infoValue}>{log.object_type || log.target_type || log.entity_type || "None"}</span>
+              </div>
+              <div className={styles.infoBlock}>
+                <span className={styles.infoLabel}>Object ID</span>
+                {(log.object_id || log.target_id || log.entity_id) ? (
+                  <div className={styles.copyable}>
+                    <span className={styles.infoValue}>{log.object_id || log.target_id || log.entity_id}</span>
+                    <button
+                      className={styles.copyBtn}
+                      aria-label="Copy object ID"
+                      onClick={() => navigator.clipboard.writeText(String(log.object_id || log.target_id || log.entity_id))}
+                    >
+                      <CopyIcon />
+                    </button>
                   </div>
-                )}
-                {log.object_id && (
-                  <div className={styles.infoBlock}>
-                    <span className={styles.infoLabel}>Object ID</span>
-                    <div className={styles.copyable}>
-                      <span className={styles.infoValue}>{log.object_id}</span>
-                      <button
-                        className={styles.copyBtn}
-                        aria-label="Copy object ID"
-                        onClick={() => navigator.clipboard.writeText(log.object_id)}
-                      >
-                        <CopyIcon />
-                      </button>
-                    </div>
-                  </div>
+                ) : (
+                  <span className={styles.infoValue}>None</span>
                 )}
               </div>
             </div>
-          )}
+          </div>
 
           {/* Change Details */}
-          {changeDetails.length > 0 && (
-            <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Change Details</h2>
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Change Details</h2>
+            {changeDetails.length > 0 ? (
               <table className={styles.changesTable}>
                 <thead>
                   <tr>
@@ -216,18 +286,20 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
                   ))}
                 </tbody>
               </table>
-            </div>
-          )}
+            ) : (
+              <p style={{ color: "var(--admin-section-label, #868C98)", fontSize: "13.5px", margin: 0 }}>
+                No state changes recorded for this action.
+              </p>
+            )}
+          </div>
 
           {/* Admin Notes / Description */}
-          {log.description && (
-            <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Admin Notes</h2>
-              <div className={styles.notesArea}>
-                {log.description}
-              </div>
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Admin Notes</h2>
+            <div className={styles.notesArea}>
+              {log.description || "No notes available for this log."}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Right Column */}
@@ -241,6 +313,14 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
             <div className={styles.networkLabel}>Device / Browser</div>
             <div className={styles.networkValue}>{deviceBrowser}</div>
           </div>
+          {log.user_agent && (
+            <div className={styles.networkCard}>
+              <div className={styles.networkLabel}>User Agent</div>
+              <div className={styles.networkValue} style={{ fontSize: 12, wordBreak: 'break-all' }}>
+                {log.user_agent}
+              </div>
+            </div>
+          )}
           {log.app_version && (
             <div className={styles.networkCard}>
               <div className={styles.networkLabel}>App Version</div>
