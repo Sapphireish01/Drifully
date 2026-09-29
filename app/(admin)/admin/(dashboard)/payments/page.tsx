@@ -225,7 +225,7 @@ export default function PaymentsPage() {
                     </td>
                     <td
                       style={{ cursor: "pointer", fontWeight: 600 }}
-                      onClick={() => router.push(`/admin/payments/${t.id}`)}
+                      onClick={() => paymentsService.viewTransaction(router, t.id, t.paymentId)}
                     >
                       {t.id}
                     </td>
@@ -240,7 +240,7 @@ export default function PaymentsPage() {
                         rowId={`${t.id}-${i}`}
                         openKebab={openKebab}
                         setOpenKebab={setOpenKebab}
-                        onViewDetails={() => router.push(`/admin/payments/${t.id}`)}
+                        onViewDetails={() => paymentsService.viewTransaction(router, t.id, t.paymentId)}
                         onMarkAsSuccessful={() => handleMarkAsSuccessful(t.id)}
                       />
                     </td>

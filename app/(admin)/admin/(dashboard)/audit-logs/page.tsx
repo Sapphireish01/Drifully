@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Pagination from "@/components/admin/Pagination";
 import Spinner from "@/components/admin/Spinner";
 import FilterBar from "@/components/admin/FilterBar";
@@ -15,6 +16,7 @@ import styles from "./audit-logs.module.css";
 const PAGE_SIZE = 10;
 
 export default function AuditLogsPage() {
+  const router = useRouter();
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const [exportingFormat, setExportingFormat] = useState<string | null>(null);
@@ -243,8 +245,16 @@ export default function AuditLogsPage() {
                   </tr>
                 ) : (
                   paginatedLogs.map((log) => (
-                    <tr key={log.id}>
-                      <td><input type="checkbox" className={styles.checkbox} /></td>
+                    <tr
+                      key={log.id}
+                      style={{ cursor: "pointer" }}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest(`.${styles.actionCell}`) || target.closest('input[type="checkbox"]')) return;
+                        router.push(`/admin/audit-logs/${log.id}`);
+                      }}
+                    >
+                      <td><input type="checkbox" className={styles.checkbox} onClick={(e) => e.stopPropagation()} /></td>
                       <td>
                         {log.timestamp
                           ? new Date(log.timestamp).toLocaleString("en-US", {

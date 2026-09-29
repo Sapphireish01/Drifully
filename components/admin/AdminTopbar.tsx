@@ -24,6 +24,10 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Audit Logs",
     subtitle: "Track admin and system activity across the platform",
   },
+  "/admin/audit-logs/:id": {
+    title: "Audit Log Details",
+    subtitle: "Review detailed audit log and system activity",
+  },
   "/admin/tickets": {
     title: "Tickets",
     subtitle: "Monitor platform growth, bookings, and revenue trends",
@@ -152,6 +156,7 @@ export default function AdminTopbar() {
   // Resolve dynamic routes before exact lookup
   const resolvedPath = (() => {
     if (/^\/admin\/payments\/[^/]+$/.test(pathname)) return "/admin/payments/:id";
+    if (/^\/admin\/audit-logs\/[^/]+$/.test(pathname)) return "/admin/audit-logs/:id";
     return pathname;
   })();
 

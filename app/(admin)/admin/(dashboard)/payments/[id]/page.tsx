@@ -43,8 +43,10 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type");
   const referenceParam = searchParams.get("reference");
-  const routeId = (routeParams?.id as string) || (params as any)?.id || "";
-  const lookupReference = referenceParam || routeId;
+  const paymentIdParam = searchParams.get("payment_id") || searchParams.get("id");
+  const rawRouteId = (routeParams?.id as string) || (params as any)?.id || "";
+  const routeId = rawRouteId && rawRouteId !== "info" ? rawRouteId : "";
+  const lookupReference = paymentIdParam || referenceParam || routeId;
 
   const [tx, setTx] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +56,7 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
 
   const isPayout =
     typeParam === "payout" ||
-    Boolean(referenceParam) ||
+    (!paymentIdParam && Boolean(referenceParam)) ||
     lookupReference?.toUpperCase().startsWith("PAYOUT-") ||
     Boolean(tx?.payout_id);
 
@@ -64,7 +66,7 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
     const fetchPayment = async () => {
       try {
         setLoading(true);
-        if (typeParam === "payout" || Boolean(referenceParam) || lookupReference.toUpperCase().startsWith("PAYOUT-")) {
+        if (typeParam === "payout" || (!paymentIdParam && (Boolean(referenceParam) || lookupReference.toUpperCase().startsWith("PAYOUT-")))) {
           const data = await paymentsService.getPayoutDetails(lookupReference);
           setTx(data);
         } else {
@@ -73,8 +75,12 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
             setTx(data);
           } catch (err) {
             // Fallback: attempt getPayoutDetails if payment details lookup fails
-            const payoutData = await paymentsService.getPayoutDetails(lookupReference);
-            setTx(payoutData);
+            try {
+              const payoutData = await paymentsService.getPayoutDetails(lookupReference);
+              setTx(payoutData);
+            } catch {
+              throw err;
+            }
           }
         }
       } catch (error) {
@@ -84,7 +90,7 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
       }
     };
     fetchPayment();
-  }, [lookupReference, typeParam, referenceParam]);
+  }, [lookupReference, typeParam, referenceParam, paymentIdParam]);
 
   const handleMarkAsSuccessful = async () => {
     try {
@@ -239,7 +245,7 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
                 <span className={styles.fieldValue}>
                   {isPayout
                     ? (tx.driver_details?.name || tx.driverName || "N/A")
-                    : (tx.customer_info?.name || tx.customerName || tx.customer_name || "N/A")}
+                    : (tx.customer_info?.name || tx.customer_name || tx.customerName || tx.customer?.name || tx.user?.full_name || tx.full_name || "N/A")}
                 </span>
               </div>
               <div className={styles.field}>
@@ -247,21 +253,21 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
                 <span className={styles.fieldValue}>
                   {isPayout
                     ? (tx.driver_details?.email || "N/A")
-                    : (tx.customer_info?.email || tx.customerEmail || tx.customer_email || "N/A")}
+                    : (tx.customer_info?.email || tx.customer_email || tx.customerEmail || tx.customer?.email || tx.user?.email || "N/A")}
                 </span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Phone</span>
                 <span className={styles.fieldValue}>
                   {isPayout
-                    ? (tx.driver_details?.phone_number || "N/A")
-                    : (tx.customer_info?.phone || tx.customerPhone || tx.customer_phone || "N/A")}
+                    ? (tx.driver_details?.phone_number || tx.driver_details?.phone || "N/A")
+                    : (tx.customer_info?.phone || tx.customer_phone || tx.customerPhone || tx.customer?.phone_number || tx.user?.phone_number || "N/A")}
                 </span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Date Created</span>
                 <span className={styles.fieldValue}>
-                  {formatDate(tx.customer_info?.date_created || tx.dateCreated || tx.created_at)}
+                  {formatDate(tx.customer_info?.date_created || tx.dateCreated || tx.created_at || tx.date)}
                 </span>
               </div>
               <div className={styles.field}>
@@ -269,7 +275,7 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
                 <span className={styles.fieldValue}>
                   {isPayout
                     ? (tx.driver_details?.trip_status?.label || tx.driver_details?.trip_status?.value || "N/A")
-                    : (tx.customer_info?.booking_type || tx.bookingType || tx.booking_type || "N/A")}
+                    : (tx.customer_info?.booking_type || tx.booking_type || tx.bookingType || tx.transaction_type || tx.type || "N/A")}
                 </span>
               </div>
             </div>
@@ -292,14 +298,14 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
                 <span className={styles.fieldLabel}>{isPayout ? "Booking Reference" : "Booking ID"}</span>
                 <span className={styles.fieldValue}>
                   {isPayout
-                    ? (tx.booking_reference || "N/A")
-                    : (tx.payment_information?.booking_id || tx.bookingId || tx.booking_id || "N/A")}
+                    ? (tx.booking_reference || tx.booking_ref || "N/A")
+                    : (tx.payment_information?.booking_id || tx.booking_reference || tx.booking_ref || tx.bookingId || tx.booking_id || "N/A")}
                   <button
                     className={styles.inlineCopyBtn}
                     onClick={() => navigator.clipboard.writeText(
                       isPayout
-                        ? (tx.booking_reference || "")
-                        : (tx.payment_information?.booking_id || tx.bookingId || tx.booking_id || "")
+                        ? (tx.booking_reference || tx.booking_ref || "")
+                        : (tx.payment_information?.booking_id || tx.booking_reference || tx.booking_ref || tx.bookingId || tx.booking_id || "")
                     )}
                     aria-label="Copy"
                   >
@@ -312,7 +318,7 @@ export default function PaymentDetailsPage({ params }: { params?: any }) {
                 <span className={styles.fieldValue}>
                   {isPayout && tx.payment_details?.amount != null
                     ? formatCurrency(tx.payment_details.amount)
-                    : formatCurrency(tx.payment_information?.amount ?? tx.amount)}
+                    : formatCurrency(tx.payment_information?.amount ?? tx.amount ?? tx.total_amount)}
                 </span>
               </div>
               <div className={styles.field}>

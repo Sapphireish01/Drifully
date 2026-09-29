@@ -16,12 +16,17 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
   const routeParams = useParams();
   const searchParams = useSearchParams();
 
-  const id =
+  const rawId =
     (routeParams?.id as string) ||
-    searchParams.get("audit_id") ||
-    searchParams.get("id") ||
     (params as any)?.id ||
     "";
+  const queryAuditId =
+    searchParams.get("audit_id") ||
+    searchParams.get("id");
+  const id =
+    rawId && rawId !== "info"
+      ? rawId
+      : (queryAuditId || rawId);
 
   const [log, setLog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -122,11 +127,27 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
     log.latitude && log.longitude ? `${log.latitude}, ${log.longitude}` : null
   );
 
-  // Change details: build from previous_value / new_value if present
+  // Change details: build from previous_value / new_value or changes list if present
   const changeDetails: Array<{ field: string; before: string; after: string }> = [];
-  if (log.previous_value != null || log.new_value != null) {
+  if (Array.isArray(log.changes)) {
+    log.changes.forEach((c: any) => {
+      changeDetails.push({
+        field: c.field || c.name || "Field",
+        before: c.before != null ? String(c.before) : (c.old_value != null ? String(c.old_value) : "—"),
+        after: c.after != null ? String(c.after) : (c.new_value != null ? String(c.new_value) : "—"),
+      });
+    });
+  } else if (Array.isArray(log.change_details)) {
+    log.change_details.forEach((c: any) => {
+      changeDetails.push({
+        field: c.field || c.name || "Field",
+        before: c.before != null ? String(c.before) : "—",
+        after: c.after != null ? String(c.after) : "—",
+      });
+    });
+  } else if (log.previous_value != null || log.new_value != null) {
     changeDetails.push({
-      field: log.object_type || "Value",
+      field: log.field_changed || log.object_type || "Value",
       before: log.previous_value != null ? String(log.previous_value) : "—",
       after: log.new_value != null ? String(log.new_value) : "—",
     });
@@ -155,11 +176,11 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
           className={styles.exportBtn}
           onClick={async () => {
             try {
-              const response = await auditLogsService.exportAuditLogs();
+              const response = await auditLogsService.exportAuditLogs('xlsx');
               const url = window.URL.createObjectURL(new Blob([response.data]));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `audit_log_${log.id}.xlsx`);
+              link.setAttribute('download', `audit_log_${log.id || id}.xlsx`);
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
@@ -192,11 +213,11 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
               )}
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Name</span>
-                <span className={styles.infoValue}>{log.user || 'System'}</span>
+                <span className={styles.infoValue}>{log.user || log.performed_by || log.actor_name || 'System'}</span>
               </div>
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Role</span>
-                <span className={styles.infoValue}>{log.actor_type || 'N/A'}</span>
+                <span className={styles.infoValue}>{log.actor_type || log.role || 'N/A'}</span>
               </div>
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Category</span>
@@ -211,17 +232,17 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
             <div className={styles.recordGrid}>
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Object Type</span>
-                <span className={styles.infoValue}>{log.object_type || "None"}</span>
+                <span className={styles.infoValue}>{log.object_type || log.target_type || log.entity_type || "None"}</span>
               </div>
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Object ID</span>
-                {log.object_id ? (
+                {(log.object_id || log.target_id || log.entity_id) ? (
                   <div className={styles.copyable}>
-                    <span className={styles.infoValue}>{log.object_id}</span>
+                    <span className={styles.infoValue}>{log.object_id || log.target_id || log.entity_id}</span>
                     <button
                       className={styles.copyBtn}
                       aria-label="Copy object ID"
-                      onClick={() => navigator.clipboard.writeText(log.object_id)}
+                      onClick={() => navigator.clipboard.writeText(String(log.object_id || log.target_id || log.entity_id))}
                     >
                       <CopyIcon />
                     </button>

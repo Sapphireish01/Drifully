@@ -402,7 +402,7 @@ export const paymentsService = {
           skipToast: true,
         });
         if (response.data) {
-          return response.data?.data || response.data;
+          return response.data?.data || response.data?.result || response.data;
         }
       } catch (err: any) {
         lastError = err;
@@ -417,7 +417,7 @@ export const paymentsService = {
             skipToast: true,
           });
           if (response.data) {
-            return response.data?.data || response.data;
+            return response.data?.data || response.data?.result || response.data;
           }
         } catch (err: any) {
           lastError = err;
@@ -437,7 +437,8 @@ export const paymentsService = {
       transactionPaymentIdMap.set(String(id).toUpperCase(), String(paymentId));
       transactionPaymentIdMap.set(String(paymentId).toUpperCase(), String(paymentId));
     }
-    router.push(`/admin/payments/${encodeURIComponent(targetId)}`);
+    const query = paymentId ? `?payment_id=${encodeURIComponent(paymentId)}` : `?payment_id=${encodeURIComponent(id)}`;
+    router.push(`/admin/payments/${encodeURIComponent(targetId)}${query}`);
   },
 
   /**

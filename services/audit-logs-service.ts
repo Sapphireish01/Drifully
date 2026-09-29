@@ -15,13 +15,25 @@ export const auditLogsService = {
     }
   },
 
-  getAuditLogDetail: async (auditId: string) => {
+  getAuditLogDetail: async (auditId: string | number) => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/audit-logs/info/', audit_id: auditId }
+        params: { path: 'api/v1/admin/audit-logs/info/', audit_id: auditId, id: auditId },
+        skipToast: true,
       });
-      return response.data?.data || response.data;
+      if (response.data) {
+        return response.data?.data || response.data?.result || response.data;
+      }
     } catch (error) {
+      try {
+        const fallbackRes = await publicApi.get('', {
+          params: { path: `api/v1/admin/audit-logs/${auditId}/` },
+          skipToast: true,
+        });
+        if (fallbackRes.data) {
+          return fallbackRes.data?.data || fallbackRes.data?.result || fallbackRes.data;
+        }
+      } catch {}
       console.error(`Failed to fetch audit log detail for ${auditId}:`, error);
       throw error;
     }
