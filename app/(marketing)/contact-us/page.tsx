@@ -235,7 +235,7 @@ export default function ContactUsPage() {
             <div className="contact-info-card contact-info-card--bottom">
               <div className="contact-info-title">Chat with us directly</div>
               <div className="contact-info-item">Email: support@drifully.com</div>
-              <div className="contact-info-item">Phone: +234 255 473 4562</div>
+              <div className="contact-info-item">Phone: +1 (520) 736 7447</div>
             </div>
           </div>
         </div>
