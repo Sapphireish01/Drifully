@@ -128,8 +128,11 @@ const jsonLd = {
 
 import { ToastProvider } from "@/lib/toast-context";
 import { ToastContainer } from "@/components/admin/Toast";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
   return (
     <html lang="en" className={dmSans.variable} suppressHydrationWarning data-scroll-behavior="smooth">
       <body suppressHydrationWarning>
@@ -143,7 +146,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <ToastContainer />
         </ToastProvider>
+        {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );
 }
+
